@@ -1,0 +1,46 @@
+{
+    "name": "rfxcom2mqtt",
+    "repository": "https://github.com/sguernion/rfxcom2mqtt",
+    "author": "Sguernion<sguernion@github.com>",
+    "license": "Apache-2.0",
+    "version": "1.0.0",
+    "description": "RFXCOM to MQTT bridge",
+    "main": "src/index.ts",
+    "dependencies": {
+        "@types/express": "^4.17.21",
+        "connect-gzip-static": "^3.0.1",
+        "cookie-parser": "^1.4.5",
+        "dotenv": "^8.2.0",
+        "express": "^4.18.2",
+        "express-static-gzip": "^2.1.7",
+        "finalhandler": "^1.2.0",
+        "http-status-codes": "^2.3.0",
+        "mqtt": "^4.3.7",
+        "node-config-yaml": "^0.1.4",
+        "node-cron": "^3.0.2",
+        "object-assign-deep": "^0.4.0",
+        "rfxcom": "^2.6.0",
+        "winston": "^3.11.0",
+        "rfxcom2mqtt-frontend": "0.1.0-dev"
+    },
+    "scripts": {
+        "start": "ts-node ./src/index.ts",
+        "dev": "ts-node ./src/dev.ts",
+        "pretty": "prettier --write \"./**/*.{js,jsx,ts,tsx}\"",
+        "lint": "eslint \"./**/*.{js,jsx,ts,tsx}\"",
+        "pretty:check": "prettier --check \"./**/*.{js,jsx,ts,tsx}\""
+    },
+    "devDependencies": {
+        "@tsconfig/node18": "^18.2.2",
+        "@types/node": "^20.11.6",
+        "@types/object-assign-deep": "^0.4.3",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.3.3",
+        "@typescript-eslint/eslint-plugin": "~6.7.4",
+        "@typescript-eslint/parser": "~6.7.4",
+        "eslint": "~8.50.0",
+        "eslint-config-prettier": "~9.0.0",
+        "eslint-plugin-prettier": "~5.0.0",
+        "prettier": "~3.0.3"
+    }
+}

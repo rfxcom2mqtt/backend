@@ -1,0 +1,53 @@
+# This workflow will do a clean install of node dependencies, cache/restore them, build the source code and run tests across different versions of node
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
+
+name: Node.js CI
+
+on:
+    push:
+        branches: ['develop', 'feature/**']
+    pull_request:
+        branches: ['develop']
+defaults:
+    run:
+        working-directory: ./
+env:
+    NPM_TOKEN: ${{secrets.NPM_TOKEN}}
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        steps:
+            - name: 📥 Checkout Repository
+              uses: actions/checkout@v4
+              with:
+                  submodules: true
+                  fetch-depth: 0
+
+            - name: 📦 Install pnpm
+              uses: pnpm/action-setup@v2
+              with:
+                  version: 8
+                  run_install: true
+
+            - name: 🚀 Use Node.js
+              uses: actions/setup-node@v3
+              with:
+                  node-version: 20
+                  cache: pnpm
+                  cache-dependency-path: './yarn-lock.json'
+
+            - name: 🛠️ Install Dependencies
+              run: pnpm install --frozen-lockfile
+
+            - name: 🔍 Check static code analysis
+              run: pnpm run lint
+
+            - name: 💅 Check code style
+              run: pnpm run pretty:check
+
+            #- name: 🧪 Run tests
+            #  run: pnpm run test:unit
+
+            - name: 🏗️ Build bundle
+              run: pnpm build
