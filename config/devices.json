@@ -1,0 +1,19 @@
+{
+    "0x00E07CFE": {
+        "seqnbr": 8,
+        "subtype": 0,
+        "id": "0x00E07CFE",
+        "level": 15,
+        "rssi": 5,
+        "type": "lighting2",
+        "deviceName": [
+            "KlikAanKlikUit",
+            "HomeEasy UK",
+            "Chacon",
+            "NEXA",
+            "Intertechno"
+        ],
+        "subTypeValue": "AC",
+        "states": ["0x00E07CFE_1","0x00E07CFE_2","0x00E07CFE_3"]
+    }
+}

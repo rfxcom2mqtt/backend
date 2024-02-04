@@ -1,0 +1,14 @@
+version: "3.8"
+
+services: 
+  rfxcom2mqtt:
+    image: rfxcom2mqtt/rfxcom2mqtt
+    container_name: rfxcom2mqtt
+    build: ./
+    volumes:
+      - ./config:/app/data
+    devices:
+      - /dev/ttyUSB1:/dev/ttyUSB0
+    environment:
+      - TZ=Europe/Paris
+    restart: unless-stopped

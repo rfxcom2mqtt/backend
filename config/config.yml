@@ -1,0 +1,50 @@
+mock: true
+loglevel: 'debug'
+healthcheck:
+  enabled: true
+  cron: '*/2 * * * *'
+cacheState:
+  enable: true,
+  saveInterval: 2
+
+frontend:
+  enabled: true
+  host: localhost
+  port: 8890
+
+homeassistant:
+  discovery: true
+  discovery_topic: homeassistant
+  discovery_device: rfxcom2mqtt
+
+mqtt:
+  base_topic: rfxcom2mqtt
+  server: tcp://192.168.1.7
+  username: hassio
+  password: hassio3522
+
+rfxcom:
+  usbport: /dev/ttyUSB0
+  debug: true
+  transmit:
+    repeat: 4
+    lighting1:
+      - X10
+      - ARC
+      - ELRO
+      - PHILIPS_SBC
+    lighting2:
+      - AC
+      - HOMEEASY_EU
+    lighting3:
+      - KOPPLA
+    lighting4:
+      - PT2262
+  devices:
+    - id: 'mocked_device2'
+      name: "AC_notUse_device"
+      friendlyName: 'not_use'
+      units:
+        - unitCode: 1
+          name: "AC_notuse_1"
+          friendlyName: 'not_use 1'
