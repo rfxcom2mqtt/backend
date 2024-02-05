@@ -4,21 +4,20 @@ import express, { Router, Request, Response, NextFunction } from "express";
 import { StatusCodes } from "http-status-codes";
 import * as core from "express-serve-static-core";
 import fs from "fs";
-import logger from "./logger";
+import logger from "../libs/logger";
 import { Settings, SettingFrontend } from "../settings";
 import expressStaticGzip from "express-static-gzip";
 import StateStore, { DeviceStore } from "../store/state";
 //import { RawData } from 'ws';
 import { BridgeInfo } from "../models/models";
 //import frontend from 'rfxcom2mqtt-frontend';
+import Api from "./Api";
 
 export default class Server {
   private server?: core.Express;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private frontConf: SettingFrontend;
-  private router: Router;
-  private state: StateStore;
-  private bridgeInfo: BridgeInfo;
+  private api: Api;
 
   constructor(
     conf: Settings,
@@ -27,40 +26,7 @@ export default class Server {
     bridgeInfo: BridgeInfo,
   ) {
     this.frontConf = conf.frontend;
-    this.bridgeInfo = bridgeInfo;
-    this.router = Router();
-    this.router.get("/", (req: Request, res: Response) => {
-      return this.onApiRequest(req, res);
-    });
-    this.router.get("/settings", (req: Request, res: Response) => {
-      res
-        .header("Access-Control-Allow-Origin", "*")
-        .status(StatusCodes.OK)
-        .json(conf);
-    });
-
-    this.router.get("/devices", (req: Request, res: Response) => {
-      res
-        .header("Access-Control-Allow-Origin", "*")
-        .status(StatusCodes.OK)
-        .json(devices.getAll());
-    });
-
-    this.router.get("/devices/status", (req: Request, res: Response) => {
-      res
-        .header("Access-Control-Allow-Origin", "*")
-        .status(StatusCodes.OK)
-        .json(state.getAll());
-    });
-
-    this.router.get("/bridge/info", (req: Request, res: Response) => {
-      res
-        .header("Access-Control-Allow-Origin", "*")
-        .status(StatusCodes.OK)
-        .json(this.bridgeInfo);
-    });
-
-    this.state = state;
+    this.api = new Api(conf, devices, state, bridgeInfo);
   }
 
   private authenticate(req: Request, res: Response, next: NextFunction): void {
@@ -124,7 +90,7 @@ export default class Server {
         this.authenticate(req, res, next);
       },
     );
-    this.server.use("/api", this.router);
+    this.server.use("/api", this.api.router);
 
     //initialize the WebSocket server instance
     //const wss = expressWs(this.server);
@@ -193,10 +159,5 @@ export default class Server {
 
   async stop(): Promise<void> {
     logger.info("Controller stop");
-  }
-
-  private onApiRequest(req: Request, res: Response): any {
-    logger.info("onRequest " + req.originalUrl + " body :" + req.body);
-    return res.status(StatusCodes.OK).json({});
   }
 }
