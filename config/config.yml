@@ -5,7 +5,7 @@ healthcheck:
   cron: '*/2 * * * *'
 cacheState:
   enable: true,
-  saveInterval: 2
+  saveInterval: 10
 
 frontend:
   enabled: true

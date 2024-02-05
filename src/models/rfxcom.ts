@@ -11,133 +11,195 @@ export class RfxcomInfo {
   enabledProtocols: string[] = [];
 }
 
-interface RfxcomEvent {
+export interface RfxcomEvent {
   id: string;
-  subtype: string;
-  seqnbr: string;
+  deviceName?: string; // computed value
+  subtype: number;
+  subTypeValue?: string; // computed value
+  seqnbr: number;
+  type: string;
 }
 
 interface Lighting1Event extends RfxcomEvent {
   houseCode: string;
   unitCode: string;
-  commandNumber: string;
+  commandNumber: number;
   command: string;
-  rssi: string;
+  rssi: number;
 }
 
-interface Lighting2Event extends RfxcomEvent {
+export interface Lighting2Event extends RfxcomEvent {
   unitCode: string;
-  commandNumber: string;
+  commandNumber: number;
   command: string;
-  level: string;
-  rssi: string;
+  level: number;
+  rssi: number;
 }
 
-interface Lighting4Event extends RfxcomEvent {
+export interface Lighting4Event extends RfxcomEvent {
   data: string;
-  commandNumber: string;
+  commandNumber: number;
   command: string;
   pulseWidth: string;
-  rssi: string;
+  rssi: number;
 }
 
 interface Lighting5Event extends RfxcomEvent {
   unitCode: string;
-  commandNumber: string;
+  commandNumber: number;
   command: string;
   level: string;
-  rssi: string;
+  rssi: number;
 }
 
 interface Lighting6Event extends RfxcomEvent {
   groupCode: string;
   unitCode: string;
-  commandNumber: string;
+  commandNumber: number;
   command: string;
-  rssi: string;
+  rssi: number;
 }
 
-interface ChimeEvent extends RfxcomEvent {}
-interface FanEvent extends RfxcomEvent {}
-interface Blinds1Event extends RfxcomEvent {}
-interface EdisioEvent extends RfxcomEvent {}
-interface ActivLinkEvent extends RfxcomEvent {}
-interface FunkbusEvent extends RfxcomEvent {}
-interface HunterfanEvent extends RfxcomEvent {}
-interface Security1Event extends RfxcomEvent {}
+interface ChimeEvent extends RfxcomEvent {
+  commandNumber: number;
+  command: string;
+  rssi: number;
+}
+
+interface FanEvent extends RfxcomEvent {
+  commandNumber: number;
+  command: string;
+  rssi: number;
+  state: string;
+  co2: string;
+}
+
+interface Blinds1Event extends RfxcomEvent {
+  unitCode: number;
+  commandNumber: number;
+  command: string;
+  batteryLevel: number;
+  rssi: number;
+}
+
+interface EdisioEvent extends RfxcomEvent {
+  unitCode: number;
+  commandNumber: number;
+  command: string;
+  level: number;
+  colour: string;
+  maxRepeat: number;
+  repeatCount: number;
+  batteryVoltage: number;
+  rssi: number;
+  extraBytes: string;
+}
+
+interface ActivLinkEvent extends RfxcomEvent {
+  commandNumber: number;
+  command: string;
+  alert: string;
+  deviceStatus: string;
+  batteryLevel: number;
+  rssi: number;
+}
+
+interface FunkbusEvent extends RfxcomEvent {
+  groupCode: string;
+  commandNumber: number;
+  command: string;
+  commandTime: string;
+  deviceTypeNumber: number;
+  sceneNumber: number;
+  channelNumber: number;
+  rssi: number;
+}
+
+interface HunterfanEvent extends RfxcomEvent {
+  commandNumber: number;
+  command: string;
+  rssi: number;
+}
+
+interface Security1Event extends RfxcomEvent {
+  deviceStatus: string;
+  tampered: string;
+  batteryLevel: string;
+  rssi: number;
+}
 
 interface Camera1Event extends RfxcomEvent {
   houseCode: string;
-  commandNumber: string;
+  commandNumber: number;
   command: string;
-  rssi: string;
+  rssi: number;
 }
 
 interface RemoteEvent extends RfxcomEvent {
   houseCode: string;
-  commandNumber: string;
+  commandNumber: number;
   command: string;
   commandType: string;
-  rssi: string;
+  rssi: number;
 }
 
 interface Blinds2Event extends RfxcomEvent {
   unitCode: string;
-  commandNumber: string;
+  commandNumber: number;
   command: string;
   percent: string;
   angle: string;
-  batteryLevel: string;
-  rssi: string;
+  batteryLevel: number;
+  rssi: number;
 }
 
 interface thermostat1Event extends RfxcomEvent {
   temperature: string;
   setpoint: string;
-  modeNumber: string;
+  modeNumber: number;
   mode: string;
-  statusNumber: string;
+  statusNumber: number;
   status: string;
-  rssi: string;
+  rssi: number;
 }
 
 interface Thermostat3Event extends RfxcomEvent {
-  commandNumber: string;
+  commandNumber: number;
   command: string;
 }
 
-interface Bbq3Event extends RfxcomEvent {
+export interface Bbq1Event extends RfxcomEvent {
   temperature: string;
-  batteryLevel: string;
-  rssi: string;
+  batteryLevel: number;
+  rssi: number;
 }
 
-interface TempEvent extends RfxcomEvent {
+export interface TempEvent extends RfxcomEvent {
   temperature: string;
-  batteryLevel: string;
-  rssi: string;
+  batteryLevel: number;
+  rssi: number;
 }
 
 interface TemprainEvent extends TempEvent {
   rainfall: string;
 }
 
-interface HumidityEvent extends RfxcomEvent {
+export interface HumidityEvent extends RfxcomEvent {
   humidity: string;
   humidityStatus: string;
-  batteryLevel: string;
-  rssi: string;
+  batteryLevel: number;
+  rssi: number;
 }
 
-interface TemphumidityEvent extends RfxcomEvent {
+export interface TemphumidityEvent extends RfxcomEvent {
   temperature: string;
   humidity: string;
   humidityStatus: string;
-  batteryLevel: string;
-  rssi: string;
+  batteryLevel: number;
+  rssi: number;
 }
 
-interface TemphumbaroEvent extends TemphumidityEvent {
+export interface TemphumbaroEvent extends TemphumidityEvent {
   barometer: string;
   forecast: string;
 }
@@ -146,8 +208,8 @@ interface RainEvent extends RfxcomEvent {
   rainfallIncrement?: string;
   rainfall?: string;
   rainfallRate?: string;
-  batteryLevel: string;
-  rssi: string;
+  batteryLevel: number;
+  rssi: number;
 }
 
 interface WindEvent extends RfxcomEvent {
@@ -156,15 +218,15 @@ interface WindEvent extends RfxcomEvent {
   averageSpeed?: string;
   temperature?: string;
   chillfactor?: string;
-  batteryLevel: string;
-  rssi: string;
+  batteryLevel: number;
+  rssi: number;
 }
 
-interface UvEvent extends RfxcomEvent {
-  uv: string;
+export interface UvEvent extends RfxcomEvent {
+  uv: number;
   temperature?: string;
-  batteryLevel: string;
-  rssi: string;
+  batteryLevel: number;
+  rssi: number;
 }
 
 interface DateEvent extends RfxcomEvent {
@@ -175,75 +237,111 @@ interface DateEvent extends RfxcomEvent {
   minute: string;
   second: string;
   weekDay: string;
-  batteryLevel: string;
-  rssi: string;
+  batteryLevel: number;
+  rssi: number;
 }
 
-type TodoRfxcomEvent = {
-  id: string;
-  subtype: string;
-  seqnbr: string;
-  houseCode: string;
-  unitCode: string;
-  commandNumber: string;
-  command: string;
-  rssi: string;
-  level: string;
-  data: string;
-  pulseWidth: string;
-  groupCode: string;
-  state: string;
-  co2: string;
-  batteryLevel: string;
-  colour: string;
-  maxRepeat: string;
-  repeatCount: string;
-  batteryVoltage: string;
-  extraBytes: string;
-  alert: string;
-  deviceStatus: string;
-  commandTime: string;
-  deviceTypeNumber: string;
-  sceneNumber: string;
-  channelNumber: string;
-  tampered: string;
-  percent: string;
-  angle: string;
-  setpoint: string;
-  modeNumber: string;
-  mode: string;
-  statusNumber: string;
-  rainfall: string;
-  humidityStatus: string;
-  forecast: string;
-  temperature: string;
-  humidity: string;
-  barometer: string;
-  rainfallIncrement: string;
-  rainfallRate: string;
-  gustSpeed: string;
-  direction: string;
-  averageSpeed: string;
-  chillfactor: string;
-  uv: string;
-  year: string;
-  month: string;
-  day: string;
-  hour: string;
-  minute: string;
-  second: string;
-  weekDay: string;
-  count: string;
-  current: string;
-  power: string;
-  energy: string;
-  powerFactor: string;
-  frequency: string;
-  weight: string;
+interface Elec1Event extends RfxcomEvent {
+  energy: number;
+  count: number;
+  current: number;
+  batteryLevel: number;
+  rssi: number;
+}
+
+interface Elec23Event extends RfxcomEvent {
+  energy: number;
+  count: number;
+  power: number;
+  batteryLevel: number;
+  rssi: number;
+}
+
+interface Elec4Event extends RfxcomEvent {
+  energy: number;
+  count: number;
+  current: number;
+  batteryLevel: number;
+  rssi: number;
+}
+
+interface Elec5Event extends RfxcomEvent {
+  voltage: number;
+  current: number;
+  power: number;
+  energy: number;
+  powerFactor: number;
+  frequency: number;
+  rssi: number;
+}
+
+export interface WeightEvent extends RfxcomEvent {
+  weight: number;
+  batteryLevel: number;
+  rssi: number;
+}
+
+interface CartelectronicEvent extends RfxcomEvent {
+  identifiantCompteur: string;
+  typeContrat: string;
+  periodeTarifaireEnCours: string;
+  compteur: string[];
+  avertissemntJourEJP: string;
+  avertissementCouleurAujourdHui: string;
+  avertissementCouleurDemain: string;
+  puissanceApparenteValide: boolean;
+  puissanceApparente: string;
+  teleInfoPresente: string;
+  tensionMoyenne: string;
+  indexTariffaireEnCours: string;
+  unknownSubtype: boolean;
+  batteryLevel: number;
+  rssi: number;
+}
+
+interface RfxsensorEvent extends RfxcomEvent {
   message: string;
+  rssi: number;
+}
+
+interface RfxmeterEvent extends RfxcomEvent {
+  counter: number;
+  rssi: number;
+}
+
+export interface WaterlevelEvent extends RfxcomEvent {
+  temperature: string;
+  level: number;
+  batteryLevel: number;
+  rssi: number;
+}
+
+interface LightningEvent extends RfxcomEvent {
   status: string;
   distance: string;
   strikes: string;
-  valid: string;
+  batteryLevel: number;
+  rssi: number;
+  valid: boolean;
+}
+
+interface WeatherEvent extends RfxcomEvent {
+  temperature: string;
+  averageSpeed: number;
+  gustSpeed: number;
+  rssi: number;
+  rainfallIncrement: string;
+  // for subtype 0
+  direction?: string;
+  humidity?: string;
+  humidityStatus?: string;
+  uv?: string;
+  insolation?: string;
+  batteryLevel?: string;
+}
+
+interface SolarEvent extends RfxcomEvent {
   insolation: string;
-};
+  batteryLevel: number;
+  rssi: number;
+}

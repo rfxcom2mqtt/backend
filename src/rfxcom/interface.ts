@@ -6,7 +6,7 @@ export default interface IRfxcom {
   onCommand(deviceType: string, entityName: string, payload: any): void;
   onDisconnect(callback: any): void;
   subscribeProtocolsEvent(callback: any): void;
-  getSubType(type: string, subType: string): void;
+  getSubType(type: string, subType: string): string;
   stop(): void;
   sendCommand(
     deviceType: string,

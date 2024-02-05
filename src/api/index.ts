@@ -1,5 +1,5 @@
 import cookieParser from "cookie-parser";
-import express, { Router, Request, Response, NextFunction } from "express";
+import express, { Request, Response, NextFunction } from "express";
 //import expressWs from 'express-ws';
 import { StatusCodes } from "http-status-codes";
 import * as core from "express-serve-static-core";
@@ -77,13 +77,13 @@ export default class Server {
         cert: fs.readFileSync(this.frontConf.sslCert),
       };
       this.server = express();
-      this.server.use(express.json());
-      this.server.use(express.urlencoded({ extended: true }));
-      this.server.use(cookieParser());
     } else {
       this.server = express();
     }
 
+    this.server.use(express.json());
+    this.server.use(express.urlencoded({ extended: true }));
+    this.server.use(cookieParser());
     this.server.use(
       "/api",
       (req: Request, res: Response, next: NextFunction) => {
@@ -94,9 +94,11 @@ export default class Server {
 
     //initialize the WebSocket server instance
     //const wss = expressWs(this.server);
-    this.server.get("/", function (req: Request, res: Response, next) {
-      logger.info("get route" + req);
-      res.end();
+    this.server.use(function (req: Request, res: Response, next: NextFunction) {
+      logger.info(
+        req.method + " " + req.originalUrl + " : " + JSON.stringify(req.body),
+      );
+      next();
     });
 
     //wss.app.ws('/', function(ws, req: Request) {
@@ -133,9 +135,9 @@ export default class Server {
       });
     }
 
-    const staticFrontend = expressStaticGzip("../frontend/build/", {
+    const staticFrontend = expressStaticGzip("../../../frontend/build/", {
       enableBrotli: true,
-      index: false,
+      index: "index.html",
       customCompressions: [
         {
           encodingName: "deflate",
