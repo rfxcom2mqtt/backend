@@ -1,7 +1,7 @@
 import { Settings, SettingDevice, read } from "../settings";
 import Discovery from "../discovery";
 import Mqtt from "../mqtt";
-import Server from "./Server";
+import Server from "../api";
 import Rfxcom from "../rfxcom";
 import IRfxcom from "../rfxcom/interface";
 import MockRfxcom from "../rfxcom/Mock";
