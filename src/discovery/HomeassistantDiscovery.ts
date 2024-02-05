@@ -71,7 +71,7 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
       entityTopic,
     );
     this.mqtt.publish(
-      this.mqtt.topics.devices + "/" + entityName,
+      this.mqtt.topics.devices + "/" + entityTopic,
       JSON.stringify(entityState),
       (error: any) => {},
       { retain: true, qos: 1 },
@@ -86,6 +86,7 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
       entityState.deviceType === "lighting5" ||
       entityState.deviceType === "lighting6"
     ) {
+      entityState.command = value;
       const cmd = value.toLowerCase().split(" ");
       let command = cmd[0];
       if (cmd[0] === "group") {
@@ -105,8 +106,10 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
       }
     } else if (entityState.deviceType === "lighting4") {
       entityState.rfxFunction = "sendData";
+      entityState.command = value;
     } else if (entityState.deviceType === "chime1") {
       entityState.rfxFunction = "chime";
+      entityState.command = value;
     } else {
       logger.error(
         "device type (" + entityState.deviceType + ") not supported",
