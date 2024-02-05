@@ -1,6 +1,6 @@
 "use strict";
 
-import IRfxcom  from "../rfxcom/interface";
+import IRfxcom from "../rfxcom/interface";
 import { Settings, SettingDevice } from "../settings";
 import Mqtt from "../mqtt";
 import { DeviceEntity } from "../models/models";
@@ -256,8 +256,7 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
       json_attributes_topic: this.topicDevice + "/" + entityTopic,
       origin: this.discoveryOrigin,
       state_topic: this.topicDevice + "/" + entityTopic,
-    }
-
+    };
 
     if (payload.rssi !== undefined) {
       const json = {
@@ -271,7 +270,7 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
         unique_id: deviceTopic + "_linkquality_" + devicePrefix,
         unit_of_measurement: "dBm",
         value_template: "{{ value_json.rssi }}",
-        ...commonConf
+        ...commonConf,
       };
       this.publishDiscovery(
         "sensor/" + deviceTopic + "/linkquality/config",
@@ -290,7 +289,7 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
         unique_id: deviceTopic + "_battery_" + devicePrefix,
         unit_of_measurement: "%",
         value_template: "{{ value_json.batteryLevel }}",
-        ...commonConf
+        ...commonConf,
       };
       this.publishDiscovery(
         "sensor/" + deviceTopic + "/battery/config",
@@ -309,7 +308,7 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
         unique_id: deviceTopic + "_voltage_" + devicePrefix,
         unit_of_measurement: "mV",
         value_template: "{{ value_json.batteryVoltage }}",
-        ...commonConf
+        ...commonConf,
       };
       this.publishDiscovery(
         "sensor/" + deviceTopic + "/voltage/config",
@@ -329,7 +328,7 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
         unique_id: deviceTopic + "_humidity_" + devicePrefix,
         unit_of_measurement: "%",
         value_template: "{{ value_json.humidity }}",
-        ...commonConf
+        ...commonConf,
       };
       this.publishDiscovery(
         "sensor/" + deviceTopic + "/humidity/config",
@@ -349,7 +348,7 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
         unique_id: deviceTopic + "_temperature_" + devicePrefix,
         unit_of_measurement: "°C",
         value_template: "{{ value_json.temperature }}",
-        ...commonConf
+        ...commonConf,
       };
       this.publishDiscovery(
         "sensor/" + deviceTopic + "/temperature/config",
@@ -368,7 +367,7 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
         unique_id: deviceTopic + "_co2_" + devicePrefix,
         unit_of_measurement: "°C",
         value_template: "{{ value_json.co2 }}",
-        ...commonConf
+        ...commonConf,
       };
       this.publishDiscovery(
         "sensor/" + deviceTopic + "/co2/config",
@@ -376,8 +375,8 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
       );
     }
 
-     // power
-     if (payload.power !== undefined) {
+    // power
+    if (payload.power !== undefined) {
       const json = {
         device_class: "power",
         entity_category: "diagnostic",
@@ -387,7 +386,7 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
         state_class: "measurement",
         unique_id: deviceTopic + "_power_" + devicePrefix,
         value_template: "{{ value_json.power }}",
-        ...commonConf
+        ...commonConf,
       };
       this.publishDiscovery(
         "sensor/" + deviceTopic + "/power/config",
@@ -395,8 +394,8 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
       );
     }
 
-     // energy
-     if (payload.energy !== undefined) {
+    // energy
+    if (payload.energy !== undefined) {
       const json = {
         device_class: "energy",
         entity_category: "diagnostic",
@@ -406,7 +405,7 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
         state_class: "total_increasing",
         unique_id: deviceTopic + "_energy_" + devicePrefix,
         value_template: "{{ value_json.energy }}",
-        ...commonConf
+        ...commonConf,
       };
       this.publishDiscovery(
         "sensor/" + deviceTopic + "/energy/config",
@@ -414,8 +413,8 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
       );
     }
 
-     // barometer
-     if (payload.barometer !== undefined) {
+    // barometer
+    if (payload.barometer !== undefined) {
       const json = {
         device_class: "pressure",
         entity_category: "diagnostic",
@@ -426,16 +425,16 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
         unit_of_measurement: "hPa",
         unique_id: deviceTopic + "_barometer_" + devicePrefix,
         value_template: "{{ value_json.barometer }}",
-        ...commonConf
+        ...commonConf,
       };
       this.publishDiscovery(
         "sensor/" + deviceTopic + "/barometer/config",
         JSON.stringify(json),
       );
     }
-    
-     // count
-     if (payload.count !== undefined) {
+
+    // count
+    if (payload.count !== undefined) {
       const json = {
         device_class: "pressure",
         entity_category: "diagnostic",
@@ -446,16 +445,12 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
         unit_of_measurement: "hPa",
         unique_id: deviceTopic + "_count_" + devicePrefix,
         value_template: "{{ value_json.count }}",
-        ...commonConf
+        ...commonConf,
       };
       this.publishDiscovery(
         "sensor/" + deviceTopic + "/count/config",
         JSON.stringify(json),
       );
     }
-
-
-    
-    
   }
 }

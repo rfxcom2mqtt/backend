@@ -1,4 +1,3 @@
-
 export default interface IRfxcom {
   isGroup(payload: any): boolean;
   initialise(): Promise<void>;

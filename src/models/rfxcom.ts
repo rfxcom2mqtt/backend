@@ -11,13 +11,13 @@ export class RfxcomInfo {
   enabledProtocols: string[] = [];
 }
 
-interface RfxcomEvent{
+interface RfxcomEvent {
   id: string;
   subtype: string;
   seqnbr: string;
 }
 
-interface Lighting1Event extends RfxcomEvent{
+interface Lighting1Event extends RfxcomEvent {
   houseCode: string;
   unitCode: string;
   commandNumber: string;
@@ -25,7 +25,7 @@ interface Lighting1Event extends RfxcomEvent{
   rssi: string;
 }
 
-interface Lighting2Event extends RfxcomEvent{
+interface Lighting2Event extends RfxcomEvent {
   unitCode: string;
   commandNumber: string;
   command: string;
@@ -33,7 +33,7 @@ interface Lighting2Event extends RfxcomEvent{
   rssi: string;
 }
 
-interface Lighting4Event extends RfxcomEvent{
+interface Lighting4Event extends RfxcomEvent {
   data: string;
   commandNumber: string;
   command: string;
@@ -41,7 +41,7 @@ interface Lighting4Event extends RfxcomEvent{
   rssi: string;
 }
 
-interface Lighting5Event extends RfxcomEvent{
+interface Lighting5Event extends RfxcomEvent {
   unitCode: string;
   commandNumber: string;
   command: string;
@@ -49,40 +49,39 @@ interface Lighting5Event extends RfxcomEvent{
   rssi: string;
 }
 
-interface Lighting6Event extends RfxcomEvent{
-  groupCode: string
+interface Lighting6Event extends RfxcomEvent {
+  groupCode: string;
   unitCode: string;
   commandNumber: string;
   command: string;
   rssi: string;
 }
 
-interface ChimeEvent extends RfxcomEvent{}
-interface FanEvent extends RfxcomEvent{}
-interface Blinds1Event extends RfxcomEvent{}
-interface EdisioEvent extends RfxcomEvent{}
-interface ActivLinkEvent extends RfxcomEvent{}
-interface FunkbusEvent extends RfxcomEvent{}
-interface HunterfanEvent extends RfxcomEvent{}
-interface Security1Event extends RfxcomEvent{}
+interface ChimeEvent extends RfxcomEvent {}
+interface FanEvent extends RfxcomEvent {}
+interface Blinds1Event extends RfxcomEvent {}
+interface EdisioEvent extends RfxcomEvent {}
+interface ActivLinkEvent extends RfxcomEvent {}
+interface FunkbusEvent extends RfxcomEvent {}
+interface HunterfanEvent extends RfxcomEvent {}
+interface Security1Event extends RfxcomEvent {}
 
-
-interface Camera1Event extends RfxcomEvent{
-  houseCode: string
+interface Camera1Event extends RfxcomEvent {
+  houseCode: string;
   commandNumber: string;
   command: string;
   rssi: string;
 }
 
-interface RemoteEvent extends RfxcomEvent{
-  houseCode: string
+interface RemoteEvent extends RfxcomEvent {
+  houseCode: string;
   commandNumber: string;
   command: string;
   commandType: string;
   rssi: string;
 }
 
-interface Blinds2Event extends RfxcomEvent{
+interface Blinds2Event extends RfxcomEvent {
   unitCode: string;
   commandNumber: string;
   command: string;
@@ -92,7 +91,7 @@ interface Blinds2Event extends RfxcomEvent{
   rssi: string;
 }
 
-interface thermostat1Event extends RfxcomEvent{
+interface thermostat1Event extends RfxcomEvent {
   temperature: string;
   setpoint: string;
   modeNumber: string;
@@ -102,35 +101,35 @@ interface thermostat1Event extends RfxcomEvent{
   rssi: string;
 }
 
-interface Thermostat3Event extends RfxcomEvent{
+interface Thermostat3Event extends RfxcomEvent {
   commandNumber: string;
   command: string;
 }
 
-interface Bbq3Event extends RfxcomEvent{
+interface Bbq3Event extends RfxcomEvent {
   temperature: string;
   batteryLevel: string;
   rssi: string;
 }
 
-interface TempEvent extends RfxcomEvent{
+interface TempEvent extends RfxcomEvent {
   temperature: string;
   batteryLevel: string;
   rssi: string;
 }
 
-interface TemprainEvent extends TempEvent{
+interface TemprainEvent extends TempEvent {
   rainfall: string;
 }
 
-interface HumidityEvent extends RfxcomEvent{
+interface HumidityEvent extends RfxcomEvent {
   humidity: string;
   humidityStatus: string;
   batteryLevel: string;
   rssi: string;
 }
 
-interface TemphumidityEvent extends RfxcomEvent{
+interface TemphumidityEvent extends RfxcomEvent {
   temperature: string;
   humidity: string;
   humidityStatus: string;
@@ -138,12 +137,12 @@ interface TemphumidityEvent extends RfxcomEvent{
   rssi: string;
 }
 
-interface TemphumbaroEvent extends TemphumidityEvent{
+interface TemphumbaroEvent extends TemphumidityEvent {
   barometer: string;
   forecast: string;
 }
 
-interface RainEvent extends RfxcomEvent{
+interface RainEvent extends RfxcomEvent {
   rainfallIncrement?: string;
   rainfall?: string;
   rainfallRate?: string;
@@ -151,7 +150,7 @@ interface RainEvent extends RfxcomEvent{
   rssi: string;
 }
 
-interface WindEvent extends RfxcomEvent{
+interface WindEvent extends RfxcomEvent {
   gustSpeed: string;
   direction?: string;
   averageSpeed?: string;
@@ -161,14 +160,14 @@ interface WindEvent extends RfxcomEvent{
   rssi: string;
 }
 
-interface UvEvent extends RfxcomEvent{
+interface UvEvent extends RfxcomEvent {
   uv: string;
   temperature?: string;
   batteryLevel: string;
   rssi: string;
 }
 
-interface DateEvent extends RfxcomEvent{
+interface DateEvent extends RfxcomEvent {
   year: string;
   month: string;
   day: string;

@@ -35,7 +35,7 @@ jobs:
               with:
                   node-version: 20
                   cache: pnpm
-                  cache-dependency-path: './yarn-lock.json'
+                  cache-dependency-path: './package-lock.json'
 
             - name: 🛠️ Install Dependencies
               run: pnpm install --frozen-lockfile
@@ -49,5 +49,5 @@ jobs:
             #- name: 🧪 Run tests
             #  run: pnpm run test:unit
 
-            - name: 🏗️ Build bundle
-              run: pnpm build
+            #- name: 🏗️ Build bundle
+            #  run: pnpm build

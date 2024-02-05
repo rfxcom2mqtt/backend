@@ -1,9 +1,10 @@
 FROM node:latest
 
 WORKDIR /usr/app
-COPY ./src/package.json .
+COPY ./package.json .
+COPY ./tsconfig.json .
 RUN npm install
 RUN npm install -g ts-node typescript
-COPY ./src .
+COPY ./src ./src
 
-CMD ["ts-node", "index.ts"]
+CMD ["ts-node", "./src/index.ts"]
