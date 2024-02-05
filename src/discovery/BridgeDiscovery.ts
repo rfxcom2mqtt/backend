@@ -1,6 +1,6 @@
 "use strict";
 
-import IRfxcom  from "../rfxcom/interface";
+import IRfxcom from "../rfxcom/interface";
 import { Settings } from "../settings";
 import Mqtt from "../mqtt";
 import { DeviceBridge, BridgeInfo } from "../models/models";

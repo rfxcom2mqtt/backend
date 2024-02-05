@@ -2,7 +2,7 @@ name: CI/CD
 
 on:
   push:
-    branches: ["main"]
+    branches: ["main","develop"]
 
 jobs:
   build:
@@ -19,6 +19,7 @@ jobs:
           images: rfxcom2mqtt/rfxcom2mqtt
           tags: |
             type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=dev,event=develop
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2

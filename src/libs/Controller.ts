@@ -4,7 +4,7 @@ import Mqtt from "../mqtt";
 import Server from "./Server";
 import Rfxcom from "../rfxcom";
 import IRfxcom from "../rfxcom/interface";
-import  MockRfxcom from "../rfxcom/Mock";
+import MockRfxcom from "../rfxcom/Mock";
 import { BridgeInfo } from "../models/models";
 import { MQTTMessage, MqttEventListener } from "../models/mqtt";
 import { RfxcomInfo } from "../models/rfxcom";

@@ -4,7 +4,6 @@ import { RfxcomInfo } from "../models/rfxcom";
 import logger from "../libs/logger";
 import IRfxcom from "./interface";
 
-
 export default class Rfxcom implements IRfxcom {
   private debug: boolean;
   private config: SettingRfxcom;

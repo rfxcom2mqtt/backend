@@ -20,8 +20,7 @@
         "node-cron": "^3.0.2",
         "object-assign-deep": "^0.4.0",
         "rfxcom": "^2.6.0",
-        "winston": "^3.11.0",
-        "rfxcom2mqtt-frontend": "0.1.0-dev"
+        "winston": "^3.11.0"
     },
     "scripts": {
         "start": "ts-node ./src/index.ts",
@@ -33,14 +32,15 @@
     "devDependencies": {
         "@tsconfig/node18": "^18.2.2",
         "@types/node": "^20.11.6",
+        "@types/node-cron": "^3.0.11",
         "@types/object-assign-deep": "^0.4.3",
-        "ts-node": "^10.9.2",
-        "typescript": "^5.3.3",
         "@typescript-eslint/eslint-plugin": "~6.7.4",
         "@typescript-eslint/parser": "~6.7.4",
         "eslint": "~8.50.0",
         "eslint-config-prettier": "~9.0.0",
         "eslint-plugin-prettier": "~5.0.0",
-        "prettier": "~3.0.3"
+        "prettier": "~3.0.3",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.3.3"
     }
 }
