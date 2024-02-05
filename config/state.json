@@ -36,7 +36,10 @@
             "NEXA",
             "Intertechno"
         ],
-        "subTypeValue": "AC"
+        "subTypeValue": "AC",
+        "deviceType": "lighting2",
+        "rfxFunction": 0,
+        "rfxCommand": "switchOff"
     },
     "0x011B8CC2_6": {
         "seqnbr": 42,
@@ -367,5 +370,19 @@
         "rssi": 5,
         "type": "lighting2",
         "subTypeValue": "AC"
+    },
+    "temp_device": {
+        "id": "temp_device",
+        "seqnbr": 1,
+        "subtype": 1,
+        "temperature": "19",
+        "humidity": "60",
+        "humidityStatus": "Off",
+        "barometer": "1040",
+        "forecast": "",
+        "batteryLevel": 100,
+        "rssi": 5,
+        "type": "temphumbaro1",
+        "subTypeValue": "notfound"
     }
 }

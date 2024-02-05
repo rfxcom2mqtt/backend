@@ -1,9 +1,120 @@
+import rfxcom from "rfxcom";
 import { SettingRfxcom } from "../settings";
-import { RfxcomInfo } from "../models/rfxcom";
+import {
+  RfxcomInfo,
+  Lighting2Event,
+  Lighting4Event,
+  RfxcomEvent,
+  TemphumbaroEvent,
+  TemphumidityEvent,
+  TempEvent,
+  Bbq1Event,
+  HumidityEvent,
+  UvEvent,
+  WeightEvent,
+  WaterlevelEvent,
+} from "../models/rfxcom";
 import IRfxcom from "./interface";
 
 import { Logger } from "../libs/logger";
-const logger = Logger.getLogger("RFXCOM")
+const logger = Logger.getLogger("RFXCOM");
+
+const rfxcomEvents: RfxcomEvent[] = [];
+
+rfxcomEvents.push({
+  id: "mocked_device2",
+  seqnbr: 7,
+  subtype: 0,
+  unitCode: "1",
+  commandNumber: 0,
+  command: "Off",
+  level: 0,
+  rssi: 5,
+  type: "lighting2",
+  subTypeValue: "AC",
+} as Lighting2Event);
+rfxcomEvents.push({
+  id: "temphumbaro_device",
+  seqnbr: 1,
+  subtype: 1,
+  temperature: "19",
+  humidity: "60",
+  humidityStatus: "Off",
+  barometer: "1040",
+  forecast: "",
+  batteryLevel: 100,
+  rssi: 5,
+  type: "temphumbaro1",
+} as TemphumbaroEvent);
+rfxcomEvents.push({
+  id: "temphum_device",
+  seqnbr: 1,
+  subtype: 1,
+  temperature: "19",
+  humidity: "60",
+  humidityStatus: "Off",
+  batteryLevel: 100,
+  rssi: 5,
+  type: "temperaturehumidity1",
+} as TemphumidityEvent);
+rfxcomEvents.push({
+  id: "temp_device",
+  seqnbr: 1,
+  subtype: 1,
+  temperature: "19",
+  batteryLevel: 100,
+  rssi: 5,
+  type: "temperature1",
+} as TempEvent);
+rfxcomEvents.push({
+  id: "bbp1_device",
+  seqnbr: 1,
+  subtype: 1,
+  temperature: "19",
+  batteryLevel: 100,
+  rssi: 5,
+  type: "bbq1",
+} as Bbq1Event);
+rfxcomEvents.push({
+  id: "uv1_device",
+  seqnbr: 1,
+  subtype: 1,
+  temperature: "19",
+  uv: 2,
+  batteryLevel: 100,
+  rssi: 5,
+  type: "uv1",
+} as UvEvent);
+rfxcomEvents.push({
+  id: "hum_device",
+  seqnbr: 1,
+  subtype: 1,
+  humidity: "60",
+  humidityStatus: "Off",
+  batteryLevel: 100,
+  rssi: 5,
+  type: "humidity1",
+} as HumidityEvent);
+rfxcomEvents.push({
+  id: "weight_device",
+  seqnbr: 1,
+  subtype: 1,
+  weight: 60,
+  batteryLevel: 100,
+  rssi: 5,
+  type: "weight1",
+} as WeightEvent);
+
+rfxcomEvents.push({
+  id: "waterlevel_device",
+  seqnbr: 1,
+  subtype: 1,
+  temperature: "10",
+  level: 50,
+  batteryLevel: 100,
+  rssi: 5,
+  type: "waterlevel",
+} as WaterlevelEvent);
 
 export default class MockRfxcom implements IRfxcom {
   private config: SettingRfxcom;
@@ -48,26 +159,18 @@ export default class MockRfxcom implements IRfxcom {
   }
   subscribeProtocolsEvent(callback: any) {
     logger.info("Mock subscribeProtocolsEvent");
-    const deviceId = "mocked_device2";
-    const deviceConf = this.config.devices.find(
-      (dev: any) => dev.id === deviceId,
-    );
-    callback(
-      "lighting2",
-      {
-        id: deviceId,
-        seqnbr: 7,
-        subtype: 0,
-        unitCode: "1",
-        commandNumber: 0,
-        command: "Off",
-        level: 0,
-        rssi: 5,
-        type: "lighting2",
-        subTypeValue: "AC",
-      },
-      deviceConf,
-    );
+    rfxcomEvents.forEach((event) => {
+      //event.deviceName = rfxcom.deviceNames[event.type][event.subtype];
+      let deviceId = event.id;
+      if (event.type === "lighting4") {
+        deviceId = (event as Lighting4Event).data;
+      }
+      event.subTypeValue = this.getSubType(event.type, "" + event.subtype);
+      const deviceConf = this.config.devices.find(
+        (dev: any) => dev.id === deviceId,
+      );
+      callback(event.type, event, deviceConf);
+    });
   }
   isGroup(payload: any): boolean {
     if (payload.type === "lighting2") {
@@ -75,8 +178,24 @@ export default class MockRfxcom implements IRfxcom {
     }
     return false;
   }
-  getSubType(type: string, subType: string) {
+  getSubType(type: string, subType: string): string {
     logger.info("Mock get subtype");
+    let returnValue = "notfound";
+    rfxcom.transmitterPacketTypes.forEach(function (packetType: string) {
+      if (type === packetType) {
+        if (rfxcom[packetType] !== undefined) {
+          rfxcom[packetType].forEach(function (subTypeName: string) {
+            if (
+              parseInt(subType) === parseInt(rfxcom[packetType][subTypeName])
+            ) {
+              returnValue = subTypeName;
+            }
+          });
+        }
+      }
+    });
+
+    return returnValue;
   }
   stop() {
     logger.info("Mock stop");

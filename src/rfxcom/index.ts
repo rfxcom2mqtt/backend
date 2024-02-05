@@ -1,10 +1,10 @@
 import rfxcom from "rfxcom";
 import { SettingRfxcom, SettingDevice } from "../settings";
-import { RfxcomInfo } from "../models/rfxcom";
+import { RfxcomInfo, RfxcomEvent } from "../models/rfxcom";
 import IRfxcom from "./interface";
 
 import { Logger } from "../libs/logger";
-const logger = Logger.getLogger("RFXCOM")
+const logger = Logger.getLogger("RFXCOM");
 
 export default class Rfxcom implements IRfxcom {
   private debug: boolean;
@@ -239,13 +239,13 @@ export default class Rfxcom implements IRfxcom {
           }
           evt.subTypeValue = this.getSubType(evt.type, evt.subtype);
           const deviceConf = this.getDeviceConfig(deviceId);
-          callback(protocol, evt, deviceConf);
+          callback(protocol, evt as RfxcomEvent, deviceConf);
         });
       });
     }
   }
 
-  getSubType(type: string, subType: string) {
+  getSubType(type: string, subType: string): string {
     let returnValue = "notfound";
     rfxcom.transmitterPacketTypes.forEach(function (packetType: string) {
       if (type === packetType) {
