@@ -1,7 +1,9 @@
 import { SettingRfxcom } from "../settings";
 import { RfxcomInfo } from "../models/rfxcom";
-import logger from "../libs/logger";
 import IRfxcom from "./interface";
+
+import { Logger } from "../libs/logger";
+const logger = Logger.getLogger("RFXCOM")
 
 export default class MockRfxcom implements IRfxcom {
   private config: SettingRfxcom;
@@ -12,16 +14,16 @@ export default class MockRfxcom implements IRfxcom {
 
   initialise(): Promise<void> {
     return new Promise((resolve, reject) => {
-      logger.info("RFXCOM Mock device initialised");
+      logger.info("Mock device initialised");
       resolve();
     });
   }
   getStatus(callback: any) {
-    logger.info("RFXCOM Mock get status");
+    logger.info("Mock get status");
     callback("online");
   }
   onStatus(callback: any) {
-    logger.info("RFXCOM Mock on status");
+    logger.info("Mock on status");
     const rfxcomInfo = new RfxcomInfo();
     rfxcomInfo.receiverTypeCode = 83;
     rfxcomInfo.receiverType = "Mock";
@@ -38,14 +40,14 @@ export default class MockRfxcom implements IRfxcom {
     callback(rfxcomInfo);
   }
   onCommand(deviceType: string, entityName: string, payload: any) {
-    logger.info("RFXCOM Mock on command");
+    logger.info("Mock on command");
   }
   onDisconnect(callback: any) {
-    logger.info("RFXCOM Mock on disconnect");
+    logger.info("Mock on disconnect");
     callback({});
   }
   subscribeProtocolsEvent(callback: any) {
-    logger.info("RFXCOM Mock subscribeProtocolsEvent");
+    logger.info("Mock subscribeProtocolsEvent");
     const deviceId = "mocked_device2";
     const deviceConf = this.config.devices.find(
       (dev: any) => dev.id === deviceId,
@@ -74,10 +76,10 @@ export default class MockRfxcom implements IRfxcom {
     return false;
   }
   getSubType(type: string, subType: string) {
-    logger.info("RFXCOM Mock get subtype");
+    logger.info("Mock get subtype");
   }
   stop() {
-    logger.info("RFXCOM Mock stop");
+    logger.info("Mock stop");
   }
 
   sendCommand(
@@ -86,6 +88,6 @@ export default class MockRfxcom implements IRfxcom {
     command: string | undefined,
     entityName: string,
   ) {
-    logger.info("RFXCOM Mock send command : " + command);
+    logger.info("Mock send command : " + command);
   }
 }

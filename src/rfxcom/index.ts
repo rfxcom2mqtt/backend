@@ -1,8 +1,10 @@
 import rfxcom from "rfxcom";
 import { SettingRfxcom, SettingDevice } from "../settings";
 import { RfxcomInfo } from "../models/rfxcom";
-import logger from "../libs/logger";
 import IRfxcom from "./interface";
+
+import { Logger } from "../libs/logger";
+const logger = Logger.getLogger("RFXCOM")
 
 export default class Rfxcom implements IRfxcom {
   private debug: boolean;
