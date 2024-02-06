@@ -69,5 +69,5 @@ build multi Arch image
 docker buildx build \ 
 --platform linux/amd64,linux/arm/v7 \
 --push \
--t sguernion/rfxcom2mqtt .
+-t rfxcom2mqtt/rfxcom2mqtt .
 ```

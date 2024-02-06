@@ -1,6 +1,6 @@
 {
     "name": "rfxcom2mqtt",
-    "repository": "https://github.com/sguernion/rfxcom2mqtt",
+    "repository": "https://github.com/rfxcom2mqtt/rfxcom2mqtt",
     "author": "Sguernion<sguernion@github.com>",
     "license": "Apache-2.0",
     "version": "1.0.0",
