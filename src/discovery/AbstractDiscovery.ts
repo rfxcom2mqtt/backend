@@ -24,7 +24,7 @@ export default class AbstractDiscovery {
     this.discoveryOrigin = {
       name: "Rfxcom2MQTT",
       sw: "",
-      url: "https://sguernion.github.io/rfxcom2mqtt/",
+      url: "https://rfxcom2mqtt.github.io/rfxcom2mqtt/",
     };
   }
 
