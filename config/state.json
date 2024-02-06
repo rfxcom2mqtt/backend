@@ -382,7 +382,86 @@
         "forecast": "",
         "batteryLevel": 100,
         "rssi": 5,
-        "type": "temphumbaro1",
-        "subTypeValue": "notfound"
+        "type": "temperature1",
+        "subTypeValue": "TEMP1"
+    },
+    "temphumbaro_device": {
+        "id": "temphumbaro_device",
+        "seqnbr": 1,
+        "subtype": 1,
+        "temperature": "19",
+        "humidity": "60",
+        "humidityStatus": "Off",
+        "barometer": "1040",
+        "forecast": "",
+        "batteryLevel": 100,
+        "rssi": 5,
+        "type": "tempHumBaro1",
+        "subTypeValue": "THB1"
+    },
+    "temphum_device": {
+        "id": "temphum_device",
+        "seqnbr": 1,
+        "subtype": 1,
+        "temperature": "19",
+        "humidity": "60",
+        "humidityStatus": "Off",
+        "batteryLevel": 100,
+        "rssi": 5,
+        "type": "temperatureHumidity1",
+        "subTypeValue": "TH1"
+    },
+    "bbp1_device": {
+        "id": "bbp1_device",
+        "seqnbr": 1,
+        "subtype": 1,
+        "temperature": "19",
+        "batteryLevel": 100,
+        "rssi": 5,
+        "type": "bbq1",
+        "subTypeValue": "MAVERICK"
+    },
+    "uv1_device": {
+        "id": "uv1_device",
+        "seqnbr": 1,
+        "subtype": 1,
+        "temperature": "19",
+        "uv": 2,
+        "batteryLevel": 100,
+        "rssi": 5,
+        "type": "uv1",
+        "subTypeValue": "UV1"
+    },
+    "hum_device": {
+        "id": "hum_device",
+        "seqnbr": 1,
+        "subtype": 0,
+        "humidity": "60",
+        "humidityStatus": "Off",
+        "batteryLevel": 100,
+        "rssi": 5,
+        "type": "humidity1",
+        "subTypeValue": "HUMIDITY_UNUSED"
+    },
+    "weight_device": {
+        "id": "weight_device",
+        "seqnbr": 1,
+        "subtype": 1,
+        "weight": 60,
+        "batteryLevel": 100,
+        "rssi": 5,
+        "type": "weight1",
+        "subTypeValue": "WEIGHT1"
+    },
+    "waterlevel_device": {
+        "id": "waterlevel_device",
+        "seqnbr": 1,
+        "subtype": 0,
+        "temperature": "10",
+        "level": 50,
+        "batteryLevel": 100,
+        "rssi": 5,
+        "type": "waterlevel",
+        "subTypeValue": "TS_FT002"
     }
 }

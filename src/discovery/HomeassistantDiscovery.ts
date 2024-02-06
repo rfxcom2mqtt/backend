@@ -452,5 +452,64 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
         JSON.stringify(json),
       );
     }
+
+    // weight
+    if (payload.weight !== undefined) {
+      const json = {
+        device_class: "weight",
+        enabled_by_default: true,
+        icon: "mdi:weight",
+        name: deviceName + " Weight",
+        object_id: deviceTopic + "_weight",
+        state_class: "measurement",
+        unit_of_measurement: "Kg",
+        unique_id: deviceTopic + "_weight_" + devicePrefix,
+        value_template: "{{ value_json.weight }}",
+        ...commonConf,
+      };
+      this.publishDiscovery(
+        "sensor/" + deviceTopic + "/weight/config",
+        JSON.stringify(json),
+      );
+    }
+
+    // uv
+    if (payload.uv !== undefined) {
+      const json = {
+        enabled_by_default: true,
+        icon: "mdi:sunglasses",
+        name: deviceName + " UV",
+        object_id: deviceTopic + "_uv",
+        state_class: "measurement",
+        unit_of_measurement: "UV index",
+        unique_id: deviceTopic + "_uv_" + devicePrefix,
+        value_template: "{{ value_json.uv }}",
+        ...commonConf,
+      };
+      this.publishDiscovery(
+        "sensor/" + deviceTopic + "/uv/config",
+        JSON.stringify(json),
+      );
+    }
+
+    // uv
+    if (payload.uv !== undefined) {
+      const json = {
+        device_class: "precipitation_intensity",
+        enabled_by_default: true,
+        icon: "mdi:sunglasses",
+        name: deviceName + " UV",
+        object_id: deviceTopic + "_uv",
+        state_class: "measurement",
+        unit_of_measurement: "UV index",
+        unique_id: deviceTopic + "_uv_" + devicePrefix,
+        value_template: "{{ value_json.uv }}",
+        ...commonConf,
+      };
+      this.publishDiscovery(
+        "sensor/" + deviceTopic + "/uv/config",
+        JSON.stringify(json),
+      );
+    }
   }
 }

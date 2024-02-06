@@ -6,18 +6,19 @@ import * as core from "express-serve-static-core";
 import fs from "fs";
 import logger from "../libs/logger";
 import { Settings, SettingFrontend } from "../settings";
-import expressStaticGzip from "express-static-gzip";
 import StateStore, { DeviceStore } from "../store/state";
 //import { RawData } from 'ws';
 import { BridgeInfo } from "../models/models";
-//import frontend from 'rfxcom2mqtt-frontend';
+
 import Api from "./Api";
+import Frontend from "./Frontend";
 
 export default class Server {
   private server?: core.Express;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private frontConf: SettingFrontend;
   private api: Api;
+  private frontend: Frontend;
 
   constructor(
     conf: Settings,
@@ -27,6 +28,7 @@ export default class Server {
   ) {
     this.frontConf = conf.frontend;
     this.api = new Api(conf, devices, state, bridgeInfo);
+    this.frontend = new Frontend(conf);
   }
 
   private authenticate(req: Request, res: Response, next: NextFunction): void {
@@ -91,6 +93,7 @@ export default class Server {
       },
     );
     this.server.use("/api", this.api.router);
+    this.server.use("/", this.frontend.router);
 
     //initialize the WebSocket server instance
     //const wss = expressWs(this.server);
@@ -134,20 +137,6 @@ export default class Server {
         );
       });
     }
-
-    const staticFrontend = expressStaticGzip("../../../frontend/build/", {
-      enableBrotli: true,
-      index: "index.html",
-      customCompressions: [
-        {
-          encodingName: "deflate",
-          fileExtension: "zz",
-        },
-      ],
-      orderPreference: ["br", "gz"],
-    });
-    this.server.use("*", staticFrontend);
-    //this.server.use("/", expressStaticGzip( frontend.getPath()));
 
     this.server.use(
       (err: Error, req: Request, res: Response, next: NextFunction) => {

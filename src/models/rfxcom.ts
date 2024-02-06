@@ -205,9 +205,9 @@ export interface TemphumbaroEvent extends TemphumidityEvent {
 }
 
 interface RainEvent extends RfxcomEvent {
-  rainfallIncrement?: string;
-  rainfall?: string;
-  rainfallRate?: string;
+  rainfallIncrement?: number;
+  rainfall?: number;
+  rainfallRate?: number;
   batteryLevel: number;
   rssi: number;
 }
