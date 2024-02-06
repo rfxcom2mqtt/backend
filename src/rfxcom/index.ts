@@ -246,20 +246,16 @@ export default class Rfxcom implements IRfxcom {
   }
 
   getSubType(type: string, subType: string): string {
-    let returnValue = "notfound";
-    rfxcom.transmitterPacketTypes.forEach(function (packetType: string) {
-      if (type === packetType) {
-        if (rfxcom[packetType] !== undefined) {
-          rfxcom[packetType].forEach(function (subTypeName: string) {
-            if (
-              parseInt(subType) === parseInt(rfxcom[packetType][subTypeName])
-            ) {
-              returnValue = subTypeName;
-            }
-          });
-        }
+    let returnValue = "";
+    if (rfxcom.packetNames[type] !== undefined) {
+      if (rfxcom[type] !== undefined) {
+        rfxcom[type].forEach(function (subTypeName: string) {
+          if (parseInt(subType) === parseInt(rfxcom[type][subTypeName])) {
+            returnValue = subTypeName;
+          }
+        });
       }
-    });
+    }
 
     return returnValue;
   }

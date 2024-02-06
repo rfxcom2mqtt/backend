@@ -44,7 +44,7 @@ rfxcomEvents.push({
   forecast: "",
   batteryLevel: 100,
   rssi: 5,
-  type: "temphumbaro1",
+  type: "tempHumBaro1",
 } as TemphumbaroEvent);
 rfxcomEvents.push({
   id: "temphum_device",
@@ -55,7 +55,7 @@ rfxcomEvents.push({
   humidityStatus: "Off",
   batteryLevel: 100,
   rssi: 5,
-  type: "temperaturehumidity1",
+  type: "temperatureHumidity1",
 } as TemphumidityEvent);
 rfxcomEvents.push({
   id: "temp_device",
@@ -88,7 +88,7 @@ rfxcomEvents.push({
 rfxcomEvents.push({
   id: "hum_device",
   seqnbr: 1,
-  subtype: 1,
+  subtype: 0,
   humidity: "60",
   humidityStatus: "Off",
   batteryLevel: 100,
@@ -108,7 +108,7 @@ rfxcomEvents.push({
 rfxcomEvents.push({
   id: "waterlevel_device",
   seqnbr: 1,
-  subtype: 1,
+  subtype: 0,
   temperature: "10",
   level: 50,
   batteryLevel: 100,
@@ -179,21 +179,17 @@ export default class MockRfxcom implements IRfxcom {
     return false;
   }
   getSubType(type: string, subType: string): string {
-    logger.info("Mock get subtype");
-    let returnValue = "notfound";
-    rfxcom.transmitterPacketTypes.forEach(function (packetType: string) {
-      if (type === packetType) {
-        if (rfxcom[packetType] !== undefined) {
-          rfxcom[packetType].forEach(function (subTypeName: string) {
-            if (
-              parseInt(subType) === parseInt(rfxcom[packetType][subTypeName])
-            ) {
-              returnValue = subTypeName;
-            }
-          });
-        }
+    logger.info("Mock get subtype : " + type + "." + subType);
+    let returnValue = "";
+    if (rfxcom.packetNames[type.toLocaleLowerCase()] !== undefined) {
+      if (rfxcom[type] !== undefined) {
+        rfxcom[type].forEach(function (subTypeName: string) {
+          if (parseInt(subType) === parseInt(rfxcom[type][subTypeName])) {
+            returnValue = subTypeName;
+          }
+        });
       }
-    });
+    }
 
     return returnValue;
   }
