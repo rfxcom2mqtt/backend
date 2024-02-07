@@ -4,7 +4,7 @@ import IRfxcom from "../rfxcom/interface";
 import { Settings } from "../settings";
 import Mqtt from "../mqtt";
 import { MQTTMessage, MqttEventListener } from "../models/mqtt";
-import StateStore from "../store/state";
+import StateStore, { DeviceStore } from "../store/state";
 import HomeassistantDiscovery from "./HomeassistantDiscovery";
 import BridgeDiscovery from "./BridgeDiscovery";
 
@@ -18,6 +18,7 @@ export default class Discovery implements MqttEventListener {
     rfxtrx: IRfxcom,
     config: Settings,
     state: StateStore,
+    device: DeviceStore,
   ) {
     this.baseTopic = mqtt.topics.base;
     this.homeassistant = new HomeassistantDiscovery(
@@ -25,6 +26,7 @@ export default class Discovery implements MqttEventListener {
       rfxtrx,
       config,
       state,
+      device,
     );
     this.bridge = new BridgeDiscovery(mqtt, rfxtrx, config);
   }

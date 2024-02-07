@@ -68,6 +68,22 @@ class StateStore {
     return this.state[entity.id] || {};
   }
 
+  getByDeviceId(id: string): KeyValue {
+    logger.debug(`get entities of device : ` + id);
+    const entities: KeyValue[] = [];
+
+    for (const entity in this.state) {
+      if (this.state[entity].id === id) {
+        const value = this.state[entity];
+        value.deviceId = value.id;
+        value.id = entity;
+        entities.push(value);
+      }
+    }
+
+    return entities;
+  }
+
   getAll(): { [s: string | number]: KeyValue } {
     return this.state;
   }
@@ -88,7 +104,7 @@ class StateStore {
 }
 
 export class DeviceStore {
-  private devices: { [s: string | number]: KeyValue } = {};
+  private devices: { [s: string | number]: DeviceState } = {};
   private file =
     (process.env.RFXCOM2MQTT_DATA ?? "/app/data/") + "devices.json";
   private timer?: NodeJS.Timeout = undefined;
@@ -143,26 +159,26 @@ export class DeviceStore {
     }
   }
 
-  exists(entity: DeviceState): boolean {
-    return this.devices.hasOwnProperty(entity.id);
+  exists(id: string): boolean {
+    return this.devices.hasOwnProperty(id);
   }
 
-  get(entity: DeviceState): KeyValue {
-    logger.debug(`get device state : ` + entity.id);
-    return this.devices[entity.id] || {};
+  get(id: string): DeviceState {
+    logger.debug(`get device state : ` + id);
+    return this.devices[id];
   }
 
   getAll(): { [s: string | number]: KeyValue } {
     return this.devices;
   }
 
-  set(entity: DeviceState, update: KeyValue, reason?: string): KeyValue {
-    logger.debug(`update device state : ` + entity.id);
-    const fromState = this.devices[entity.id] || {};
+  set(id: string, update: DeviceState, reason?: string): DeviceState {
+    logger.debug(`update device state : ` + id);
+    const fromState = this.devices[id] || new DeviceState([], "");
     const toState = objectAssignDeep({}, fromState, update);
-    const newCache = { ...toState };
-    this.devices[entity.id] = newCache;
-    return toState;
+    const newCache = { ...toState } as DeviceState;
+    this.devices[id] = newCache;
+    return this.devices[id];
   }
 
   remove(id: string | number): void {

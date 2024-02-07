@@ -1,9 +1,9 @@
 import { StatusCodes } from "http-status-codes";
-import { Router, Request, Response } from "express";
+import { Router, Request, Response, NextFunction } from "express";
 import { logger } from "../libs/logger";
 import { Settings, SettingFrontend, settingsService } from "../settings";
 import StateStore, { DeviceStore } from "../store/state";
-import { BridgeInfo } from "../models/models";
+import { BridgeInfo, DeviceState } from "../models/models";
 
 export default class Api {
   private frontConf: SettingFrontend;
@@ -20,8 +20,8 @@ export default class Api {
     this.frontConf = conf.frontend;
     this.bridgeInfo = bridgeInfo;
     this.router = Router();
-    this.router.get("/", (req: Request, res: Response) => {
-      return this.onApiRequest(req, res);
+    this.router.get("/", (req: Request, res: Response, next: NextFunction) => {
+      return this.onApiRequest(req, res, next);
     });
     this.router.get("/settings", (req: Request, res: Response) => {
       res
@@ -44,11 +44,22 @@ export default class Api {
         .json(devices.getAll());
     });
 
-    this.router.get("/devices/status", (req: Request, res: Response) => {
+    this.router.get("/devices/:id", (req: Request, res: Response) => {
+      const id = req.params.id;
+      logger.info("get device " + id + " info");
       res
         .header("Access-Control-Allow-Origin", "*")
         .status(StatusCodes.OK)
-        .json(state.getAll());
+        .json(devices.get(id));
+    });
+
+    this.router.get("/devices/:id/entities", (req: Request, res: Response) => {
+      const id = req.params.id;
+      logger.info("get device " + id + " entities");
+      res
+        .header("Access-Control-Allow-Origin", "*")
+        .status(StatusCodes.OK)
+        .json(state.getByDeviceId(id));
     });
 
     this.router.get("/bridge/info", (req: Request, res: Response) => {
@@ -58,11 +69,29 @@ export default class Api {
         .json(this.bridgeInfo);
     });
 
+    this.router.post("/bridge/action", (req: Request, res: Response) => {
+      const action = req.body?.action;
+      if (action === "restart") {
+        //TODO
+      }
+      res
+        .header("Access-Control-Allow-Origin", "*")
+        .status(StatusCodes.OK)
+        .json({});
+    });
+
     this.state = state;
   }
 
-  private onApiRequest(req: Request, res: Response): any {
-    logger.info("onRequest " + req.originalUrl + " body :" + req.body);
-    return res.status(StatusCodes.OK).json({});
+  private onApiRequest(req: Request, res: Response, next: NextFunction): any {
+    logger.info(
+      "onRequest " +
+        req.method +
+        " " +
+        req.originalUrl +
+        " body :" +
+        JSON.stringify(req.body),
+    );
+    return next();
   }
 }

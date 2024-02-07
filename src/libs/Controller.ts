@@ -42,6 +42,7 @@ export default class Controller implements MqttEventListener {
       this.rfxBridge,
       this.config,
       this.state,
+      this.device,
     );
     this.mqttClient.addListener(this.discovery);
     this.mqttClient.addListener(this);
@@ -69,7 +70,7 @@ export default class Controller implements MqttEventListener {
 
   async start(): Promise<void> {
     logger.info("Controller Starting");
-    this.state.start();
+    this.device.start();
     this.discovery.start();
     this.server?.start();
     try {
@@ -122,6 +123,7 @@ export default class Controller implements MqttEventListener {
     await this.rfxBridge.stop();
     await this.exitCallback(0, restart);
     await this.server?.stop();
+    this.device.stop();
   }
 
   scheduleHealthcheck() {
