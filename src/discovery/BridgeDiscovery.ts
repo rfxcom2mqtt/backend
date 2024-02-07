@@ -5,7 +5,7 @@ import { Settings, settingsService } from "../settings";
 import Mqtt from "../mqtt";
 import { DeviceBridge, BridgeInfo } from "../models/models";
 import { MQTTMessage } from "../models/mqtt";
-import logger from "../libs/logger";
+import { loggerFactory, logger } from "../libs/logger";
 import AbstractDiscovery from "./AbstractDiscovery";
 
 export default class BridgeDiscovery extends AbstractDiscovery {
@@ -24,7 +24,7 @@ export default class BridgeDiscovery extends AbstractDiscovery {
   onMQTTMessage(data: MQTTMessage) {
     if (data.topic === this.baseTopic + "/bridge/request/log_level") {
       const payload = JSON.parse(data.message);
-      logger.setLevel(payload.log_level);
+      loggerFactory.setLevel(payload.log_level);
       logger.info("update log level to : " + payload.log_level);
       settingsService.set(["loglevel"], payload.log_level);
     }

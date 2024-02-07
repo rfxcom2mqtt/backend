@@ -1,4 +1,4 @@
-import logger from "../libs/logger";
+import { logger } from "../libs/logger";
 import { Router } from "express";
 import { Settings, SettingFrontend } from "../settings";
 //import { RawData } from 'ws';

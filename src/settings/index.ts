@@ -3,7 +3,7 @@ import objectAssignDeep from "object-assign-deep";
 import { KeyValue } from "../models/models";
 import yaml from "./yaml";
 import path from "path";
-import logger from "../libs/logger";
+import { logger, loggerFactory } from "../libs/logger";
 
 type RecursivePartial<T> = { [P in keyof T]?: RecursivePartial<T[P]> };
 
@@ -118,6 +118,7 @@ class SettingsService {
       this.getFileSettings(file),
     ) as Settings;
     applyEnvironmentVariables(this._settingsWithDefaults);
+    loggerFactory.setLevel(this._settingsWithDefaults!!.loglevel);
     logger.info("configuration loaded from path : " + file);
   }
 
@@ -150,6 +151,7 @@ class SettingsService {
       _settings,
       newSettings,
     );
+
     this.write();
   }
 

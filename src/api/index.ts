@@ -4,7 +4,7 @@ import express, { Request, Response, NextFunction } from "express";
 import { StatusCodes } from "http-status-codes";
 import * as core from "express-serve-static-core";
 import fs from "fs";
-import logger from "../libs/logger";
+import { logger } from "../libs/logger";
 import { Settings, SettingFrontend } from "../settings";
 import StateStore, { DeviceStore } from "../store/state";
 import { BridgeInfo } from "../models/models";

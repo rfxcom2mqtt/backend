@@ -1,7 +1,3 @@
-//  subtype: string,
-//seqnbr:           seqnbr,
-//cmnd:             cmnd,
-
 export class RfxcomInfo {
   receiverTypeCode: number = 0;
   receiverType: string = "";

@@ -6,7 +6,7 @@ import Mqtt from "../mqtt";
 import { DeviceEntity } from "../models/models";
 import { MQTTMessage } from "../models/mqtt";
 import StateStore from "../store/state";
-import logger from "../libs/logger";
+import { logger } from "../libs/logger";
 import AbstractDiscovery from "./AbstractDiscovery";
 
 export default class HomeassistantDiscovery extends AbstractDiscovery {

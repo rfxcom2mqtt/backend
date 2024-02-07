@@ -2,8 +2,8 @@ import * as mqtt from "mqtt";
 import { Settings, SettingMqtt } from "../settings";
 import { MqttEventListener, MQTTMessage } from "../models/mqtt";
 import fs from "fs";
-import { Logger } from "../libs/logger";
-const logger = Logger.getLogger("MQTT");
+import { loggerFactory } from "../libs/logger";
+const logger = loggerFactory.getLogger("MQTT");
 
 interface MQTTOptions {
   qos?: mqtt.QoS;
