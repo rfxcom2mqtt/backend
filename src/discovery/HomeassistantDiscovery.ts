@@ -96,8 +96,8 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
         entityState.commandNumber = cmd[0] === "group" ? 4 : 1; //WORK only for lithing2
         entityState.rfxFunction = "switchOn";
       } else if (command === "off") {
-        entityState.rfxFunction = cmd[0] === "group" ? 3 : 0; //WORK only for lithing2
-        entityState.rfxCommand = "switchOff";
+        entityState.commandNumber = cmd[0] === "group" ? 3 : 0; //WORK only for lithing2
+        entityState.rfxFunction = "switchOff";
       } else {
         if (cmd[0] === "level") {
           entityState.rfxFunction = "setLevel";
