@@ -8,7 +8,7 @@ const saveInterval = 1000 * 60 * 1; // 1 minutes
 
 class StateStore {
   private state: { [s: string | number]: KeyValue } = {};
-  private file = process.env.RFXCOM2MQTT_DATA_STATE ?? "/app/data/state.json";
+  private file = (process.env.RFXCOM2MQTT_DATA ?? "/app/data/") + "state.json";
   private timer?: NodeJS.Timeout = undefined;
   private config: Settings;
   private saveInterval: number;
@@ -89,7 +89,8 @@ class StateStore {
 
 export class DeviceStore {
   private devices: { [s: string | number]: KeyValue } = {};
-  private file = process.env.RFXCOM2MQTT_DATA_STATE ?? "/app/data/devices.json";
+  private file =
+    (process.env.RFXCOM2MQTT_DATA ?? "/app/data/") + "devices.json";
   private timer?: NodeJS.Timeout = undefined;
   private config: Settings;
   private saveInterval: number;

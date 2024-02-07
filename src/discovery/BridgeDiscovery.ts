@@ -1,7 +1,7 @@
 "use strict";
 
 import IRfxcom from "../rfxcom/interface";
-import { Settings } from "../settings";
+import { Settings, settingsService } from "../settings";
 import Mqtt from "../mqtt";
 import { DeviceBridge, BridgeInfo } from "../models/models";
 import { MQTTMessage } from "../models/mqtt";
@@ -26,6 +26,7 @@ export default class BridgeDiscovery extends AbstractDiscovery {
       const payload = JSON.parse(data.message);
       logger.setLevel(payload.log_level);
       logger.info("update log level to : " + payload.log_level);
+      settingsService.set(["loglevel"], payload.log_level);
     }
   }
 

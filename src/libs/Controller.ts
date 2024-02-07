@@ -1,4 +1,4 @@
-import { Settings, SettingDevice, read } from "../settings";
+import { Settings, SettingDevice, settingsService } from "../settings";
 import Discovery from "../discovery";
 import Mqtt from "../mqtt";
 import Server from "../api";
@@ -29,8 +29,7 @@ export default class Controller implements MqttEventListener {
   constructor(exitCallback: (code: number, restart: boolean) => void) {
     this.exitCallback = exitCallback;
 
-    const file = process.env.RFXCOM2MQTT_CONFIG ?? "/app/data/config.yml";
-    this.config = read(file);
+    this.config = settingsService.read();
     this.state = new State(this.config);
     this.device = new DeviceStore(this.config);
     logger.setLevel(this.config.loglevel);
@@ -58,6 +57,17 @@ export default class Controller implements MqttEventListener {
     }
   }
 
+  async startMqtt() {
+    // MQTT
+    try {
+      await this.mqttClient.connect();
+    } catch (error: any) {
+      logger.error(`MQTT failed to connect, exiting...`);
+      await this.rfxBridge.stop();
+      await this.exitCallback(1, false);
+    }
+  }
+
   async start(): Promise<void> {
     logger.info("Controller Starting");
     this.state.start();
@@ -71,14 +81,7 @@ export default class Controller implements MqttEventListener {
       logger.error(error.stack);
     }
 
-    // MQTT
-    try {
-      await this.mqttClient.connect();
-    } catch (error: any) {
-      logger.error(`MQTT failed to connect, exiting...`);
-      await this.rfxBridge.stop();
-      await this.exitCallback(1, false);
-    }
+    await this.startMqtt();
 
     this.rfxBridge.subscribeProtocolsEvent(
       (type: any, evt: any, deviceConf: any) =>

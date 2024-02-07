@@ -1,3 +1,7 @@
+declare module "rfxcom2mqtt-frontend" {
+  export function getPath(): string;
+}
+
 declare module "connect-gzip-static" {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   export type RequestHandler = (req: any, res: any) => void;

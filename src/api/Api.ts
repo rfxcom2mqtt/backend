@@ -1,7 +1,7 @@
 import { StatusCodes } from "http-status-codes";
 import { Router, Request, Response } from "express";
 import logger from "../libs/logger";
-import { Settings, SettingFrontend } from "../settings";
+import { Settings, SettingFrontend, settingsService } from "../settings";
 import StateStore, { DeviceStore } from "../store/state";
 import { BridgeInfo } from "../models/models";
 
@@ -27,7 +27,14 @@ export default class Api {
       res
         .header("Access-Control-Allow-Origin", "*")
         .status(StatusCodes.OK)
-        .json(conf);
+        .json(settingsService.get());
+    });
+    this.router.post("/settings", (req: Request, res: Response) => {
+      settingsService.apply(req.body);
+      res
+        .header("Access-Control-Allow-Origin", "*")
+        .status(StatusCodes.OK)
+        .json(settingsService.get());
     });
 
     this.router.get("/devices", (req: Request, res: Response) => {
