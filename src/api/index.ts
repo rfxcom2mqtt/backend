@@ -1,15 +1,13 @@
 import cookieParser from "cookie-parser";
 import express, { Request, Response, NextFunction } from "express";
-//import expressWs from 'express-ws';
+
 import { StatusCodes } from "http-status-codes";
 import * as core from "express-serve-static-core";
 import fs from "fs";
 import logger from "../libs/logger";
 import { Settings, SettingFrontend } from "../settings";
 import StateStore, { DeviceStore } from "../store/state";
-//import { RawData } from 'ws';
 import { BridgeInfo } from "../models/models";
-
 import Api from "./Api";
 import Frontend from "./Frontend";
 
@@ -86,6 +84,8 @@ export default class Server {
     this.server.use(express.json());
     this.server.use(express.urlencoded({ extended: true }));
     this.server.use(cookieParser());
+
+    this.server.use(this.frontend.router);
     this.server.use(
       "/api",
       (req: Request, res: Response, next: NextFunction) => {
@@ -93,23 +93,13 @@ export default class Server {
       },
     );
     this.server.use("/api", this.api.router);
-    this.server.use("/", this.frontend.router);
 
-    //initialize the WebSocket server instance
-    //const wss = expressWs(this.server);
     this.server.use(function (req: Request, res: Response, next: NextFunction) {
       logger.info(
         req.method + " " + req.originalUrl + " : " + JSON.stringify(req.body),
       );
       next();
     });
-
-    //wss.app.ws('/', function(ws, req: Request) {
-    //    ws.on('message', function(msg : RawData ) {
-    //        logger.info(msg.toString());
-    //    });
-    //    logger.info('socket'+req);
-    //  });
 
     /* istanbul ignore next */
     const options = {
