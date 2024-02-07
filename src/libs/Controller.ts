@@ -9,7 +9,7 @@ import { BridgeInfo } from "../models/models";
 import { MQTTMessage, MqttEventListener } from "../models/mqtt";
 import { RfxcomInfo } from "../models/rfxcom";
 import utils from "./utils";
-import logger from "./logger";
+import { logger } from "./logger";
 import State, { DeviceStore } from "../store/state";
 
 import cron from "node-cron";
@@ -32,7 +32,6 @@ export default class Controller implements MqttEventListener {
     this.config = settingsService.read();
     this.state = new State(this.config);
     this.device = new DeviceStore(this.config);
-    logger.setLevel(this.config.loglevel);
     logger.info("configuration : " + JSON.stringify(this.config));
     this.rfxBridge = this.config.mock
       ? new MockRfxcom(this.config.rfxcom)

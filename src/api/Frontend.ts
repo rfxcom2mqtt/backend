@@ -1,4 +1,4 @@
-import logger from "../libs/logger";
+import { logger } from "../libs/logger";
 import express, { Router } from "express";
 import { Settings, SettingFrontend } from "../settings";
 import expressStaticGzip from "express-static-gzip";

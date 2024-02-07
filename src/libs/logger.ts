@@ -8,7 +8,7 @@ const logToWinstonLevel = (level: LogLevel): WinstonLogLevel =>
 const winstonToLevel = (level: WinstonLogLevel): LogLevel =>
   level === "warning" ? "warn" : level;
 
-export class Logger {
+class Logger {
   private logger: winston.Logger;
   private name: string;
   private transportsToUse: winston.transport[];
@@ -63,11 +63,30 @@ export class Logger {
   error(message: string): void {
     this.logger.error(message);
   }
+}
 
-  public static getLogger(name: string): Logger {
-    return new Logger(name);
+class LoggerFactory {
+  private loggers: Logger[] = [];
+  private default?: Logger;
+
+  setLevel(level: LogLevel): void {
+    this.loggers.forEach((logger) => logger.setLevel(level));
+  }
+
+  public getLogger(name: string): Logger {
+    const logger = new Logger(name);
+    this.loggers.push(logger);
+    return logger;
+  }
+
+  public getDefault() {
+    if (this.default === undefined) {
+      this.default = this.getLogger("RFXCOM2MQTT");
+    }
+    return this.default;
   }
 }
 
-const logger = Logger.getLogger("RFXCOM2MQTT");
-export default logger;
+const loggerFactory = new LoggerFactory();
+const logger = loggerFactory.getDefault();
+export { loggerFactory, logger };
