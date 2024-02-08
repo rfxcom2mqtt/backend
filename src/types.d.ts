@@ -1,4 +1,4 @@
-declare module "rfxcom2mqtt-frontend" {
+declare module "@rfxcom2mqtt/frontend" {
   export function getPath(): string;
 }
 

@@ -23,7 +23,8 @@ export class DeviceEntity {
 export class DeviceState extends DeviceEntity {
   public id: string = "";
   public type: string = "";
-  public subtype: string = "";
+  public subtype: number = 0;
+  public subTypeValue: string = "";
   entities: string[] = [];
   sensors: string[] = [];
   switchs: string[] = [];
@@ -51,13 +52,13 @@ export class DeviceStateStore {
   }
 
   addSensor(sensorId: string) {
-    if (!this.state.entities.includes(sensorId)) {
+    if (!this.state.sensors.includes(sensorId)) {
       this.state.sensors.push(sensorId);
     }
   }
 
   addSwitch(switchId: string) {
-    if (!this.state.entities.includes(switchId)) {
+    if (!this.state.switchs.includes(switchId)) {
       this.state.switchs.push(switchId);
     }
   }
