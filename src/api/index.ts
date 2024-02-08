@@ -94,12 +94,12 @@ export default class Server {
     );
     this.server.use("/api", this.api.router);
 
-    this.server.use(function (req: Request, res: Response, next: NextFunction) {
+    /*this.server.use(function (req: Request, res: Response, next: NextFunction) {
       logger.info(
         req.method + " " + req.originalUrl + " : " + JSON.stringify(req.body),
       );
       next();
-    });
+    });*/
 
     /* istanbul ignore next */
     const options = {

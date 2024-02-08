@@ -171,6 +171,7 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
         deviceName,
       );
       deviceState.subtype = payload.subtype;
+      deviceState.subTypeValue = payload.subTypeValue;
       deviceState.type = payload.type;
       deviceState.id = id;
       deviceJson = new DeviceStateStore(deviceState);
