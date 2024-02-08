@@ -175,10 +175,10 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
       deviceState.type = payload.type;
       deviceState.id = id;
       deviceJson = new DeviceStateStore(deviceState);
-      deviceJson.addEntity(entityId);
     } else {
       deviceJson = new DeviceStateStore(this.deviceStore.get(id));
     }
+    deviceJson.addEntity(entityId);
 
     this.publishDiscoverySensorToMQTT(
       payload,
@@ -462,7 +462,6 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
     // count
     if (payload.count !== undefined) {
       const json = {
-        device_class: "pressure",
         entity_category: "diagnostic",
         enabled_by_default: true,
         name: deviceName + " Count",
