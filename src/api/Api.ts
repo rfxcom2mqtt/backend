@@ -10,15 +10,18 @@ export default class Api {
   public router: Router;
   private state: StateStore;
   private bridgeInfo: BridgeInfo;
+  private actionCallback: any;
 
   constructor(
     conf: Settings,
     devices: DeviceStore,
     state: StateStore,
     bridgeInfo: BridgeInfo,
+    actionCallback: any,
   ) {
     this.frontConf = conf.frontend;
     this.bridgeInfo = bridgeInfo;
+    this.actionCallback = actionCallback;
     this.router = Router();
     this.router.get("/", (req: Request, res: Response, next: NextFunction) => {
       return this.onApiRequest(req, res, next);
@@ -53,9 +56,9 @@ export default class Api {
         .json(devices.get(id));
     });
 
-    this.router.get("/devices/:id/entities", (req: Request, res: Response) => {
+    this.router.get("/devices/:id/state", (req: Request, res: Response) => {
       const id = req.params.id;
-      logger.info("get device " + id + " entities");
+      logger.info("get device " + id + " states");
       res
         .header("Access-Control-Allow-Origin", "*")
         .status(StatusCodes.OK)
@@ -72,7 +75,7 @@ export default class Api {
     this.router.post("/bridge/action", (req: Request, res: Response) => {
       const action = req.body?.action;
       if (action === "restart") {
-        //TODO
+        actionCallback(action);
       }
       res
         .header("Access-Control-Allow-Origin", "*")

@@ -17,12 +17,12 @@ export default class Frontend {
     this.router = Router();
 
     let staticFrontend;
-    if(process.env.PROFILE === "development"){
+    if (process.env.PROFILE === "development") {
       logger.debug("display local developement frontend build");
       const publicFiles = path.join(__dirname, "../../../frontend/build/");
-      this.listPublicFiles(publicFiles)
+      this.listPublicFiles(publicFiles);
       staticFrontend = serverStatic(publicFiles);
-    }else{
+    } else {
       staticFrontend = expressStaticGzip(frontend.getPath(), {
         enableBrotli: true,
         index: "index.html",

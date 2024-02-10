@@ -13,6 +13,7 @@ import Frontend from "./Frontend";
 
 export default class Server {
   private server?: core.Express;
+  private serverProcess?: any;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private frontConf: SettingFrontend;
   private api: Api;
@@ -23,9 +24,10 @@ export default class Server {
     devices: DeviceStore,
     state: StateStore,
     bridgeInfo: BridgeInfo,
+    actionCallback: any,
   ) {
     this.frontConf = conf.frontend;
-    this.api = new Api(conf, devices, state, bridgeInfo);
+    this.api = new Api(conf, devices, state, bridgeInfo, actionCallback);
     this.frontend = new Frontend(conf);
   }
 
@@ -112,20 +114,24 @@ export default class Server {
     };
 
     if (!this.frontConf.host) {
-      this.server.listen(this.frontConf.port),
+      (this.serverProcess = this.server.listen(this.frontConf.port)),
         () => {
           logger.info(`Started frontend on port ${this.frontConf.port}`);
         };
     } else if (this.frontConf.host.startsWith("/")) {
-      this.server.listen(this.frontConf.host, () => {
+      this.serverProcess = this.server.listen(this.frontConf.host, () => {
         logger.info(`Started frontend on socket ${this.frontConf.host}`);
       });
     } else {
-      this.server.listen(this.frontConf.port, this.frontConf.host, () => {
-        logger.info(
-          `Started frontend on port ${this.frontConf.host}:${this.frontConf.port}`,
-        );
-      });
+      this.serverProcess = this.server.listen(
+        this.frontConf.port,
+        this.frontConf.host,
+        () => {
+          logger.info(
+            `Started frontend on port ${this.frontConf.host}:${this.frontConf.port}`,
+          );
+        },
+      );
     }
 
     this.server.use(
@@ -139,6 +145,9 @@ export default class Server {
   }
 
   async stop(): Promise<void> {
-    logger.info("Controller stop");
+    logger.info("Server stop");
+    if (this.serverProcess) {
+      return new Promise((cb: () => void) => this.serverProcess.close(cb));
+    }
   }
 }

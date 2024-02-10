@@ -25,7 +25,7 @@
     },
     "scripts": {
         "start": "ts-node ./src/index.ts",
-        "dev": "ts-node ./src/dev.ts",
+        "dev": "ts-node ./src/dev.ts --env-file=.env.dev",
         "pretty": "prettier --write \"./**/*.{js,jsx,ts,tsx}\"",
         "lint": "eslint \"./**/*.{js,jsx,ts,tsx}\"",
         "pretty:check": "prettier --check \"./**/*.{js,jsx,ts,tsx}\""

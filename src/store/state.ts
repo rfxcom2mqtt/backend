@@ -168,7 +168,7 @@ export class DeviceStore {
     return this.devices[id];
   }
 
-  getAll(): { [s: string | number]: KeyValue } {
+  getAll(): { [s: string | number]: DeviceState } {
     return this.devices;
   }
 
