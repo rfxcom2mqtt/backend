@@ -53,7 +53,50 @@ export default class Controller implements MqttEventListener {
         this.device,
         this.state,
         this.bridgeInfo,
+        (action: string) => this.runAction(action),
       );
+    }
+  }
+
+  reload() {
+    this.config = settingsService.read();
+    this.state = new State(this.config);
+    this.device = new DeviceStore(this.config);
+    logger.info("configuration : " + JSON.stringify(this.config));
+    this.rfxBridge = this.config.mock
+      ? new MockRfxcom(this.config.rfxcom)
+      : new Rfxcom(this.config.rfxcom);
+    this.mqttClient = new Mqtt(this.config);
+    this.discovery = new Discovery(
+      this.mqttClient,
+      this.rfxBridge,
+      this.config,
+      this.state,
+      this.device,
+    );
+    this.mqttClient.addListener(this.discovery);
+    this.mqttClient.addListener(this);
+
+    if (this.config.frontend.enabled) {
+      this.server = new Server(
+        this.config,
+        this.device,
+        this.state,
+        this.bridgeInfo,
+        (action: string) => this.runAction(action),
+      );
+    }
+  }
+
+  async runAction(action: string) {
+    if (action === "restart") {
+      logger.info("restart");
+      await this.stop(true);
+      this.reload();
+      await this.start();
+    } else if (action === "stop") {
+      logger.info("stop");
+      await this.stop(false);
     }
   }
 
@@ -118,12 +161,12 @@ export default class Controller implements MqttEventListener {
   }
 
   async stop(restart = false): Promise<void> {
+    this.device.stop();
     await this.discovery.stop();
     await this.mqttClient.disconnect();
     await this.rfxBridge.stop();
-    await this.exitCallback(0, restart);
     await this.server?.stop();
-    this.device.stop();
+    await this.exitCallback(0, restart);
   }
 
   scheduleHealthcheck() {
