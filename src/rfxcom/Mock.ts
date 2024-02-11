@@ -22,12 +22,24 @@ const logger = loggerFactory.getLogger("RFXCOM");
 const rfxcomEvents: RfxcomEvent[] = [];
 
 rfxcomEvents.push({
-  id: "mocked_device2",
+  id: "0x011Bmocked_device2",
   seqnbr: 7,
   subtype: 0,
   unitCode: "1",
   commandNumber: 0,
   command: "Off",
+  level: 0,
+  rssi: 5,
+  type: "lighting2",
+  subTypeValue: "AC",
+} as Lighting2Event);
+rfxcomEvents.push({
+  id: "0x011Bmocked_device2",
+  seqnbr: 7,
+  subtype: 0,
+  unitCode: "2",
+  commandNumber: 0,
+  command: "On",
   level: 0,
   rssi: 5,
   type: "lighting2",

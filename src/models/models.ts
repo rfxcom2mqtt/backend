@@ -20,7 +20,7 @@ export class DeviceEntity {
   }
 }
 
-export class DeviceSensor{
+export class DeviceSensor {
   constructor(
     public id: string = "",
     public label: string = "",
@@ -31,7 +31,7 @@ export class DeviceSensor{
   ) {}
 }
 
-class DeviceSwitch{
+export class DeviceSwitch {
   constructor(
     public id: string = "",
     public label: string = "",
@@ -39,7 +39,7 @@ class DeviceSwitch{
     public property: string = "command",
     public type: string = "binary",
     public value_off: string = "Off",
-    public value_on: string =  "On"
+    public value_on: string = "On",
   ) {}
 }
 
@@ -49,8 +49,8 @@ export class DeviceState extends DeviceEntity {
   public subtype: number = 0;
   public subTypeValue: string = "";
   entities: string[] = [];
-  sensors: { [s: string]: DeviceSensor }  = {};
-  switchs: { [s: string]: DeviceSwitch }  = {};
+  sensors: { [s: string]: DeviceSensor } = {};
+  switchs: { [s: string]: DeviceSwitch } = {};
 
   constructor(identifiers: string[], name: string) {
     super(identifiers, name);
