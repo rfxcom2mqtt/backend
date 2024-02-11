@@ -75,8 +75,6 @@ class StateStore {
     for (const entity in this.state) {
       if (this.state[entity].id === id) {
         const value = this.state[entity];
-        value.deviceId = value.id;
-        value.id = entity;
         entities.push(value);
       }
     }
@@ -91,21 +89,22 @@ class StateStore {
   getAllValue(): KeyValue[] {
     const entities: KeyValue[] = [];
     for (const entity in this.state) {
-        entities.push(this.state[entity]);
+      entities.push(this.state[entity]);
     }
     return entities;
   }
 
-  set(entity: EntityState, update: KeyValue, reason?: string): KeyValue {
-    logger.debug(`update entity state : ` + entity.id);
-    const fromState = this.state[entity.id] || {};
+  set(id: string, update: KeyValue, reason?: string): KeyValue {
+    logger.debug(`update entity state : ` + id);
+    const fromState = this.state[id] || {};
     const toState = objectAssignDeep({}, fromState, update);
+    toState.entityId = id;
     const newCache = { ...toState };
-    this.state[entity.id] = newCache;
+    this.state[id] = newCache;
     return toState;
   }
 
-  remove(id: string | number): void {
+  remove(id: string): void {
     logger.debug(`remove entity state : ` + id);
     delete this.state[id];
   }

@@ -1,23 +1,24 @@
 {
-    "mocked_device2": {
+    "0x011Bmocked_device2": {
         "manufacturer": "Rfxcom",
         "via_device": "rfxcom2mqtt_bridge",
         "identifiers": [
-            "rfxcom2mqtt_AC_mocked_device2",
-            "rfxcom2mqtt_not_use"
+            "rfxcom2mqtt_AC_011Bmocked_device2",
+            "rfxcom2mqtt_AC_011Bmocked_device2"
         ],
-        "name": "not_use",
-        "id": "mocked_device2",
+        "name": "AC_011Bmocked_device2",
+        "id": "0x011Bmocked_device2",
         "type": "lighting2",
         "subtype": 0,
         "subTypeValue": "AC",
         "entities": [
-            "AC_mocked_device2_1"
+            "AC_011Bmocked_device2_1",
+            "AC_011Bmocked_device2_2"
         ],
         "sensors": {
-            "AC_notUse_device_linkquality": {
-                "id": "AC_notUse_device_linkquality",
-                "label": "not_use Linkquality",
+            "0x011Bmocked_device2_linkquality": {
+                "id": "0x011Bmocked_device2_linkquality",
+                "label": "AC_011Bmocked_device2 Linkquality",
                 "description": "Link quality (signal strength)",
                 "property": "rssi",
                 "type": "number",
@@ -25,9 +26,18 @@
             }
         },
         "switchs": {
-            "AC_mocked_device2_1": {
-                "id": "AC_mocked_device2_1",
-                "label": "AC_mocked_device2_1",
+            "0x011Bmocked_device2_1": {
+                "id": "0x011Bmocked_device2_1",
+                "label": "AC_011Bmocked_device2_1",
+                "description": "On/off state of the switch",
+                "property": "command",
+                "type": "binary",
+                "value_off": "Off",
+                "value_on": "On"
+            },
+            "0x011Bmocked_device2_2": {
+                "id": "0x011Bmocked_device2_2",
+                "label": "AC_011Bmocked_device2_2",
                 "description": "On/off state of the switch",
                 "property": "command",
                 "type": "binary",

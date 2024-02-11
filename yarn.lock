@@ -1837,6 +1837,19 @@
   dependencies:
     "@babel/runtime" "^7.23.9"
 
+"@mui/lab@^5.0.0-alpha.165":
+  version "5.0.0-alpha.165"
+  resolved "https://registry.yarnpkg.com/@mui/lab/-/lab-5.0.0-alpha.165.tgz#7fd60d26597f60b1dbf7d3ddbd646fcece276385"
+  integrity sha512-8/zJStT10nh9yrAzLOPTICGhpf5YiGp/JpM0bdTP7u5AE+YT+X2u6QwMxuCrVeW8/WVLAPFg0vtzyfgPcN5T7g==
+  dependencies:
+    "@babel/runtime" "^7.23.9"
+    "@mui/base" "5.0.0-beta.36"
+    "@mui/system" "^5.15.9"
+    "@mui/types" "^7.2.13"
+    "@mui/utils" "^5.15.9"
+    clsx "^2.1.0"
+    prop-types "^15.8.1"
+
 "@mui/material@^5.15.7":
   version "5.15.9"
   resolved "https://registry.yarnpkg.com/@mui/material/-/material-5.15.9.tgz#4d6a4aee002c6a2d0e174e08c6d23245c18dd828"
@@ -2016,15 +2029,16 @@
     uncontrollable "^8.0.1"
     warning "^4.0.3"
 
-"@rfxcom2mqtt/frontend@0.1.3":
-  version "0.1.3"
-  resolved "https://registry.yarnpkg.com/@rfxcom2mqtt/frontend/-/frontend-0.1.3.tgz#f9df65b00c16a5bf33d1e376671783cdd35ee197"
-  integrity sha512-So8jxEiU9UKRPdAG1iKBRiPV0SmVvKgOWHsyDuN56saR9iEgAvce+XHKRAEekrJpOsEkLoF2681xrBRvChayQw==
+"@rfxcom2mqtt/frontend@0.1.4":
+  version "0.1.4"
+  resolved "https://registry.yarnpkg.com/@rfxcom2mqtt/frontend/-/frontend-0.1.4.tgz#515f150358d744d293c6ecbedf0929d9d1a549d7"
+  integrity sha512-63l4isnxBv+ZdoWN+F3h4IFh0R9V2i8mRuuRo6iZK47qqRwR2/h8gbkaKs9fkGoP7wG69g2oe/1nAm8BGE7gVw==
   dependencies:
     "@emotion/react" "^11.11.3"
     "@emotion/styled" "^11.11.0"
     "@fontsource/roboto" "^5.0.8"
     "@mui/icons-material" "^5.15.7"
+    "@mui/lab" "^5.0.0-alpha.165"
     "@mui/material" "^5.15.7"
     "@mui/styled-engine-sc" "^6.0.0-alpha.14"
     "@mui/x-data-grid" "^6.19.2"

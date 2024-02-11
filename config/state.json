@@ -1,6 +1,6 @@
 {
-    "mocked_device2_1": {
-        "id": "mocked_device2_1",
+    "0x011Bmocked_device2_1": {
+        "id": "0x011Bmocked_device2",
         "seqnbr": 7,
         "subtype": 0,
         "unitCode": "1",
@@ -10,7 +10,20 @@
         "rssi": 5,
         "type": "lighting2",
         "subTypeValue": "AC",
-        "deviceId": "mocked_device2"
+        "entityId": "0x011Bmocked_device2_1"
+    },
+    "0x011Bmocked_device2_2": {
+        "id": "0x011Bmocked_device2",
+        "seqnbr": 7,
+        "subtype": 0,
+        "unitCode": "2",
+        "commandNumber": 0,
+        "command": "On",
+        "level": 0,
+        "rssi": 5,
+        "type": "lighting2",
+        "subTypeValue": "AC",
+        "entityId": "0x011Bmocked_device2_2"
     },
     "temphumbaro_device": {
         "id": "temphumbaro_device",
@@ -25,7 +38,7 @@
         "rssi": 5,
         "type": "tempHumBaro1",
         "subTypeValue": "THB1",
-        "deviceId": "temphumbaro_device"
+        "entityId": "temphumbaro_device"
     },
     "temphum_device": {
         "id": "temphum_device",
@@ -37,7 +50,8 @@
         "batteryLevel": 100,
         "rssi": 5,
         "type": "temperatureHumidity1",
-        "subTypeValue": "TH1"
+        "subTypeValue": "TH1",
+        "entityId": "temphum_device"
     },
     "temp_device": {
         "id": "temp_device",
@@ -47,7 +61,8 @@
         "batteryLevel": 100,
         "rssi": 5,
         "type": "temperature1",
-        "subTypeValue": "TEMP1"
+        "subTypeValue": "TEMP1",
+        "entityId": "temp_device"
     },
     "bbp1_device": {
         "id": "bbp1_device",
@@ -57,7 +72,8 @@
         "batteryLevel": 100,
         "rssi": 5,
         "type": "bbq1",
-        "subTypeValue": "MAVERICK"
+        "subTypeValue": "MAVERICK",
+        "entityId": "bbp1_device"
     },
     "uv1_device": {
         "id": "uv1_device",
@@ -68,7 +84,8 @@
         "batteryLevel": 100,
         "rssi": 5,
         "type": "uv1",
-        "subTypeValue": "UV1"
+        "subTypeValue": "UV1",
+        "entityId": "uv1_device"
     },
     "hum_device": {
         "id": "hum_device",
@@ -79,7 +96,8 @@
         "batteryLevel": 100,
         "rssi": 5,
         "type": "humidity1",
-        "subTypeValue": "HUMIDITY_UNUSED"
+        "subTypeValue": "HUMIDITY_UNUSED",
+        "entityId": "hum_device"
     },
     "weight_device": {
         "id": "weight_device",
@@ -89,7 +107,8 @@
         "batteryLevel": 100,
         "rssi": 5,
         "type": "weight1",
-        "subTypeValue": "WEIGHT1"
+        "subTypeValue": "WEIGHT1",
+        "entityId": "weight_device"
     },
     "waterlevel_device": {
         "id": "waterlevel_device",
@@ -100,6 +119,7 @@
         "batteryLevel": 100,
         "rssi": 5,
         "type": "waterlevel",
-        "subTypeValue": "TS_FT002"
+        "subTypeValue": "TS_FT002",
+        "entityId": "waterlevel_device"
     }
 }
