@@ -88,6 +88,14 @@ class StateStore {
     return this.state;
   }
 
+  getAllValue(): KeyValue[] {
+    const entities: KeyValue[] = [];
+    for (const entity in this.state) {
+        entities.push(this.state[entity]);
+    }
+    return entities;
+  }
+
   set(entity: EntityState, update: KeyValue, reason?: string): KeyValue {
     logger.debug(`update entity state : ` + entity.id);
     const fromState = this.state[entity.id] || {};
