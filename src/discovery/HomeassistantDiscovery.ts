@@ -3,7 +3,7 @@
 import IRfxcom from "../rfxcom/interface";
 import { Settings, SettingDevice } from "../settings";
 import Mqtt from "../mqtt";
-import { DeviceEntity, DeviceState, DeviceStateStore } from "../models/models";
+import { DeviceEntity, DeviceSensor, DeviceState, DeviceStateStore } from "../models/models";
 import { MQTTMessage } from "../models/mqtt";
 import StateStore, { DeviceStore } from "../store/state";
 import { logger } from "../libs/logger";
@@ -251,7 +251,7 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
         "switch/" + entityTopic + "/config",
         JSON.stringify(json),
       );
-      deviceJson.addSwitch(entityId);
+      deviceJson.addSwitchId(json.object_id);
     }
 
     //"activlink", "asyncconfig", "asyncdata", "blinds1", "blinds2", "camera1", "chime1", "curtain1", "edisio",
@@ -293,7 +293,7 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
         "sensor/" + deviceTopic + "/linkquality/config",
         JSON.stringify(json),
       );
-      deviceJson.addSensor(deviceTopic + "_linkquality");
+      deviceJson.addSensor(new DeviceSensor(json.object_id,json.name,"Link quality (signal strength)","rssi","number",json.unit_of_measurement));
     }
     // batteryLevel
     if (payload.batteryLevel !== undefined) {
@@ -313,7 +313,7 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
         "sensor/" + deviceTopic + "/battery/config",
         JSON.stringify(json),
       );
-      deviceJson.addSensor(deviceTopic + "_battery");
+      deviceJson.addSensor(new DeviceSensor(json.object_id,json.name,"Remaining battery in %","batteryLevel","number",json.unit_of_measurement));
     }
     // batteryVoltage
     if (payload.batteryVoltage !== undefined) {
@@ -333,7 +333,7 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
         "sensor/" + deviceTopic + "/voltage/config",
         JSON.stringify(json),
       );
-      deviceJson.addSensor(deviceTopic + "_voltage");
+      deviceJson.addSensor(new DeviceSensor(json.object_id,json.name,"Tension","voltage","number",json.unit_of_measurement));
     }
 
     // humidity
@@ -354,7 +354,7 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
         "sensor/" + deviceTopic + "/humidity/config",
         JSON.stringify(json),
       );
-      deviceJson.addSensor(deviceTopic + "_humidity");
+      deviceJson.addSensor(new DeviceSensor(json.object_id,json.name,"Measured relative humidity","humidity","number",json.unit_of_measurement));
     }
 
     // temperature
@@ -375,7 +375,7 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
         "sensor/" + deviceTopic + "/temperature/config",
         JSON.stringify(json),
       );
-      deviceJson.addSensor(deviceTopic + "_temperature");
+      deviceJson.addSensor(new DeviceSensor(json.object_id,json.name,"Measured temperature value","temperature","number",json.unit_of_measurement));
     }
 
     // co2
@@ -395,7 +395,7 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
         "sensor/" + deviceTopic + "/co2/config",
         JSON.stringify(json),
       );
-      deviceJson.addSensor(deviceTopic + "_co2");
+      deviceJson.addSensor(new DeviceSensor(json.object_id,json.name,"Co2","co2","number",json.unit_of_measurement));
     }
 
     // power
@@ -415,7 +415,7 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
         "sensor/" + deviceTopic + "/power/config",
         JSON.stringify(json),
       );
-      deviceJson.addSensor(deviceTopic + "_power");
+      deviceJson.addSensor(new DeviceSensor(json.object_id,json.name,"Power","power","number",""));
     }
 
     // energy
@@ -435,7 +435,7 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
         "sensor/" + deviceTopic + "/energy/config",
         JSON.stringify(json),
       );
-      deviceJson.addSensor(deviceTopic + "_energy");
+      deviceJson.addSensor(new DeviceSensor(json.object_id,json.name,"Energy increment","energy","number",""));
     }
 
     // barometer
@@ -456,7 +456,7 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
         "sensor/" + deviceTopic + "/barometer/config",
         JSON.stringify(json),
       );
-      deviceJson.addSensor(deviceTopic + "_barometer");
+      deviceJson.addSensor(new DeviceSensor(json.object_id,json.name,"The measured atmospheric pressure","barometer","number",json.unit_of_measurement));
     }
 
     // count
@@ -467,7 +467,7 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
         name: deviceName + " Count",
         object_id: deviceTopic + "_count",
         state_class: "measurement",
-        unit_of_measurement: "hPa",
+        unit_of_measurement: "",
         unique_id: deviceTopic + "_count_" + devicePrefix,
         value_template: "{{ value_json.count }}",
         ...commonConf,
@@ -476,7 +476,7 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
         "sensor/" + deviceTopic + "/count/config",
         JSON.stringify(json),
       );
-      deviceJson.addSensor(deviceTopic + "_count");
+      deviceJson.addSensor(new DeviceSensor(json.object_id,json.name,"Counter","count","number",json.unit_of_measurement));
     }
 
     // weight
@@ -497,7 +497,7 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
         "sensor/" + deviceTopic + "/weight/config",
         JSON.stringify(json),
       );
-      deviceJson.addSensor(deviceTopic + "_weight");
+      deviceJson.addSensor(new DeviceSensor(json.object_id,json.name,"Weight","weight","number",json.unit_of_measurement));
     }
 
     // uv
@@ -517,7 +517,7 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
         "sensor/" + deviceTopic + "/uv/config",
         JSON.stringify(json),
       );
-      deviceJson.addSensor(deviceTopic + "_uv");
+      deviceJson.addSensor(new DeviceSensor(json.object_id,json.name,"UV","uv","number",json.unit_of_measurement));
     }
   }
 }

@@ -20,14 +20,37 @@ export class DeviceEntity {
   }
 }
 
+export class DeviceSensor{
+  constructor(
+    public id: string = "",
+    public label: string = "",
+    public description: string = "",
+    public property: string = "",
+    public type: string = "",
+    public unit: string = "",
+  ) {}
+}
+
+class DeviceSwitch{
+  constructor(
+    public id: string = "",
+    public label: string = "",
+    public description: string = "On/off state of the switch",
+    public property: string = "command",
+    public type: string = "binary",
+    public value_off: string = "Off",
+    public value_on: string =  "On"
+  ) {}
+}
+
 export class DeviceState extends DeviceEntity {
   public id: string = "";
   public type: string = "";
   public subtype: number = 0;
   public subTypeValue: string = "";
   entities: string[] = [];
-  sensors: string[] = [];
-  switchs: string[] = [];
+  sensors: { [s: string]: DeviceSensor }  = {};
+  switchs: { [s: string]: DeviceSwitch }  = {};
 
   constructor(identifiers: string[], name: string) {
     super(identifiers, name);
@@ -51,15 +74,23 @@ export class DeviceStateStore {
     }
   }
 
-  addSensor(sensorId: string) {
-    if (!this.state.sensors.includes(sensorId)) {
-      this.state.sensors.push(sensorId);
+  addSensorId(sensorId: string) {
+    this.addSensor(new DeviceSensor(sensorId, sensorId));
+  }
+
+  addSensor(sensor: DeviceSensor) {
+    if (this.state.sensors[sensor.id] === undefined) {
+      this.state.sensors[sensor.id] = sensor;
     }
   }
 
-  addSwitch(switchId: string) {
-    if (!this.state.switchs.includes(switchId)) {
-      this.state.switchs.push(switchId);
+  addSwitchId(switchId: string) {
+    this.addSwitch(new DeviceSwitch(switchId, switchId));
+  }
+
+  addSwitch(dswitch: DeviceSwitch) {
+    if (this.state.switchs[dswitch.id] === undefined) {
+      this.state.switchs[dswitch.id] = dswitch;
     }
   }
 }
