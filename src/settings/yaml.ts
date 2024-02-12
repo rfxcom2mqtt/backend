@@ -2,7 +2,7 @@ import yaml from "js-yaml";
 import fs from "fs";
 import { KeyValue } from "../models/models";
 import equals from "fast-deep-equal/es6";
-import { logger } from "../libs/logger";
+import { logger } from "../utils/logger";
 
 function read(file: string): KeyValue {
   try {

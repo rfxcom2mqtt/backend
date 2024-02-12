@@ -16,7 +16,7 @@ import {
 } from "../models/rfxcom";
 import IRfxcom from "./interface";
 
-import { loggerFactory } from "../libs/logger";
+import { loggerFactory } from "../utils/logger";
 const logger = loggerFactory.getLogger("RFXCOM");
 
 const rfxcomEvents: RfxcomEvent[] = [];

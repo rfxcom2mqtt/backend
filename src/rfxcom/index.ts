@@ -3,7 +3,7 @@ import { SettingRfxcom, SettingDevice } from "../settings";
 import { RfxcomInfo, RfxcomEvent } from "../models/rfxcom";
 import IRfxcom from "./interface";
 
-import { loggerFactory } from "../libs/logger";
+import { loggerFactory } from "../utils/logger";
 const logger = loggerFactory.getLogger("RFXCOM");
 
 export default class Rfxcom implements IRfxcom {

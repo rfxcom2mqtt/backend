@@ -5,7 +5,7 @@ import { Settings, settingsService } from "../settings";
 import Mqtt from "../mqtt";
 import { DeviceBridge, BridgeInfo } from "../models/models";
 import { MQTTMessage } from "../models/mqtt";
-import { loggerFactory, logger } from "../libs/logger";
+import { loggerFactory, logger } from "../utils/logger";
 import AbstractDiscovery from "./AbstractDiscovery";
 
 export default class BridgeDiscovery extends AbstractDiscovery {

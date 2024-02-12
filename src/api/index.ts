@@ -4,7 +4,7 @@ import express, { Request, Response, NextFunction } from "express";
 import { StatusCodes } from "http-status-codes";
 import * as core from "express-serve-static-core";
 import fs from "fs";
-import { logger } from "../libs/logger";
+import { logger } from "../utils/logger";
 import { Settings, SettingFrontend } from "../settings";
 import StateStore, { DeviceStore } from "../store/state";
 import { BridgeInfo } from "../models/models";
@@ -24,10 +24,11 @@ export default class Server {
     devices: DeviceStore,
     state: StateStore,
     bridgeInfo: BridgeInfo,
-    actionCallback: any,
+    bridgeActionCallback: any,
+    deviceActionCallback: any,
   ) {
     this.frontConf = conf.frontend;
-    this.api = new Api(conf, devices, state, bridgeInfo, actionCallback);
+    this.api = new Api(conf, devices, state, bridgeInfo, bridgeActionCallback,deviceActionCallback);
     this.frontend = new Frontend(conf);
   }
 

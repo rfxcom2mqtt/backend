@@ -2,7 +2,7 @@ import * as mqtt from "mqtt";
 import { Settings, SettingMqtt } from "../settings";
 import { MqttEventListener, MQTTMessage } from "../models/mqtt";
 import fs from "fs";
-import { loggerFactory } from "../libs/logger";
+import { loggerFactory } from "../utils/logger";
 const logger = loggerFactory.getLogger("MQTT");
 
 interface MQTTOptions {

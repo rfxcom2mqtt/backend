@@ -1,7 +1,7 @@
 "use strict";
 import dotenv from "dotenv";
 dotenv.config({ path: getdotenvFile() });
-import Controller from "./libs/Controller";
+import Controller from "./Controller";
 
 let controller: Controller;
 let stopping = false;

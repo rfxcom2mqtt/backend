@@ -35,6 +35,7 @@ export class DeviceSwitch {
   constructor(
     public id: string = "",
     public label: string = "",
+    public unit: number = 0,
     public description: string = "On/off state of the switch",
     public property: string = "command",
     public type: string = "binary",
@@ -66,6 +67,10 @@ export class DeviceStateStore {
 
   getInfo() {
     return new DeviceEntity(this.state.identifiers, this.state.name);
+  }
+
+  getCommandTopic(baseTopic: string,entityId: string) {
+    return baseTopic+this.state.type+"/"+this.state.subtype+"/"+this.state.id+"/"+this.state.switchs[entityId].unit;
   }
 
   addEntity(entityId: string) {

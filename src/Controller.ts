@@ -1,16 +1,16 @@
-import { Settings, SettingDevice, settingsService } from "../settings";
-import Discovery from "../discovery";
-import Mqtt from "../mqtt";
-import Server from "../api";
-import Rfxcom from "../rfxcom";
-import IRfxcom from "../rfxcom/interface";
-import MockRfxcom from "../rfxcom/Mock";
-import { BridgeInfo } from "../models/models";
-import { MQTTMessage, MqttEventListener } from "../models/mqtt";
-import { RfxcomInfo } from "../models/rfxcom";
-import utils from "./utils";
-import { logger } from "./logger";
-import State, { DeviceStore } from "../store/state";
+import { Settings, SettingDevice, settingsService } from "./settings";
+import Discovery from "./discovery";
+import Mqtt from "./mqtt";
+import Server from "./api";
+import Rfxcom from "./rfxcom";
+import IRfxcom from "./rfxcom/interface";
+import MockRfxcom from "./rfxcom/Mock";
+import { BridgeInfo, DeviceStateStore } from "./models/models";
+import { MQTTMessage, MqttEventListener } from "./models/mqtt";
+import { RfxcomInfo } from "./models/rfxcom";
+import utils from "./utils/utils";
+import { logger } from "./utils/logger";
+import State, { DeviceStore } from "./store/state";
 
 import cron from "node-cron";
 
@@ -53,7 +53,8 @@ export default class Controller implements MqttEventListener {
         this.device,
         this.state,
         this.bridgeInfo,
-        (action: string) => this.runAction(action),
+        (action: string) => this.runBridgeAction(action),
+        (deviceId: string,entityId: string,action: string) => this.runDeviceAction(deviceId,entityId,action),
       );
     }
   }
@@ -83,12 +84,18 @@ export default class Controller implements MqttEventListener {
         this.device,
         this.state,
         this.bridgeInfo,
-        (action: string) => this.runAction(action),
+        (action: string) => this.runBridgeAction(action),
+        (deviceId: string,entityId: string,action: string) => this.runDeviceAction(deviceId,entityId,action),
       );
     }
   }
 
-  async runAction(action: string) {
+  async runDeviceAction(deviceId: string,entityId: string,action: string) {
+    let device = new DeviceStateStore(this.device.get(deviceId));
+    this.discovery.onMQTTMessage({topic:device.getCommandTopic("rfxcom2mqtt/cmd/",entityId),message: action});
+  }
+
+  async runBridgeAction(action: string) {
     if (action === "restart") {
       logger.info("restart");
       await this.stop(true);

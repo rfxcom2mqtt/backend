@@ -3,7 +3,7 @@
 import IRfxcom from "../rfxcom/interface";
 import { Settings, SettingHass } from "../settings";
 import Mqtt from "../mqtt";
-import utils from "../libs/utils";
+import utils from "../utils/utils";
 
 export default class AbstractDiscovery {
   protected mqtt: Mqtt;

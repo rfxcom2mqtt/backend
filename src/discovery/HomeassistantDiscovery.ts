@@ -11,7 +11,7 @@ import {
 } from "../models/models";
 import { MQTTMessage } from "../models/mqtt";
 import StateStore, { DeviceStore } from "../store/state";
-import { logger } from "../libs/logger";
+import { logger } from "../utils/logger";
 import AbstractDiscovery from "./AbstractDiscovery";
 
 export default class HomeassistantDiscovery extends AbstractDiscovery {
@@ -253,7 +253,7 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
         "switch/" + entityTopic + "/config",
         JSON.stringify(json),
       );
-      deviceJson.addSwitch(new DeviceSwitch(entityName, json.object_id));
+      deviceJson.addSwitch(new DeviceSwitch(entityName, json.object_id, payload.unitCode));
     }
 
     //"activlink", "asyncconfig", "asyncdata", "blinds1", "blinds2", "camera1", "chime1", "curtain1", "edisio",

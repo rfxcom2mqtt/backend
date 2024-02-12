@@ -2,7 +2,7 @@ import { Settings } from "../settings";
 import { EntityState, DeviceState, KeyValue } from "../models/models";
 import fs from "fs";
 import objectAssignDeep from "object-assign-deep";
-import { logger } from "../libs/logger";
+import { logger } from "../utils/logger";
 
 const saveInterval = 1000 * 60 * 1; // 1 minutes
 
