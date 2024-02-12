@@ -1,31 +1,43 @@
 mock: true
-loglevel: 'debug'
+loglevel: info
 healthcheck:
   enabled: true
   cron: '*/2 * * * *'
 cacheState:
-  enable: true,
-  saveInterval: 10
-
-frontend:
-  enabled: true
-  host: localhost
-  port: 8890
-
+  enable: 'true,'
+  saveInterval: 1
 homeassistant:
   discovery: true
   discovery_topic: homeassistant
   discovery_device: rfxcom2mqtt
-
 mqtt:
+  include_device_information: false
+  qos: 0
+  retain: true
   base_topic: rfxcom2mqtt
   server: tcp://localhost
   username: 
   password: 
-
 rfxcom:
+  debug: false
+  receive:
+    - temperaturehumidity1
+    - homeconfort
+    - lighting1
+    - lighting2
+    - lighting3
+    - lighting4
+    - remote
+    - security1
+  devices:
+    - id: mocked_device2
+      name: AC_notUse_device
+      friendlyName: not_use
+      units:
+        - unitCode: 1
+          name: AC_notuse_1
+          friendlyName: not_use 1
   usbport: /dev/ttyUSB0
-  debug: true
   transmit:
     repeat: 4
     lighting1:
@@ -40,11 +52,7 @@ rfxcom:
       - KOPPLA
     lighting4:
       - PT2262
-  devices:
-    - id: 'mocked_device2'
-      name: "AC_notUse_device"
-      friendlyName: 'not_use'
-      units:
-        - unitCode: 1
-          name: "AC_notuse_1"
-          friendlyName: 'not_use 1'
+frontend:
+  enabled: true
+  host: 0.0.0.0
+  port: 8891
