@@ -19,10 +19,17 @@ export default class Frontend {
     let staticFrontend;
     if (process.env.PROFILE === "development") {
       logger.debug("display local developement frontend build");
-      const publicFiles = path.join(__dirname, "../../../frontend/build/");
+      const buildPath = "../../../frontend/build/";
+      const publicFiles = path.join(__dirname, buildPath);
+      fs.writeFileSync(
+        path.join(publicFiles, "config.js"),
+        this.getFrontEndConfig(),
+        "utf8",
+      );
       this.listPublicFiles(publicFiles);
       staticFrontend = serverStatic(publicFiles);
     } else {
+      frontend.setConfig(this.getFrontEndConfig());
       staticFrontend = expressStaticGzip(frontend.getPath(), {
         enableBrotli: true,
         index: "index.html",
@@ -36,6 +43,16 @@ export default class Frontend {
       });
     }
     this.router.use(staticFrontend);
+  }
+
+  getFrontEndConfig() {
+    return (
+      "window.config = { basePath: '" +
+      (process.env.BASE_PATH ? process.env.BASE_PATH : "") +
+      "', publicPath: '" +
+      (process.env.PUBLIC_URL ? process.env.PUBLIC_URL : "") +
+      "',};"
+    );
   }
 
   listPublicFiles(directoryPath: string) {

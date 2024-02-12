@@ -7,6 +7,7 @@
     "description": "RFXCOM to MQTT bridge",
     "main": "src/index.ts",
     "dependencies": {
+        "@rfxcom2mqtt/frontend": "0.1.5",
         "@types/express": "^4.17.21",
         "connect-gzip-static": "^3.0.1",
         "cookie-parser": "^1.4.5",
@@ -20,12 +21,11 @@
         "node-cron": "^3.0.2",
         "object-assign-deep": "^0.4.0",
         "rfxcom": "^2.6.0",
-        "winston": "^3.11.0",
-        "@rfxcom2mqtt/frontend": "0.1.5"
+        "winston": "^3.11.0"
     },
     "scripts": {
         "start": "ts-node ./src/index.ts",
-        "dev": "ts-node ./src/dev.ts --env-file=.env.dev",
+        "dev": "ts-node ./src/index.ts --env-file=.env.dev",
         "pretty": "prettier --write \"./**/*.{js,jsx,ts,tsx}\"",
         "lint": "eslint \"./**/*.{js,jsx,ts,tsx}\"",
         "pretty:check": "prettier --check \"./**/*.{js,jsx,ts,tsx}\""

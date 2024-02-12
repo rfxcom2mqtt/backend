@@ -1,5 +1,6 @@
 declare module "@rfxcom2mqtt/frontend" {
   export function getPath(): string;
+  export function setConfig(json: any);
 }
 
 declare module "connect-gzip-static" {

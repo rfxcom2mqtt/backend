@@ -1,10 +1,10 @@
 mock: true
-loglevel: info
+loglevel: debug
 healthcheck:
-  enabled: true
+  enabled: false
   cron: '*/2 * * * *'
 cacheState:
-  enable: 'true,'
+  enable: true
   saveInterval: 1
 homeassistant:
   discovery: true

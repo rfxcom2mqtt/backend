@@ -1,9 +1,20 @@
 "use strict";
-
+import dotenv from "dotenv";
+dotenv.config({ path: getdotenvFile() });
 import Controller from "./libs/Controller";
 
 let controller: Controller;
 let stopping = false;
+
+function getdotenvFile() {
+  console.log(process.argv[2]);
+  if (process.argv[2] !== undefined) {
+    const envFile = process.argv[2].replace("--env-file=", "");
+    console.log(envFile);
+    return envFile;
+  }
+  return ".env";
+}
 
 function exit(code: number, restart: boolean = false) {
   if (!restart) {
