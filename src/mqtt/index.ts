@@ -1,5 +1,5 @@
 import * as mqtt from "mqtt";
-import { Settings, SettingMqtt } from "../settings";
+import { SettingMqtt } from "../settings";
 import { MqttEventListener, MQTTMessage } from "../models/mqtt";
 import fs from "fs";
 import { loggerFactory } from "../utils/logger";
@@ -24,16 +24,68 @@ class Topic {
   }
 }
 
-export default class Mqtt {
+export interface IMqtt {
+  topics: Topic;
+  addListener(listener: MqttEventListener);
+  publish(
+    topic: string,
+    playload: any,
+    callback: any,
+    options: MQTTOptions,
+    base,
+  ): void;
+  publish(
+    topic: string,
+    playload: any,
+    callback: any,
+    options: MQTTOptions,
+  ): void;
+  publish(topic: string, playload: any, callback: any): void;
+  publishState(state: string);
+  connect(): Promise<void>;
+  isConnected(): boolean;
+  disconnect();
+}
+
+export class MockMqtt implements IMqtt {
+  private mqttSettings: SettingMqtt;
+  public topics: Topic;
+
+  constructor(config: SettingMqtt) {
+    this.mqttSettings = config;
+    this.topics = new Topic(config.base_topic);
+  }
+  async connect(): Promise<void> {}
+  isConnected(): boolean {
+    return true;
+  }
+  disconnect() {}
+
+  addListener(listener: MqttEventListener) {}
+  publishState(state: string) {}
+  publish(
+    topic: string,
+    playload: any,
+    callback: any,
+    options: MQTTOptions = {},
+    base = this.mqttSettings.base_topic,
+  ): void {}
+}
+
+export function getMqttInstance(config: SettingMqtt): IMqtt {
+  return config.server === "mock" ? new MockMqtt(config) : new Mqtt(config);
+}
+
+export default class Mqtt implements IMqtt {
   private defaultOptions: any;
   private client?: mqtt.MqttClient;
   private mqttSettings: SettingMqtt;
   public topics: Topic;
   private listeners: MqttEventListener[] = [];
 
-  constructor(config: Settings) {
-    this.mqttSettings = config.mqtt;
-    this.topics = new Topic(config.mqtt.base_topic);
+  constructor(config: SettingMqtt) {
+    this.mqttSettings = config;
+    this.topics = new Topic(config.base_topic);
   }
 
   addListener(listener: MqttEventListener) {

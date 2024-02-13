@@ -2,7 +2,7 @@
 
 import IRfxcom from "../rfxcom/interface";
 import { Settings, SettingDevice } from "../settings";
-import Mqtt from "../mqtt";
+import { IMqtt } from "../mqtt";
 import {
   DeviceSwitch,
   DeviceSensor,
@@ -13,6 +13,7 @@ import { MQTTMessage } from "../models/mqtt";
 import StateStore, { DeviceStore } from "../store/state";
 import { logger } from "../utils/logger";
 import AbstractDiscovery from "./AbstractDiscovery";
+import { lookup } from "./Homeassistant";
 
 export default class HomeassistantDiscovery extends AbstractDiscovery {
   protected state: StateStore;
@@ -20,7 +21,7 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
   protected devicesConfig: SettingDevice[];
 
   constructor(
-    mqtt: Mqtt,
+    mqtt: IMqtt,
     rfxtrx: IRfxcom,
     config: Settings,
     state: StateStore,
@@ -128,7 +129,7 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
   }
 
   publishDiscoveryToMQTT(payload: any) {
-    const devicePrefix = this.config.discovery_device;
+    const bridgeName = this.config.discovery_device;
     const id = payload.id;
     const deviceId = payload.subTypeValue + "_" + id.replace("0x", "");
     let deviceTopic = payload.id;
@@ -168,7 +169,7 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
     let deviceJson: DeviceStateStore;
     if (!this.deviceStore.exists(id)) {
       const deviceState = new DeviceState(
-        [devicePrefix + "_" + deviceId, devicePrefix + "_" + deviceName],
+        [bridgeName + "_" + deviceId, bridgeName + "_" + deviceName],
         deviceName,
       );
       deviceState.subtype = payload.subtype;
@@ -187,13 +188,13 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
       deviceName,
       deviceTopic,
       entityTopic,
-      devicePrefix,
+      bridgeName,
     );
     this.publishDiscoverySwitchToMQTT(
       payload,
       deviceJson,
       entityTopic,
-      devicePrefix,
+      bridgeName,
       entityId,
       entityName,
     );
@@ -205,7 +206,7 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
     payload: any,
     deviceJson: DeviceStateStore,
     entityTopic: string,
-    devicePrefix: string,
+    bridgeName: string,
     entityId: string,
     entityName: string,
   ) {
@@ -224,36 +225,39 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
         entityName += "_group";
       }
 
+      const switchInfo = new DeviceSwitch(
+        entityName,
+        entityId,
+        payload.unitCode,
+        state_on,
+        state_off,
+      );
+      deviceJson.addSwitch(switchInfo);
+
       const json = {
         availability: [{ topic: this.topicWill }],
         device: deviceJson.getInfo(),
         enabled_by_default: true,
-        payload_off: state_off,
-        payload_on: state_on,
+        payload_off: switchInfo.value_off,
+        payload_on: switchInfo.value_off,
         json_attributes_topic: this.topicDevice + "/" + entityTopic,
-        command_topic:
-          this.mqtt.topics.base +
-          "/cmd/" +
-          payload.type +
-          "/" +
-          payload.subtype +
-          "/" +
-          entityTopic +
-          "/set",
+        command_topic: deviceJson.getCommandTopic(
+          this.mqtt.topics.base + "/cmd/",
+          entityName,
+        ),
         name: entityName,
         object_id: entityId,
         origin: this.discoveryOrigin,
-        state_off: state_off,
-        state_on: state_on,
+        state_off: switchInfo.value_off,
+        state_on: switchInfo.value_on,
         state_topic: this.topicDevice + "/" + entityTopic,
-        unique_id: entityId + "_" + devicePrefix,
-        value_template: "{{ value_json.command }}",
+        unique_id: entityId + "_" + bridgeName,
+        value_template: "{{ value_json." + switchInfo.property + " }}",
       };
       this.publishDiscovery(
         "switch/" + entityTopic + "/config",
         JSON.stringify(json),
       );
-      deviceJson.addSwitch(new DeviceSwitch(entityName, json.object_id, payload.unitCode));
     }
 
     //"activlink", "asyncconfig", "asyncdata", "blinds1", "blinds2", "camera1", "chime1", "curtain1", "edisio",
@@ -267,7 +271,7 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
     deviceName: any,
     deviceTopic: any,
     entityTopic: any,
-    devicePrefix: any,
+    bridgeName: any,
   ) {
     const commonConf = {
       availability: [{ topic: this.topicWill }],
@@ -278,355 +282,172 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
     };
 
     if (payload.rssi !== undefined) {
-      const json = {
-        enabled_by_default: false,
-        entity_category: "diagnostic",
-        device_class: "signal_strength",
-        icon: "mdi:signal",
-        name: deviceName + " Linkquality",
-        object_id: deviceTopic + "_linkquality",
-        state_class: "measurement",
-        unique_id: deviceTopic + "_linkquality_" + devicePrefix,
-        unit_of_measurement: "dBm",
-        value_template: "{{ value_json.rssi }}",
-        ...commonConf,
-      };
-      this.publishDiscovery(
-        "sensor/" + deviceTopic + "/linkquality/config",
-        JSON.stringify(json),
-      );
       deviceJson.addSensor(
         new DeviceSensor(
-          json.object_id,
-          json.name,
+          deviceTopic + "_linkquality",
+          deviceName + " Linkquality",
           "Link quality (signal strength)",
           "rssi",
-          "number",
-          json.unit_of_measurement,
+          "linkquality",
         ),
       );
     }
     // batteryLevel
     if (payload.batteryLevel !== undefined) {
-      const json = {
-        device_class: "battery",
-        enabled_by_default: true,
-        icon: "mdi:battery",
-        name: deviceName + " Batterie",
-        object_id: deviceTopic + "_battery",
-        state_class: "measurement",
-        unique_id: deviceTopic + "_battery_" + devicePrefix,
-        unit_of_measurement: "%",
-        value_template: "{{ value_json.batteryLevel }}",
-        ...commonConf,
-      };
-      this.publishDiscovery(
-        "sensor/" + deviceTopic + "/battery/config",
-        JSON.stringify(json),
-      );
       deviceJson.addSensor(
         new DeviceSensor(
-          json.object_id,
-          json.name,
+          deviceTopic + "_battery",
+          deviceName + " Battery",
           "Remaining battery in %",
           "batteryLevel",
-          "number",
-          json.unit_of_measurement,
+          "battery",
         ),
       );
     }
     // batteryVoltage
     if (payload.batteryVoltage !== undefined) {
-      const json = {
-        device_class: "voltage",
-        enabled_by_default: true,
-        icon: "mdi:sine-wave",
-        name: deviceName + " Tension",
-        object_id: deviceTopic + "_voltage",
-        state_class: "measurement",
-        unique_id: deviceTopic + "_voltage_" + devicePrefix,
-        unit_of_measurement: "mV",
-        value_template: "{{ value_json.batteryVoltage }}",
-        ...commonConf,
-      };
-      this.publishDiscovery(
-        "sensor/" + deviceTopic + "/voltage/config",
-        JSON.stringify(json),
-      );
       deviceJson.addSensor(
         new DeviceSensor(
-          json.object_id,
-          json.name,
+          deviceTopic + "_voltage",
+          deviceName + " Tension",
           "Tension",
-          "voltage",
-          "number",
-          json.unit_of_measurement,
+          "batteryVoltage",
+          "battery_voltage",
         ),
       );
     }
 
     // humidity
     if (payload.humidity !== undefined) {
-      const json = {
-        device_class: "humidity",
-        enabled_by_default: true,
-        icon: "mdi:humidity",
-        name: deviceName + " Humidity",
-        object_id: deviceTopic + "_humidity",
-        state_class: "measurement",
-        unique_id: deviceTopic + "_humidity_" + devicePrefix,
-        unit_of_measurement: "%",
-        value_template: "{{ value_json.humidity }}",
-        ...commonConf,
-      };
-      this.publishDiscovery(
-        "sensor/" + deviceTopic + "/humidity/config",
-        JSON.stringify(json),
-      );
       deviceJson.addSensor(
         new DeviceSensor(
-          json.object_id,
-          json.name,
+          deviceTopic + "_humidity",
+          deviceName + " Humidity",
           "Measured relative humidity",
           "humidity",
-          "number",
-          json.unit_of_measurement,
+          "humidity",
         ),
       );
     }
 
     // temperature
     if (payload.temperature !== undefined) {
-      const json = {
-        device_class: "temperature",
-        enabled_by_default: true,
-        icon: "mdi:temperature-celsius",
-        name: deviceName + " Temperature",
-        object_id: deviceTopic + "_temperature",
-        state_class: "measurement",
-        unique_id: deviceTopic + "_temperature_" + devicePrefix,
-        unit_of_measurement: "°C",
-        value_template: "{{ value_json.temperature }}",
-        ...commonConf,
-      };
-      this.publishDiscovery(
-        "sensor/" + deviceTopic + "/temperature/config",
-        JSON.stringify(json),
-      );
       deviceJson.addSensor(
         new DeviceSensor(
-          json.object_id,
-          json.name,
+          deviceTopic + "_temperature",
+          deviceName + " Temperature",
           "Measured temperature value",
           "temperature",
-          "number",
-          json.unit_of_measurement,
+          "temperature",
         ),
       );
     }
 
     // co2
     if (payload.co2 !== undefined) {
-      const json = {
-        device_class: "carbon_dioxide",
-        enabled_by_default: true,
-        name: deviceName + " Co2",
-        object_id: deviceTopic + "_co2",
-        state_class: "measurement",
-        unique_id: deviceTopic + "_co2_" + devicePrefix,
-        unit_of_measurement: "°C",
-        value_template: "{{ value_json.co2 }}",
-        ...commonConf,
-      };
-      this.publishDiscovery(
-        "sensor/" + deviceTopic + "/co2/config",
-        JSON.stringify(json),
-      );
       deviceJson.addSensor(
         new DeviceSensor(
-          json.object_id,
-          json.name,
+          deviceTopic + "_co2",
+          deviceName + " Co2",
           "Co2",
           "co2",
-          "number",
-          json.unit_of_measurement,
+          "co2",
         ),
       );
     }
 
     // power
     if (payload.power !== undefined) {
-      const json = {
-        device_class: "power",
-        entity_category: "diagnostic",
-        enabled_by_default: true,
-        name: deviceName + " Power",
-        object_id: deviceTopic + "_power",
-        state_class: "measurement",
-        unique_id: deviceTopic + "_power_" + devicePrefix,
-        value_template: "{{ value_json.power }}",
-        ...commonConf,
-      };
-      this.publishDiscovery(
-        "sensor/" + deviceTopic + "/power/config",
-        JSON.stringify(json),
-      );
       deviceJson.addSensor(
         new DeviceSensor(
-          json.object_id,
-          json.name,
+          deviceTopic + "_power",
+          deviceName + " Power",
           "Power",
           "power",
-          "number",
-          "",
+          "power",
         ),
       );
     }
 
     // energy
     if (payload.energy !== undefined) {
-      const json = {
-        device_class: "energy",
-        entity_category: "diagnostic",
-        enabled_by_default: true,
-        name: deviceName + " Energy",
-        object_id: deviceTopic + "_energy",
-        state_class: "total_increasing",
-        unique_id: deviceTopic + "_energy_" + devicePrefix,
-        value_template: "{{ value_json.energy }}",
-        ...commonConf,
-      };
-      this.publishDiscovery(
-        "sensor/" + deviceTopic + "/energy/config",
-        JSON.stringify(json),
-      );
       deviceJson.addSensor(
         new DeviceSensor(
-          json.object_id,
-          json.name,
+          deviceTopic + "_energy",
+          deviceName + " Energy",
           "Energy increment",
           "energy",
-          "number",
-          "",
+          "energy",
         ),
       );
     }
 
     // barometer
     if (payload.barometer !== undefined) {
-      const json = {
-        device_class: "pressure",
-        entity_category: "diagnostic",
-        enabled_by_default: true,
-        name: deviceName + " Barometer",
-        object_id: deviceTopic + "_barometer",
-        state_class: "measurement",
-        unit_of_measurement: "hPa",
-        unique_id: deviceTopic + "_barometer_" + devicePrefix,
-        value_template: "{{ value_json.barometer }}",
-        ...commonConf,
-      };
-      this.publishDiscovery(
-        "sensor/" + deviceTopic + "/barometer/config",
-        JSON.stringify(json),
-      );
       deviceJson.addSensor(
         new DeviceSensor(
-          json.object_id,
-          json.name,
+          deviceTopic + "_barometer",
+          deviceName + " Barometer",
           "The measured atmospheric pressure",
           "barometer",
-          "number",
-          json.unit_of_measurement,
+          "pressure",
         ),
       );
     }
 
     // count
     if (payload.count !== undefined) {
-      const json = {
-        entity_category: "diagnostic",
-        enabled_by_default: true,
-        name: deviceName + " Count",
-        object_id: deviceTopic + "_count",
-        state_class: "measurement",
-        unit_of_measurement: "",
-        unique_id: deviceTopic + "_count_" + devicePrefix,
-        value_template: "{{ value_json.count }}",
-        ...commonConf,
-      };
-      this.publishDiscovery(
-        "sensor/" + deviceTopic + "/count/config",
-        JSON.stringify(json),
-      );
       deviceJson.addSensor(
         new DeviceSensor(
-          json.object_id,
-          json.name,
+          deviceTopic + "_count",
+          deviceName + " Count",
           "Counter",
           "count",
-          "number",
-          json.unit_of_measurement,
+          "count",
         ),
       );
     }
 
     // weight
     if (payload.weight !== undefined) {
-      const json = {
-        device_class: "weight",
-        enabled_by_default: true,
-        icon: "mdi:weight",
-        name: deviceName + " Weight",
-        object_id: deviceTopic + "_weight",
-        state_class: "measurement",
-        unit_of_measurement: "Kg",
-        unique_id: deviceTopic + "_weight_" + devicePrefix,
-        value_template: "{{ value_json.weight }}",
-        ...commonConf,
-      };
-      this.publishDiscovery(
-        "sensor/" + deviceTopic + "/weight/config",
-        JSON.stringify(json),
-      );
       deviceJson.addSensor(
         new DeviceSensor(
-          json.object_id,
-          json.name,
+          deviceTopic + "_weight",
+          deviceName + " Weight",
           "Weight",
           "weight",
-          "number",
-          json.unit_of_measurement,
+          "weight",
         ),
       );
     }
 
     // uv
     if (payload.uv !== undefined) {
-      const json = {
-        enabled_by_default: true,
-        icon: "mdi:sunglasses",
-        name: deviceName + " UV",
-        object_id: deviceTopic + "_uv",
-        state_class: "measurement",
-        unit_of_measurement: "UV index",
-        unique_id: deviceTopic + "_uv_" + devicePrefix,
-        value_template: "{{ value_json.uv }}",
-        ...commonConf,
-      };
-      this.publishDiscovery(
-        "sensor/" + deviceTopic + "/uv/config",
-        JSON.stringify(json),
-      );
       deviceJson.addSensor(
         new DeviceSensor(
-          json.object_id,
-          json.name,
+          deviceTopic + "_uv",
+          deviceName + " UV",
           "UV",
           "uv",
           "number",
-          json.unit_of_measurement,
         ),
+      );
+    }
+
+    const sensors = deviceJson.getSensors();
+    for (const index in sensors) {
+      const sensor = sensors[index];
+      const json = {
+        name: sensor.label,
+        object_id: sensor.id,
+        unique_id: sensor.id + "_" + bridgeName,
+        value_template: "{{ value_json." + sensor.property + " }}",
+        ...commonConf,
+        ...lookup[sensor.type],
+      };
+      this.publishDiscovery(
+        "sensor/" + deviceTopic + "/" + sensor.type + "/config",
+        JSON.stringify(json),
       );
     }
   }

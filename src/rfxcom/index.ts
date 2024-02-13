@@ -2,9 +2,18 @@ import rfxcom from "rfxcom";
 import { SettingRfxcom, SettingDevice } from "../settings";
 import { RfxcomInfo, RfxcomEvent } from "../models/rfxcom";
 import IRfxcom from "./interface";
+import MockRfxcom from "./Mock";
 
 import { loggerFactory } from "../utils/logger";
 const logger = loggerFactory.getLogger("RFXCOM");
+
+export { IRfxcom };
+
+export function getRfxcomInstance(config: SettingRfxcom): IRfxcom {
+  return config.usbport === "mock"
+    ? new MockRfxcom(config)
+    : new Rfxcom(config);
+}
 
 export default class Rfxcom implements IRfxcom {
   private debug: boolean;

@@ -8,7 +8,7 @@ import { logger } from "../utils/logger";
 import { Settings, SettingFrontend } from "../settings";
 import StateStore, { DeviceStore } from "../store/state";
 import { BridgeInfo } from "../models/models";
-import Api from "./Api";
+import Api from "./api/index";
 import Frontend from "./Frontend";
 
 export default class Server {
@@ -24,11 +24,10 @@ export default class Server {
     devices: DeviceStore,
     state: StateStore,
     bridgeInfo: BridgeInfo,
-    bridgeActionCallback: any,
-    deviceActionCallback: any,
+    actionCallback: any,
   ) {
     this.frontConf = conf.frontend;
-    this.api = new Api(conf, devices, state, bridgeInfo, bridgeActionCallback,deviceActionCallback);
+    this.api = new Api(devices, state, bridgeInfo, actionCallback);
     this.frontend = new Frontend(conf);
   }
 

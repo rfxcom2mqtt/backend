@@ -2029,10 +2029,10 @@
     uncontrollable "^8.0.1"
     warning "^4.0.3"
 
-"@rfxcom2mqtt/frontend@0.1.4":
-  version "0.1.4"
-  resolved "https://registry.yarnpkg.com/@rfxcom2mqtt/frontend/-/frontend-0.1.4.tgz#515f150358d744d293c6ecbedf0929d9d1a549d7"
-  integrity sha512-63l4isnxBv+ZdoWN+F3h4IFh0R9V2i8mRuuRo6iZK47qqRwR2/h8gbkaKs9fkGoP7wG69g2oe/1nAm8BGE7gVw==
+"@rfxcom2mqtt/frontend@0.1.6":
+  version "0.1.6"
+  resolved "https://registry.yarnpkg.com/@rfxcom2mqtt/frontend/-/frontend-0.1.6.tgz#820aea186039070fa88f65883584203924673e97"
+  integrity sha512-oOKXX7VPCWZs6PyeGW51toxwwi0tVv9kftzarJ3y7D8LkxT+V6mYviovN1YIj0adVbQD6/XVXKOn/lJea4a7EQ==
   dependencies:
     "@emotion/react" "^11.11.3"
     "@emotion/styled" "^11.11.0"

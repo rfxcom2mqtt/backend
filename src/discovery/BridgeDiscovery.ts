@@ -2,14 +2,14 @@
 
 import IRfxcom from "../rfxcom/interface";
 import { Settings, settingsService } from "../settings";
-import Mqtt from "../mqtt";
+import { IMqtt } from "../mqtt";
 import { DeviceBridge, BridgeInfo } from "../models/models";
 import { MQTTMessage } from "../models/mqtt";
 import { loggerFactory, logger } from "../utils/logger";
 import AbstractDiscovery from "./AbstractDiscovery";
 
 export default class BridgeDiscovery extends AbstractDiscovery {
-  constructor(mqtt: Mqtt, rfxtrx: IRfxcom, config: Settings) {
+  constructor(mqtt: IMqtt, rfxtrx: IRfxcom, config: Settings) {
     super(mqtt, rfxtrx, config);
   }
 

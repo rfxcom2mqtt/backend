@@ -1,5 +1,14 @@
 import { RfxcomInfo } from "./rfxcom";
 
+export class Action {
+  constructor(
+    public type: string = "",
+    public action: string = "",
+    public deviceId: string = "",
+    public entityId: string = "",
+  ) {}
+}
+
 export interface KeyValue {
   [s: string]: any;
 }
@@ -27,7 +36,6 @@ export class DeviceSensor {
     public description: string = "",
     public property: string = "",
     public type: string = "",
-    public unit: string = "",
   ) {}
 }
 
@@ -36,11 +44,11 @@ export class DeviceSwitch {
     public id: string = "",
     public label: string = "",
     public unit: number = 0,
+    public value_off: string = "Off",
+    public value_on: string = "On",
     public description: string = "On/off state of the switch",
     public property: string = "command",
     public type: string = "binary",
-    public value_off: string = "Off",
-    public value_on: string = "On",
   ) {}
 }
 
@@ -69,8 +77,30 @@ export class DeviceStateStore {
     return new DeviceEntity(this.state.identifiers, this.state.name);
   }
 
-  getCommandTopic(baseTopic: string,entityId: string) {
-    return baseTopic+this.state.type+"/"+this.state.subtype+"/"+this.state.id+"/"+this.state.switchs[entityId].unit;
+  getCommandTopic(baseTopic: string, entityId: string) {
+    return (
+      baseTopic +
+      this.state.type +
+      "/" +
+      this.state.subtype +
+      "/" +
+      this.state.id +
+      "/" +
+      this.state.switchs[entityId].unit
+    );
+  }
+
+  getStateTopic(baseTopic: string, entityId: string) {
+    return (
+      baseTopic +
+      this.state.type +
+      "/" +
+      this.state.subtype +
+      "/" +
+      this.state.id +
+      "/" +
+      this.state.switchs[entityId].unit
+    );
   }
 
   addEntity(entityId: string) {
@@ -83,10 +113,15 @@ export class DeviceStateStore {
     this.addSensor(new DeviceSensor(sensorId, sensorId));
   }
 
-  addSensor(sensor: DeviceSensor) {
+  addSensor(sensor: DeviceSensor): DeviceSensor {
     if (this.state.sensors[sensor.id] === undefined) {
       this.state.sensors[sensor.id] = sensor;
     }
+    return sensor;
+  }
+
+  getSensors(): { [s: string]: DeviceSensor } {
+    return this.state.sensors;
   }
 
   addSwitchId(switchId: string) {

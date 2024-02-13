@@ -1,5 +1,3 @@
-mock: true
-loglevel: debug
 healthcheck:
   enabled: false
   cron: '*/2 * * * *'
@@ -14,8 +12,8 @@ mqtt:
   include_device_information: false
   qos: 0
   retain: true
+  server: mock
   base_topic: rfxcom2mqtt
-  server: tcp://localhost
   username: 
   password: 
 rfxcom:
@@ -37,7 +35,7 @@ rfxcom:
         - unitCode: 1
           name: AC_notuse_1
           friendlyName: not_use 1
-  usbport: /dev/ttyUSB0
+  usbport: mock
   transmit:
     repeat: 4
     lighting1:

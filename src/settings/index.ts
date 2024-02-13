@@ -8,7 +8,6 @@ import { logger, loggerFactory } from "../utils/logger";
 type RecursivePartial<T> = { [P in keyof T]?: RecursivePartial<T[P]> };
 
 export interface Settings {
-  mock: boolean;
   loglevel: "warn" | "debug" | "info" | "error";
   cacheState: {
     enable: boolean;
@@ -205,7 +204,6 @@ class SettingsService {
 export const settingsService = new SettingsService();
 
 const defaults: RecursivePartial<Settings> = {
-  mock: false,
   loglevel: "info",
   healthcheck: {
     enabled: true,

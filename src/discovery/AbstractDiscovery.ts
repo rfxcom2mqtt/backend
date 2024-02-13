@@ -2,11 +2,11 @@
 
 import IRfxcom from "../rfxcom/interface";
 import { Settings, SettingHass } from "../settings";
-import Mqtt from "../mqtt";
+import { IMqtt } from "../mqtt";
 import utils from "../utils/utils";
 
 export default class AbstractDiscovery {
-  protected mqtt: Mqtt;
+  protected mqtt: IMqtt;
   protected rfxtrx: IRfxcom;
   protected config: SettingHass;
   protected topicWill: string;
@@ -14,7 +14,7 @@ export default class AbstractDiscovery {
   protected baseTopic: string;
   protected discoveryOrigin: { name: string; sw: string; url: string };
 
-  constructor(mqtt: Mqtt, rfxtrx: IRfxcom, config: Settings) {
+  constructor(mqtt: IMqtt, rfxtrx: IRfxcom, config: Settings) {
     this.mqtt = mqtt;
     this.rfxtrx = rfxtrx;
     this.config = config.homeassistant;
