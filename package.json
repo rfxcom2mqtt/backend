@@ -6,8 +6,15 @@
     "version": "1.0.0",
     "description": "RFXCOM to MQTT bridge",
     "main": "src/index.ts",
+    "engines": {
+        "node": "^18 || ^20 || ^21"
+    },
     "dependencies": {
-        "@rfxcom2mqtt/frontend": "0.1.7",
+        "git-last-commit": "^1.0.1",
+        "rimraf": "^5.0.5",
+        "semver": "^7.5.4",
+        "source-map-support": "^0.5.21",
+        "@rfxcom2mqtt/frontend": "0.1.7-1",
         "@types/express": "^4.17.21",
         "connect-gzip-static": "^3.0.1",
         "cookie-parser": "^1.4.5",
@@ -24,6 +31,8 @@
         "winston": "^3.11.0"
     },
     "scripts": {
+        "build": "npx tsc && node index.js writehash",
+        "build-start": "node index.js --env-file=.env.dev",
         "start": "ts-node ./src/index.ts",
         "dev": "ts-node ./src/index.ts --env-file=.env.dev",
         "pretty": "prettier --write \"./**/*.{js,jsx,ts,tsx}\"",

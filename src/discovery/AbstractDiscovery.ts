@@ -1,23 +1,21 @@
 "use strict";
 
 import IRfxcom from "../rfxcom/interface";
-import { Settings, SettingHass } from "../settings";
+import { settingsService } from "../settings";
 import { IMqtt } from "../mqtt";
 import utils from "../utils/utils";
 
 export default class AbstractDiscovery {
   protected mqtt: IMqtt;
   protected rfxtrx: IRfxcom;
-  protected config: SettingHass;
   protected topicWill: string;
   protected topicDevice: string;
   protected baseTopic: string;
   protected discoveryOrigin: { name: string; sw: string; url: string };
 
-  constructor(mqtt: IMqtt, rfxtrx: IRfxcom, config: Settings) {
+  constructor(mqtt: IMqtt, rfxtrx: IRfxcom) {
     this.mqtt = mqtt;
     this.rfxtrx = rfxtrx;
-    this.config = config.homeassistant;
     this.topicWill = mqtt.topics.base + "/" + mqtt.topics.will;
     this.topicDevice = mqtt.topics.base + "/" + mqtt.topics.devices;
     this.baseTopic = mqtt.topics.base;
@@ -40,7 +38,7 @@ export default class AbstractDiscovery {
       payload,
       (error: any) => {},
       { retain: true, qos: 1 },
-      this.config.discovery_topic,
+      settingsService.get().homeassistant.discovery_topic,
     );
   }
 }

@@ -2,39 +2,55 @@ import { StatusCodes } from "http-status-codes";
 import { Router, Request, Response } from "express";
 import { logger } from "../../utils/logger";
 import StateStore, { DeviceStore } from "../../store/state";
-import { Action } from "../../models/models";
+import { Action, DeviceStateStore } from "../../models/models";
 import { lookup } from "../../discovery/Homeassistant";
+import { settingsService } from "../../settings";
 
 export default class DeviceApi {
   public router: Router;
 
-  constructor(devices: DeviceStore, state: StateStore, actionCallback: any) {
+  constructor(
+    devicesStore: DeviceStore,
+    state: StateStore,
+    actionCallback: any,
+  ) {
     this.router = Router();
 
     this.router.get("/", (req: Request, res: Response) => {
-      res.status(StatusCodes.OK).json(devices.getAll());
+      const devices = devicesStore.getAll();
+      for (const index in devices) {
+        const device = new DeviceStateStore(devices[index]);
+        device.overrideDeviceInfo();
+      }
+      res.status(StatusCodes.OK).json(devices);
     });
 
     this.router.get("/:id", (req: Request, res: Response) => {
       const id = req.params.id;
       logger.info("get device " + id + " info");
 
-      const device = devices.get(id);
-      for (const index in device.sensors) {
-        const sensor = device.sensors[index];
-        device.sensors[index] = {
+      const device = new DeviceStateStore(devicesStore.get(id));
+      device.overrideDeviceInfo();
+
+      for (const index in device.getSensors()) {
+        const sensor = device.getSensors()[index];
+        device.getSensors()[index] = {
           ...sensor,
           ...lookup[sensor.type],
         };
       }
-      res.status(StatusCodes.OK).json(device);
+      res.status(StatusCodes.OK).json(device.state);
     });
 
     this.router.post("/:id/rename", (req: Request, res: Response) => {
       const id = req.params.id;
       const newName = req.body?.name;
-      logger.info("rename device " + id+ " to "+newName);
-      
+      logger.info("rename device " + id + " to " + newName);
+      settingsService.applyDeviceOverride({
+        id: id,
+        name: newName,
+      });
+      //TODO change discovery value
       res.status(StatusCodes.OK).json({});
     });
 
@@ -53,13 +69,24 @@ export default class DeviceApi {
       res.status(StatusCodes.OK).json({});
     });
 
-    this.router.post("/:id/sensor/:sensorId/rename", (req: Request, res: Response) => {
-      const id = req.params.id;
-      const sensorId = req.params.sensorId;
-      const newName = req.body?.name;
-      logger.info("rename  device " + id + " sensor " + sensorId + " to " + newName);
-     
-      res.status(StatusCodes.OK).json({});
-    });
+    this.router.post(
+      "/:id/switch/:itemId/rename",
+      (req: Request, res: Response) => {
+        const id = req.params.id;
+        const itemId = req.params.itemId;
+        const newName = req.body?.name;
+        const unitCode: number = parseInt(req.body?.unitCode);
+        logger.info(
+          "rename  device " + id + " sensor " + itemId + " to " + newName,
+        );
+        settingsService.applyDeviceOverride({
+          id: id,
+          units: [{ unitCode: unitCode, name: newName }],
+        });
+        //TODO change discovery value
+
+        res.status(StatusCodes.OK).json({});
+      },
+    );
   }
 }

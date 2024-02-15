@@ -1,5 +1,5 @@
 import rfxcom from "rfxcom";
-import { SettingRfxcom } from "../settings";
+import { SettingRfxcom, settingsService } from "../settings";
 import {
   RfxcomInfo,
   Lighting2Event,
@@ -100,7 +100,7 @@ rfxcomEvents.push({
 rfxcomEvents.push({
   id: "hum_device",
   seqnbr: 1,
-  subtype: 0,
+  subtype: 1,
   humidity: "60",
   humidityStatus: "Off",
   batteryLevel: 100,
@@ -129,10 +129,10 @@ rfxcomEvents.push({
 } as WaterlevelEvent);
 
 export default class MockRfxcom implements IRfxcom {
-  private config: SettingRfxcom;
+  constructor() {}
 
-  constructor(config: SettingRfxcom) {
-    this.config = config;
+  private getConfig(): SettingRfxcom {
+    return settingsService.get().rfxcom;
   }
 
   initialise(): Promise<void> {
@@ -162,7 +162,12 @@ export default class MockRfxcom implements IRfxcom {
     ];
     callback(rfxcomInfo);
   }
-  onCommand(deviceType: string, entityName: string, payload: any) {
+  onCommand(
+    deviceType: string,
+    entityName: string,
+    payload: any,
+    deviceConf: any,
+  ) {
     logger.info("Mock on command");
   }
   onDisconnect(callback: any) {
@@ -178,10 +183,7 @@ export default class MockRfxcom implements IRfxcom {
         deviceId = (event as Lighting4Event).data;
       }
       event.subTypeValue = this.getSubType(event.type, "" + event.subtype);
-      const deviceConf = this.config.devices.find(
-        (dev: any) => dev.id === deviceId,
-      );
-      callback(event.type, event, deviceConf);
+      callback(event.type, event);
     });
   }
   isGroup(payload: any): boolean {

@@ -1,4 +1,5 @@
 import { RfxcomInfo } from "./rfxcom";
+import { settingsService } from "../settings";
 
 export class Action {
   constructor(
@@ -17,22 +18,22 @@ export class DeviceEntity {
   public manufacturer: string = "Rfxcom";
   public via_device: string = "rfxcom2mqtt_bridge";
   public identifiers: string[] = [];
+  public id: string = "";
   public name: string = "";
+  public originalName: string = "";
 
-  constructor(
-    identifiers: string[] = [],
-    //public model: string = '',
-    name: string = "",
-  ) {
-    this.identifiers = identifiers;
+  constructor(id: string = "", name: string = "") {
+    this.identifiers = ["rfxcom2mqtt_" + id, "rfxcom2mqtt_" + name];
+    this.id = id;
     this.name = name;
+    this.originalName = name;
   }
 }
 
 export class DeviceSensor {
   constructor(
     public id: string = "",
-    public label: string = "",
+    public name: string = "",
     public description: string = "",
     public property: string = "",
     public type: string = "",
@@ -42,7 +43,8 @@ export class DeviceSensor {
 export class DeviceSwitch {
   constructor(
     public id: string = "",
-    public label: string = "",
+    public name: string = "",
+    public originalName: string = "",
     public unit: number = 0,
     public value_off: string = "Off",
     public value_on: string = "On",
@@ -53,7 +55,6 @@ export class DeviceSwitch {
 }
 
 export class DeviceState extends DeviceEntity {
-  public id: string = "";
   public type: string = "";
   public subtype: number = 0;
   public subTypeValue: string = "";
@@ -61,8 +62,8 @@ export class DeviceState extends DeviceEntity {
   sensors: { [s: string]: DeviceSensor } = {};
   switchs: { [s: string]: DeviceSwitch } = {};
 
-  constructor(identifiers: string[], name: string) {
-    super(identifiers, name);
+  constructor(id: string, name: string) {
+    super(id, name);
   }
 }
 
@@ -73,8 +74,18 @@ export class DeviceStateStore {
     this.state = state;
   }
 
-  getInfo() {
-    return new DeviceEntity(this.state.identifiers, this.state.name);
+  getInfo(): DeviceEntity {
+    if (
+      this.state.name !== this.state.originalName &&
+      !this.state.identifiers.includes("rfxcom2mqtt_" + this.state.name)
+    ) {
+      this.state.identifiers.push("rfxcom2mqtt_" + this.state.name);
+    }
+    return this.state as DeviceEntity;
+  }
+
+  getId() {
+    return this.state.id;
   }
 
   getCommandTopic(baseTopic: string, entityId: string) {
@@ -131,6 +142,26 @@ export class DeviceStateStore {
   addSwitch(dswitch: DeviceSwitch) {
     if (this.state.switchs[dswitch.id] === undefined) {
       this.state.switchs[dswitch.id] = dswitch;
+    }
+  }
+
+  overrideDeviceInfo() {
+    const deviceConf = settingsService
+      .get()
+      .devices.find((dev: any) => dev.id === this.state.id);
+
+    if (deviceConf?.name !== undefined) {
+      this.state.name = deviceConf.name;
+    }
+
+    for (const index in this.state.switchs) {
+      const item = this.state.switchs[index];
+      for (const indexU in deviceConf?.units) {
+        const unit = deviceConf?.units[indexU];
+        if (parseInt(unit.unitCode) === parseInt(item.unit + "")) {
+          this.state.switchs[index].name = unit.name;
+        }
+      }
     }
   }
 }

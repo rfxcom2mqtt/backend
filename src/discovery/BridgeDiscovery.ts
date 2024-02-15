@@ -9,8 +9,8 @@ import { loggerFactory, logger } from "../utils/logger";
 import AbstractDiscovery from "./AbstractDiscovery";
 
 export default class BridgeDiscovery extends AbstractDiscovery {
-  constructor(mqtt: IMqtt, rfxtrx: IRfxcom, config: Settings) {
-    super(mqtt, rfxtrx, config);
+  constructor(mqtt: IMqtt, rfxtrx: IRfxcom) {
+    super(mqtt, rfxtrx);
   }
 
   async start() {

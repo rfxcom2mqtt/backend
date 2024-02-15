@@ -3,7 +3,12 @@ export default interface IRfxcom {
   initialise(): Promise<void>;
   getStatus(callback: any): void;
   onStatus(callback: any): void;
-  onCommand(deviceType: string, entityName: string, payload: any): void;
+  onCommand(
+    deviceType: string,
+    entityName: string,
+    payload: any,
+    deviceConf: any,
+  ): void;
   onDisconnect(callback: any): void;
   subscribeProtocolsEvent(callback: any): void;
   getSubType(type: string, subType: string): string;

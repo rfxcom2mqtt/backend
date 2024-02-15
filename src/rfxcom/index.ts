@@ -1,5 +1,5 @@
 import rfxcom from "rfxcom";
-import { SettingRfxcom, SettingDevice } from "../settings";
+import { settingsService } from "../settings";
 import { RfxcomInfo, RfxcomEvent } from "../models/rfxcom";
 import IRfxcom from "./interface";
 import MockRfxcom from "./Mock";
@@ -9,21 +9,25 @@ const logger = loggerFactory.getLogger("RFXCOM");
 
 export { IRfxcom };
 
-export function getRfxcomInstance(config: SettingRfxcom): IRfxcom {
-  return config.usbport === "mock"
-    ? new MockRfxcom(config)
-    : new Rfxcom(config);
+export function getRfxcomInstance(): IRfxcom {
+  return settingsService.get().rfxcom.usbport === "mock"
+    ? new MockRfxcom()
+    : new Rfxcom();
 }
 
 export default class Rfxcom implements IRfxcom {
   private debug: boolean;
-  private config: SettingRfxcom;
   private rfxtrx;
 
-  constructor(config: SettingRfxcom) {
-    this.debug = config.debug ? config.debug : false;
-    this.config = config;
-    this.rfxtrx = new rfxcom.RfxCom(config.usbport, { debug: this.debug });
+  constructor() {
+    this.debug = this.getConfig().debug ? this.getConfig().debug : false;
+    this.rfxtrx = new rfxcom.RfxCom(this.getConfig().usbport, {
+      debug: this.debug,
+    });
+  }
+
+  private getConfig() {
+    return settingsService.get().rfxcom;
   }
 
   private getRfxcomDevices() {
@@ -48,7 +52,7 @@ export default class Rfxcom implements IRfxcom {
   }
 
   async initialise(): Promise<void> {
-    logger.info(`Connecting to RFXCOM at ${this.config.usbport}`);
+    logger.info(`Connecting to RFXCOM at ${this.getConfig().usbport}`);
     return new Promise((resolve, reject) => {
       this.rfxtrx.initialise(function (error: any) {
         if (error) {
@@ -86,7 +90,7 @@ export default class Rfxcom implements IRfxcom {
   }
 
   protected enableRFXProtocols() {
-    const config = this.config;
+    const config = this.getConfig();
     this.rfxtrx.enableRFXProtocols(config.receive, function (evt: any) {
       logger.info("RFXCOM enableRFXProtocols : " + config.receive);
     });
@@ -124,17 +128,12 @@ export default class Rfxcom implements IRfxcom {
     });
   }
 
-  private getDeviceConfig(deviceId: string): SettingDevice | undefined {
-    if (this.config.devices === undefined) {
-      return;
-    }
-
-    return this.config.devices.find(
-      (dev: SettingDevice) => dev.id === deviceId,
-    );
-  }
-
-  onCommand(deviceType: string, entityName: string, payload: any) {
+  onCommand(
+    deviceType: string,
+    entityName: string,
+    payload: any,
+    deviceConf: any,
+  ) {
     let transmitRepetitions: number | undefined;
     let subtype: string;
 
@@ -161,9 +160,6 @@ export default class Rfxcom implements IRfxcom {
     let deviceOptions = payload.deviceOptions;
 
     // Get device config if available
-    const deviceConf = this.config.devices.find(
-      (dev: any) => dev.friendlyName === entityName,
-    );
     if (deviceConf instanceof Object) {
       if (deviceConf.id !== undefined) {
         entityName = deviceConf.id;
@@ -233,9 +229,9 @@ export default class Rfxcom implements IRfxcom {
   }
 
   subscribeProtocolsEvent(callback: any) {
-    if (this.config.receive) {
+    if (this.getConfig().receive) {
       // Subscribe to specific rfxcom events
-      this.config.receive.forEach((protocol: any) => {
+      this.getConfig().receive.forEach((protocol: any) => {
         logger.info("RFXCOM listen event for protocol : " + protocol);
         this.rfxtrx.on(protocol, (evt: any, packetType: string) => {
           logger.info("receive " + protocol);
@@ -247,8 +243,7 @@ export default class Rfxcom implements IRfxcom {
             deviceId = evt.data;
           }
           evt.subTypeValue = this.getSubType(evt.type, evt.subtype);
-          const deviceConf = this.getDeviceConfig(deviceId);
-          callback(protocol, evt as RfxcomEvent, deviceConf);
+          callback(protocol, evt as RfxcomEvent);
         });
       });
     }

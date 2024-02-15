@@ -1,6 +1,5 @@
 import { logger } from "../utils/logger";
 import { Router } from "express";
-import { Settings, SettingFrontend } from "../settings";
 import expressStaticGzip from "express-static-gzip";
 import serverStatic from "serve-static";
 import path from "path";
@@ -9,11 +8,9 @@ import fs from "fs";
 import frontend from "@rfxcom2mqtt/frontend";
 
 export default class Frontend {
-  private frontConf: SettingFrontend;
   public router: Router;
 
-  constructor(conf: Settings) {
-    this.frontConf = conf.frontend;
+  constructor() {
     this.router = Router();
 
     let staticFrontend;

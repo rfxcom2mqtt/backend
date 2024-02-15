@@ -1,5 +1,5 @@
 import * as mqtt from "mqtt";
-import { SettingMqtt } from "../settings";
+import { SettingMqtt, settingsService } from "../settings";
 import { MqttEventListener, MQTTMessage } from "../models/mqtt";
 import fs from "fs";
 import { loggerFactory } from "../utils/logger";
@@ -48,12 +48,10 @@ export interface IMqtt {
 }
 
 export class MockMqtt implements IMqtt {
-  private mqttSettings: SettingMqtt;
   public topics: Topic;
 
-  constructor(config: SettingMqtt) {
-    this.mqttSettings = config;
-    this.topics = new Topic(config.base_topic);
+  constructor() {
+    this.topics = new Topic(settingsService.get().mqtt.base_topic);
   }
   async connect(): Promise<void> {}
   isConnected(): boolean {
@@ -68,24 +66,28 @@ export class MockMqtt implements IMqtt {
     playload: any,
     callback: any,
     options: MQTTOptions = {},
-    base = this.mqttSettings.base_topic,
+    base = settingsService.get().mqtt.base_topic,
   ): void {}
 }
 
-export function getMqttInstance(config: SettingMqtt): IMqtt {
-  return config.server === "mock" ? new MockMqtt(config) : new Mqtt(config);
+export function getMqttInstance(): IMqtt {
+  return settingsService.get().mqtt.server === "mock"
+    ? new MockMqtt()
+    : new Mqtt();
 }
 
 export default class Mqtt implements IMqtt {
   private defaultOptions: any;
   private client?: mqtt.MqttClient;
-  private mqttSettings: SettingMqtt;
   public topics: Topic;
   private listeners: MqttEventListener[] = [];
 
-  constructor(config: SettingMqtt) {
-    this.mqttSettings = config;
-    this.topics = new Topic(config.base_topic);
+  constructor() {
+    this.topics = new Topic(this.getConfig().base_topic);
+  }
+
+  private getConfig(): SettingMqtt {
+    return settingsService.get().mqtt;
   }
 
   addListener(listener: MqttEventListener) {
@@ -94,17 +96,17 @@ export default class Mqtt implements IMqtt {
 
   async connect(): Promise<void> {
     let port = "1883";
-    if (this.mqttSettings.port) {
-      port = this.mqttSettings.port;
+    if (this.getConfig().port) {
+      port = this.getConfig().port!!;
     }
 
     let qos = 0 as mqtt.QoS;
-    if (this.mqttSettings.qos) {
-      qos = this.mqttSettings.qos as mqtt.QoS;
+    if (this.getConfig().qos) {
+      qos = this.getConfig().qos as mqtt.QoS;
     }
 
-    this.defaultOptions = { qos: qos, retain: this.mqttSettings.retain };
-    logger.info(`Connecting to MQTT server at ${this.mqttSettings.server}`);
+    this.defaultOptions = { qos: qos, retain: this.getConfig().retain };
+    logger.info(`Connecting to MQTT server at ${this.getConfig().server}`);
     const will = {
       topic: this.topics.base + "/" + this.topics.will,
       payload: "offline",
@@ -116,50 +118,47 @@ export default class Mqtt implements IMqtt {
       password: undefined,
       will: will,
     };
-    if (this.mqttSettings.username) {
-      options.username = this.mqttSettings.username;
-      options.password = this.mqttSettings.password;
+    if (this.getConfig().username) {
+      options.username = this.getConfig().username;
+      options.password = this.getConfig().password;
     } else {
       logger.debug(`Using MQTT anonymous login`);
     }
 
-    if (this.mqttSettings.version) {
-      options.protocolVersion = this.mqttSettings.version;
+    if (this.getConfig().version) {
+      options.protocolVersion = this.getConfig().version;
     }
 
-    if (this.mqttSettings.keepalive) {
-      logger.debug(`Using MQTT keepalive: ${this.mqttSettings.keepalive}`);
-      options.keepalive = this.mqttSettings.keepalive;
+    if (this.getConfig().keepalive) {
+      logger.debug(`Using MQTT keepalive: ${this.getConfig().keepalive}`);
+      options.keepalive = this.getConfig().keepalive;
     }
 
-    if (this.mqttSettings.ca) {
+    if (this.getConfig().ca) {
       logger.debug(
-        `MQTT SSL/TLS: Path to CA certificate = ${this.mqttSettings.ca}`,
+        `MQTT SSL/TLS: Path to CA certificate = ${this.getConfig().ca}`,
       );
-      options.ca = fs.readFileSync(this.mqttSettings.ca);
+      options.ca = fs.readFileSync(this.getConfig().ca!!);
     }
 
-    if (this.mqttSettings.key && this.mqttSettings.cert) {
+    if (this.getConfig().key && this.getConfig().cert) {
       logger.debug(
-        `MQTT SSL/TLS: Path to client key = ${this.mqttSettings.key}`,
+        `MQTT SSL/TLS: Path to client key = ${this.getConfig().key}`,
       );
       logger.debug(
-        `MQTT SSL/TLS: Path to client certificate = ${this.mqttSettings.cert}`,
+        `MQTT SSL/TLS: Path to client certificate = ${this.getConfig().cert}`,
       );
-      options.key = fs.readFileSync(this.mqttSettings.key);
-      options.cert = fs.readFileSync(this.mqttSettings.cert);
+      options.key = fs.readFileSync(this.getConfig().key!!);
+      options.cert = fs.readFileSync(this.getConfig().cert!!);
     }
 
-    if (this.mqttSettings.client_id) {
-      logger.debug(`Using MQTT client ID: '${this.mqttSettings.client_id}'`);
-      options.clientId = this.mqttSettings.client_id;
+    if (this.getConfig().client_id) {
+      logger.debug(`Using MQTT client ID: '${this.getConfig().client_id}'`);
+      options.clientId = this.getConfig().client_id;
     }
 
     return new Promise((resolve, reject) => {
-      this.client = mqtt.connect(
-        this.mqttSettings.server + ":" + port,
-        options,
-      );
+      this.client = mqtt.connect(this.getConfig().server + ":" + port, options);
 
       // MQTT Connect
       this.onConnect(async () => {
@@ -214,7 +213,7 @@ export default class Mqtt implements IMqtt {
     playload: any,
     callback: any,
     options: MQTTOptions = {},
-    base = this.mqttSettings.base_topic,
+    base = this.getConfig().base_topic,
   ): void {
     const actualOptions: mqtt.IClientPublishOptions = {
       ...this.defaultOptions,

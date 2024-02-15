@@ -5,7 +5,7 @@ import { StatusCodes } from "http-status-codes";
 import * as core from "express-serve-static-core";
 import fs from "fs";
 import { logger } from "../utils/logger";
-import { Settings, SettingFrontend } from "../settings";
+import { SettingFrontend, settingsService } from "../settings";
 import StateStore, { DeviceStore } from "../store/state";
 import { BridgeInfo } from "../models/models";
 import Api from "./api/index";
@@ -15,29 +15,27 @@ export default class Server {
   private server?: core.Express;
   private serverProcess?: any;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private frontConf: SettingFrontend;
   private api: Api;
   private frontend: Frontend;
 
   constructor(
-    conf: Settings,
     devices: DeviceStore,
     state: StateStore,
     bridgeInfo: BridgeInfo,
     actionCallback: any,
   ) {
-    this.frontConf = conf.frontend;
     this.api = new Api(devices, state, bridgeInfo, actionCallback);
-    this.frontend = new Frontend(conf);
+    this.frontend = new Frontend();
   }
 
   private authenticate(req: Request, res: Response, next: NextFunction): void {
     const authHeader = req.headers.authorization;
-    if (this.frontConf.authToken) {
+    if (settingsService.get().frontend.authToken) {
       if (authHeader && authHeader !== "null") {
         const token = authHeader.split(" ")[1];
         logger.info("auth Header");
-        const isAuthenticated = this.frontConf.authToken === token;
+        const isAuthenticated =
+          settingsService.get().frontend.authToken === token;
         if (!isAuthenticated) {
           res
             .status(StatusCodes.UNAUTHORIZED)
@@ -56,13 +54,20 @@ export default class Server {
   }
 
   private isHttpsConfigured(): boolean {
-    if (this.frontConf.sslCert && this.frontConf.sslKey) {
+    if (
+      settingsService.get().frontend.sslCert &&
+      settingsService.get().frontend.sslKey
+    ) {
       if (
-        !fs.existsSync(this.frontConf.sslCert) ||
-        !fs.existsSync(this.frontConf.sslKey)
+        !fs.existsSync(settingsService.get().frontend.sslCert) ||
+        !fs.existsSync(settingsService.get().frontend.sslKey)
       ) {
         logger.error(
-          `defined ssl_cert '${this.frontConf.sslCert}' or ssl_key '${this.frontConf.sslKey}' file path does not exists, server won't be secured.`,
+          `defined ssl_cert '${
+            settingsService.get().frontend.sslCert
+          }' or ssl_key '${
+            settingsService.get().frontend.sslKey
+          }' file path does not exists, server won't be secured.`,
         ); /* eslint-disable-line max-len */
         return false;
       }
@@ -75,8 +80,8 @@ export default class Server {
     logger.info("Server Starting");
     if (this.isHttpsConfigured()) {
       const serverOptions = {
-        key: fs.readFileSync(this.frontConf.sslKey),
-        cert: fs.readFileSync(this.frontConf.sslCert),
+        key: fs.readFileSync(settingsService.get().frontend.sslKey),
+        cert: fs.readFileSync(settingsService.get().frontend.sslCert),
       };
       this.server = express();
     } else {
@@ -113,22 +118,33 @@ export default class Server {
       },
     };
 
-    if (!this.frontConf.host) {
-      (this.serverProcess = this.server.listen(this.frontConf.port)),
-        () => {
-          logger.info(`Started frontend on port ${this.frontConf.port}`);
-        };
-    } else if (this.frontConf.host.startsWith("/")) {
-      this.serverProcess = this.server.listen(this.frontConf.host, () => {
-        logger.info(`Started frontend on socket ${this.frontConf.host}`);
-      });
-    } else {
-      this.serverProcess = this.server.listen(
-        this.frontConf.port,
-        this.frontConf.host,
+    if (!settingsService.get().frontend.host) {
+      (this.serverProcess = this.server.listen(
+        settingsService.get().frontend.port,
+      )),
         () => {
           logger.info(
-            `Started frontend on port ${this.frontConf.host}:${this.frontConf.port}`,
+            `Started frontend on port ${settingsService.get().frontend.port}`,
+          );
+        };
+    } else if (settingsService.get().frontend.host.startsWith("/")) {
+      this.serverProcess = this.server.listen(
+        settingsService.get().frontend.host,
+        () => {
+          logger.info(
+            `Started frontend on socket ${settingsService.get().frontend.host}`,
+          );
+        },
+      );
+    } else {
+      this.serverProcess = this.server.listen(
+        settingsService.get().frontend.port,
+        settingsService.get().frontend.host,
+        () => {
+          logger.info(
+            `Started frontend on port ${settingsService.get().frontend.host}:${
+              settingsService.get().frontend.port
+            }`,
           );
         },
       );

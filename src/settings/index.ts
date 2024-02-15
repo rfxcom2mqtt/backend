@@ -18,6 +18,7 @@ export interface Settings {
     cron: string;
   };
   homeassistant: SettingHass;
+  devices: SettingDevice[];
   mqtt: SettingMqtt;
   rfxcom: SettingRfxcom;
   frontend: SettingFrontend;
@@ -67,13 +68,11 @@ export interface SettingRfxcom {
     lighting4: string[];
   };
   receive: string[];
-  devices: SettingDevice[];
 }
 
 export interface SettingDevice {
   id: string;
   name?: string;
-  friendlyName?: string;
   type?: string;
   subtype?: string;
   units?: Units[];
@@ -82,9 +81,8 @@ export interface SettingDevice {
 }
 
 export interface Units {
-  unitCode: string;
+  unitCode: number;
   name: string;
-  friendlyName: string;
 }
 
 class SettingsService {
@@ -141,6 +139,16 @@ class SettingsService {
     this.write();
   }
 
+  getDeviceConfig(deviceId: string): SettingDevice | undefined {
+    if (this._settingsWithDefaults!!.devices === undefined) {
+      return;
+    }
+
+    return this._settingsWithDefaults!!.devices.find(
+      (dev: SettingDevice) => dev.id === deviceId,
+    );
+  }
+
   apply(newSettings: Record<string, unknown>) {
     //TODO add settings validation
 
@@ -150,6 +158,56 @@ class SettingsService {
       _settings,
       newSettings,
     );
+
+    this.write();
+  }
+
+  applyDeviceOverride(newSettings: SettingDevice) {
+    //TODO add settings validation
+    let found = false;
+    let devices: SettingDevice[] = [];
+    if (this._settingsWithDefaults?.devices != undefined) {
+      devices = this._settingsWithDefaults?.devices;
+      logger.info("config device " + devices.length);
+      for (const index in devices) {
+        const device: SettingDevice = devices[index];
+        logger.info("override device " + newSettings.id);
+        if (device.id === newSettings.id) {
+          found = true;
+          if (newSettings.name !== undefined) {
+            device.name = newSettings.name;
+          }
+          if (newSettings.units !== undefined) {
+            let foundUnit = false;
+            for (const indexU in device.units) {
+              const unit: Units = device.units[indexU];
+              logger.info(
+                "search unit code " +
+                  newSettings.units[0].unitCode +
+                  "==" +
+                  unit.unitCode,
+              );
+              if (unit.unitCode === newSettings.units[0].unitCode) {
+                foundUnit = true;
+                if (newSettings.units[0].name !== undefined) {
+                  unit.name = newSettings.units[0].name;
+                }
+              }
+            }
+            if (!foundUnit) {
+              logger.info("push unit code " + newSettings.units[0].unitCode);
+              device.units?.push(newSettings.units[0]);
+            }
+          }
+        }
+      }
+    }
+
+    if (!found) {
+      devices?.push(newSettings);
+    }
+
+    this._settingsWithDefaults!!.devices = devices;
 
     this.write();
   }
@@ -199,6 +257,12 @@ class SettingsService {
       return null;
     }
   }
+
+  validate(): string[] {
+    const errors: string[] = [];
+    //errors.push("test");
+    return errors;
+  }
 }
 
 export const settingsService = new SettingsService();
@@ -211,13 +275,14 @@ const defaults: RecursivePartial<Settings> = {
   },
   cacheState: {
     enable: true,
-    saveInterval: 5, // interval in minutes
+    saveInterval: 1, // interval in minutes
   },
   homeassistant: {
     discovery: true,
     discovery_topic: "homeassistant",
     discovery_device: "rfxcom2mqtt",
   },
+  devices: [],
   mqtt: {
     base_topic: "rfxcom2mqtt",
     include_device_information: false,
@@ -236,7 +301,6 @@ const defaults: RecursivePartial<Settings> = {
       "remote",
       "security1",
     ],
-    devices: [],
   },
   frontend: {
     enabled: false,
@@ -289,4 +353,12 @@ function applyEnvironmentVariables(settings: Partial<Settings>): void {
       settings.rfxcom[envEntry.props] = process.env[envEntry.env];
     }
   });
+}
+
+export function reRead(): void {
+  settingsService.get();
+}
+
+export function validate(): string[] {
+  return settingsService.validate();
 }

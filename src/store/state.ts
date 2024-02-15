@@ -3,19 +3,19 @@ import { EntityState, DeviceState, KeyValue } from "../models/models";
 import fs from "fs";
 import objectAssignDeep from "object-assign-deep";
 import { logger } from "../utils/logger";
+import { settingsService } from "../settings";
 
-const saveInterval = 1000 * 60 * 1; // 1 minutes
+const saveInterval = 1000 * 60; // 1 minutes
 
 class StateStore {
   private state: { [s: string | number]: KeyValue } = {};
   private file = (process.env.RFXCOM2MQTT_DATA ?? "/app/data/") + "state.json";
   private timer?: NodeJS.Timeout = undefined;
-  private config: Settings;
   private saveInterval: number;
 
-  constructor(config: Settings) {
-    this.config = config;
-    this.saveInterval = 1000 * 60 * this.config.cacheState.saveInterval;
+  constructor() {
+    this.saveInterval =
+      saveInterval * settingsService.get().cacheState.saveInterval;
   }
 
   start(): void {
@@ -46,7 +46,7 @@ class StateStore {
   }
 
   private save(): void {
-    if (this.config.cacheState.enable) {
+    if (settingsService.get().cacheState.enable) {
       logger.debug(`Saving state to file ${this.file}`);
       const json = JSON.stringify(this.state, null, 4);
       try {
@@ -115,12 +115,11 @@ export class DeviceStore {
   private file =
     (process.env.RFXCOM2MQTT_DATA ?? "/app/data/") + "devices.json";
   private timer?: NodeJS.Timeout = undefined;
-  private config: Settings;
   private saveInterval: number;
 
-  constructor(config: Settings) {
-    this.config = config;
-    this.saveInterval = 1000 * 60 * this.config.cacheState.saveInterval;
+  constructor() {
+    this.saveInterval =
+      saveInterval * settingsService.get().cacheState.saveInterval;
   }
 
   start(): void {
@@ -151,7 +150,7 @@ export class DeviceStore {
   }
 
   private save(): void {
-    if (this.config.cacheState.enable) {
+    if (settingsService.get().cacheState.enable) {
       logger.debug(`Saving devices to file ${this.file}`);
       const json = JSON.stringify(this.devices, null, 4);
       try {
@@ -181,7 +180,7 @@ export class DeviceStore {
 
   set(id: string, update: DeviceState, reason?: string): DeviceState {
     logger.debug(`update device state : ` + id);
-    const fromState = this.devices[id] || new DeviceState([], "");
+    const fromState = this.devices[id] || new DeviceState(id, "");
     const toState = objectAssignDeep({}, fromState, update);
     const newCache = { ...toState } as DeviceState;
     this.devices[id] = newCache;

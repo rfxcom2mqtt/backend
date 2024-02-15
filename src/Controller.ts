@@ -1,4 +1,4 @@
-import { Settings, SettingDevice, settingsService } from "./settings";
+import { SettingDevice, settingsService } from "./settings";
 import Discovery from "./discovery";
 import { IMqtt, getMqttInstance } from "./mqtt";
 import { IRfxcom, getRfxcomInstance } from "./rfxcom";
@@ -12,7 +12,6 @@ import State, { DeviceStore } from "./store/state";
 import cron from "node-cron";
 
 export default class Controller implements MqttEventListener {
-  private config?: Settings;
   private rfxBridge?: IRfxcom;
   private mqttClient?: IMqtt;
   private discovery?: Discovery;
@@ -29,25 +28,23 @@ export default class Controller implements MqttEventListener {
   }
 
   reload() {
-    this.config = settingsService.read();
-    this.state = new State(this.config);
-    this.device = new DeviceStore(this.config);
-    logger.info("configuration : " + JSON.stringify(this.config));
-    this.rfxBridge = getRfxcomInstance(this.config.rfxcom);
-    this.mqttClient = getMqttInstance(this.config.mqtt);
+    const config = settingsService.read();
+    logger.info("configuration : " + JSON.stringify(config));
+    this.state = new State();
+    this.device = new DeviceStore();
+    this.rfxBridge = getRfxcomInstance();
+    this.mqttClient = getMqttInstance();
     this.discovery = new Discovery(
       this.mqttClient,
       this.rfxBridge,
-      this.config,
       this.state,
       this.device,
     );
     this.mqttClient.addListener(this.discovery);
     this.mqttClient.addListener(this);
 
-    if (this.config.frontend.enabled) {
+    if (config.frontend.enabled) {
       this.server = new Server(
-        this.config,
         this.device,
         this.state,
         this.bridgeInfo,
@@ -116,14 +113,13 @@ export default class Controller implements MqttEventListener {
 
     await this.startMqtt();
 
-    this.rfxBridge?.subscribeProtocolsEvent(
-      (type: any, evt: any, deviceConf: any) =>
-        this.sendToMQTT(type, evt, deviceConf),
+    this.rfxBridge?.subscribeProtocolsEvent((type: any, evt: any) =>
+      this.sendToMQTT(type, evt, settingsService.getDeviceConfig(evt.id)),
     );
 
     const mqttClient = this.mqttClient;
     const hass = this.discovery;
-    const config = this.config;
+    const config = settingsService.get();
     const bridgeInfo = this.bridgeInfo;
     const version = utils.getRfxcom2MQTTVersion();
     // RFXCOM Status
@@ -160,8 +156,8 @@ export default class Controller implements MqttEventListener {
   }
 
   scheduleHealthcheck() {
-    if (this.config?.healthcheck.enabled) {
-      cron.schedule(this.config.healthcheck.cron, () => {
+    if (settingsService.get().healthcheck.enabled) {
+      cron.schedule(settingsService.get().healthcheck.cron, () => {
         logger.debug("Healthcheck");
         const mqttClient = this.mqttClient;
 
@@ -177,14 +173,15 @@ export default class Controller implements MqttEventListener {
   }
 
   subscribeTopic(): string[] {
-    return [this.config?.mqtt.base_topic + "/command/#"];
+    return [settingsService.get().mqtt.base_topic + "/command/#"];
   }
   // RFXCOM Transmit
   onMQTTMessage(data: MQTTMessage) {
     const dn = data.topic.split("/");
-    if (dn[0] != this.config?.mqtt.base_topic) {
+    if (dn[0] != settingsService.get().mqtt.base_topic) {
       logger.warn(
-        "Topic Error, should start with " + this.config?.mqtt.base_topic,
+        "Topic Error, should start with " +
+          settingsService.get().mqtt.base_topic,
       );
       return;
     }
@@ -196,13 +193,22 @@ export default class Controller implements MqttEventListener {
       if (dn[4] !== undefined && dn[4].length > 0) {
         entityName += "/" + dn[4];
       }
-      this.rfxBridge?.onCommand(deviceType, entityName, data.message);
+
+      const deviceConf = settingsService
+        .get()
+        .devices.find((dev: SettingDevice) => dev.name === entityName);
+      this.rfxBridge?.onCommand(
+        deviceType,
+        entityName,
+        data.message,
+        deviceConf,
+      );
       return;
     }
 
     logger.warn(
       "Topic Error, should start with " +
-        this.config.mqtt.base_topic +
+        settingsService.get().mqtt.base_topic +
         "/command",
     );
     return;
@@ -233,7 +239,7 @@ export default class Controller implements MqttEventListener {
       topicEntity += "/" + payload.unitCode;
       if (deviceConf?.units) {
         deviceConf?.units.forEach((unit) => {
-          if (parseInt(unit.unitCode) === parseInt(payload.unitCode)) {
+          if (unit.unitCode === parseInt(payload.unitCode)) {
             if (unit.name!) {
               topicEntity = unit.name;
             }
@@ -248,7 +254,7 @@ export default class Controller implements MqttEventListener {
       (error: any) => {},
     );
 
-    if (this.config?.homeassistant?.discovery) {
+    if (settingsService.get().homeassistant?.discovery) {
       this.discovery?.publishDiscoveryToMQTT({
         device: true,
         payload: payload,
@@ -256,3 +262,5 @@ export default class Controller implements MqttEventListener {
     }
   }
 }
+
+module.exports = Controller;

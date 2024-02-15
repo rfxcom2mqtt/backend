@@ -8,14 +8,19 @@ homeassistant:
   discovery: true
   discovery_topic: homeassistant
   discovery_device: rfxcom2mqtt
+devices:
+  - id: 0x011Bmocked_device2
+    units:
+      - unitCode: 1
+        name: AC_notuse_1
 mqtt:
+  base_topic: rfxcom2mqtt
   include_device_information: false
   qos: 0
   retain: true
   server: mock
-  base_topic: rfxcom2mqtt
-  username: 
-  password: 
+  username: null
+  password: null
 rfxcom:
   debug: false
   receive:
@@ -27,14 +32,6 @@ rfxcom:
     - lighting4
     - remote
     - security1
-  devices:
-    - id: mocked_device2
-      name: AC_notUse_device
-      friendlyName: not_use
-      units:
-        - unitCode: 1
-          name: AC_notuse_1
-          friendlyName: not_use 1
   usbport: mock
   transmit:
     repeat: 4
