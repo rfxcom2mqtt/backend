@@ -76,14 +76,17 @@ export default class Controller implements MqttEventListener {
   }
 
   async runBridgeAction(action: string) {
+    logger.info(action);
     if (action === "restart") {
-      logger.info("restart");
       await this.stop(true);
       this.reload();
       await this.start();
     } else if (action === "stop") {
-      logger.info("stop");
       await this.stop(false);
+    } else if (action === "reset_devices") {
+      this.device?.reset();
+    } else if (action === "reset_state") {
+      this.state?.reset();
     }
   }
 

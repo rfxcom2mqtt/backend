@@ -23,6 +23,10 @@ function readIfExists(file: string, default_?: KeyValue): KeyValue | undefined {
 
 function writeIfChanged(file: string, content: KeyValue): boolean {
   const before = readIfExists(file);
+  delete content["args"];
+  delete content["envId"];
+  delete content["ENVID"];
+  delete content["timestamp"];
   if (!equals(before, content)) {
     logger.info("save config file");
     fs.writeFileSync(file, yaml.dump(content));

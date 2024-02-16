@@ -16,9 +16,7 @@ export default class BridgeApi {
 
     this.router.post("/action", (req: Request, res: Response) => {
       const action = req.body?.action;
-      if (action === "restart") {
-        actionCallback(new Action("bridge", action));
-      }
+      actionCallback(new Action("bridge", action));
       res.status(StatusCodes.OK).json({});
     });
   }

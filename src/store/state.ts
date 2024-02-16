@@ -59,6 +59,15 @@ class StateStore {
     }
   }
 
+  reset(): void {
+    try {
+      this.state = {};
+      fs.writeFileSync(this.file, "{}", "utf8");
+    } catch (e: any) {
+      logger.error(`Failed to write devices to '${this.file}' (${e.message})`);
+    }
+  }
+
   exists(entity: EntityState): boolean {
     return this.state.hasOwnProperty(entity.id);
   }
@@ -146,6 +155,15 @@ export class DeviceStore {
       }
     } else {
       logger.debug(`Can't load devices from file ${this.file} (doesn't exist)`);
+    }
+  }
+
+  reset(): void {
+    try {
+      this.devices = {};
+      fs.writeFileSync(this.file, "{}", "utf8");
+    } catch (e: any) {
+      logger.error(`Failed to write devices to '${this.file}' (${e.message})`);
     }
   }
 
