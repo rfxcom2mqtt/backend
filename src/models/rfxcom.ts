@@ -14,6 +14,7 @@ export interface RfxcomEvent {
   subTypeValue?: string; // computed value
   seqnbr: number;
   type: string;
+  group: boolean;
 }
 
 interface Lighting1Event extends RfxcomEvent {

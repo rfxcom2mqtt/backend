@@ -5,7 +5,8 @@ import { StatusCodes } from "http-status-codes";
 import * as core from "express-serve-static-core";
 import fs from "fs";
 import { logger } from "../utils/logger";
-import { SettingFrontend, settingsService } from "../settings";
+import { settingsService } from "../settings";
+import Discovery from "../discovery";
 import StateStore, { DeviceStore } from "../store/state";
 import { BridgeInfo } from "../models/models";
 import Api from "./api/index";
@@ -21,10 +22,11 @@ export default class Server {
   constructor(
     devices: DeviceStore,
     state: StateStore,
+    discovery: Discovery,
     bridgeInfo: BridgeInfo,
     actionCallback: any,
   ) {
-    this.api = new Api(devices, state, bridgeInfo, actionCallback);
+    this.api = new Api(devices, state, discovery, bridgeInfo, actionCallback);
     this.frontend = new Frontend();
   }
 

@@ -242,6 +242,7 @@ export default class Rfxcom implements IRfxcom {
           if (evt.type === "lighting4") {
             deviceId = evt.data;
           }
+          evt.group = this.isGroup(evt);
           evt.subTypeValue = this.getSubType(evt.type, evt.subtype);
           callback(protocol, evt as RfxcomEvent);
         });

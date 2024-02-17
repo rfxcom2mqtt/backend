@@ -1,6 +1,7 @@
 import { StatusCodes } from "http-status-codes";
 import { Router, Request, Response } from "express";
 import { logger } from "../../utils/logger";
+import Discovery from "../../discovery";
 import StateStore, { DeviceStore } from "../../store/state";
 import { Action, DeviceStateStore } from "../../models/models";
 import { lookup } from "../../discovery/Homeassistant";
@@ -12,6 +13,7 @@ export default class DeviceApi {
   constructor(
     devicesStore: DeviceStore,
     state: StateStore,
+    discovery: Discovery,
     actionCallback: any,
   ) {
     this.router = Router();
@@ -50,7 +52,13 @@ export default class DeviceApi {
         id: id,
         name: newName,
       });
-      //TODO change discovery value
+      const device = new DeviceStateStore(devicesStore.get(id));
+      device.overrideDeviceInfo();
+      devicesStore.set(id, device.state);
+      discovery.publishDiscoveryDeviceToMqtt(
+        device,
+        settingsService.get().homeassistant.discovery_device,
+      );
       res.status(StatusCodes.OK).json({});
     });
 
@@ -83,7 +91,14 @@ export default class DeviceApi {
           id: id,
           units: [{ unitCode: unitCode, name: newName }],
         });
-        //TODO change discovery value
+
+        const device = new DeviceStateStore(devicesStore.get(id));
+        device.overrideDeviceInfo();
+        devicesStore.set(id, device.state);
+        discovery.publishDiscoveryDeviceToMqtt(
+          device,
+          settingsService.get().homeassistant.discovery_device,
+        );
 
         res.status(StatusCodes.OK).json({});
       },

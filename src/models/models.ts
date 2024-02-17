@@ -20,12 +20,12 @@ export class DeviceEntity {
   public identifiers: string[] = [];
   public id: string = "";
   public name: string = "";
-  public originalName: string = "";
+  public originalName?: string;
 
-  constructor(id: string = "", name: string = "") {
+  constructor(id: string = "", name?: string) {
     this.identifiers = ["rfxcom2mqtt_" + id, "rfxcom2mqtt_" + name];
     this.id = id;
-    this.name = name;
+    this.name = name ? name : "";
     this.originalName = name;
   }
 }
@@ -51,6 +51,7 @@ export class DeviceSwitch {
     public description: string = "On/off state of the switch",
     public property: string = "command",
     public type: string = "binary",
+    public group: boolean = false,
   ) {}
 }
 
@@ -75,20 +76,42 @@ export class DeviceStateStore {
   }
 
   getInfo(): DeviceEntity {
-    if (
-      this.state.name !== this.state.originalName &&
-      !this.state.identifiers.includes("rfxcom2mqtt_" + this.state.name)
-    ) {
-      this.state.identifiers.push("rfxcom2mqtt_" + this.state.name);
+    const info = new DeviceEntity();
+    info.name = this.state.name;
+    info.id = this.state.id;
+    if (this.state.name !== this.state.originalName) {
+      info.identifiers = [
+        "rfxcom2mqtt_" + info.id,
+        "rfxcom2mqtt_" + this.state.originalName,
+        "rfxcom2mqtt_" + info.name,
+      ];
+    } else {
+      info.identifiers = [
+        "rfxcom2mqtt_" + info.id,
+        "rfxcom2mqtt_" + this.state.originalName,
+      ];
     }
-    return this.state as DeviceEntity;
+    return info;
   }
 
   getId() {
     return this.state.id;
   }
 
+  getEntityId(payload: any): any {
+    let entityId = payload.subTypeValue + "_" + payload.id.replace("0x", "");
+    if (payload.unitCode !== undefined && !payload.group) {
+      entityId += "_" + payload.unitCode;
+    }
+
+    return entityId;
+  }
+
   getCommandTopic(baseTopic: string, entityId: string) {
+    let topicSufix = "";
+    if (this.state.switchs[entityId].unit !== undefined) {
+      topicSufix = "/" + this.state.switchs[entityId].unit;
+    }
     return (
       baseTopic +
       this.state.type +
@@ -96,22 +119,19 @@ export class DeviceStateStore {
       this.state.subtype +
       "/" +
       this.state.id +
-      "/" +
-      this.state.switchs[entityId].unit
+      topicSufix
     );
   }
 
-  getStateTopic(baseTopic: string, entityId: string) {
-    return (
-      baseTopic +
-      this.state.type +
-      "/" +
-      this.state.subtype +
-      "/" +
-      this.state.id +
-      "/" +
-      this.state.switchs[entityId].unit
-    );
+  getStateTopic(baseTopic: string, switchId?: string) {
+    let topicSufix = "";
+    if (
+      switchId !== undefined &&
+      this.state.switchs[switchId].unit !== undefined
+    ) {
+      topicSufix = "/" + this.state.switchs[switchId].unit;
+    }
+    return baseTopic + "/" + this.state.id + topicSufix;
   }
 
   addEntity(entityId: string) {
@@ -143,6 +163,10 @@ export class DeviceStateStore {
     if (this.state.switchs[dswitch.id] === undefined) {
       this.state.switchs[dswitch.id] = dswitch;
     }
+  }
+
+  getSwitchs(): { [s: string]: DeviceSwitch } {
+    return this.state.switchs;
   }
 
   overrideDeviceInfo() {

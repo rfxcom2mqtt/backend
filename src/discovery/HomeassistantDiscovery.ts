@@ -1,7 +1,7 @@
 "use strict";
 
 import IRfxcom from "../rfxcom/interface";
-import { Settings, SettingDevice, settingsService } from "../settings";
+import { SettingDevice, settingsService } from "../settings";
 import { IMqtt } from "../mqtt";
 import {
   DeviceSwitch,
@@ -130,64 +130,105 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
   publishDiscoveryToMQTT(payload: any) {
     logger.info("publish to discovery : " + payload.id);
     const bridgeName = settingsService.get().homeassistant.discovery_device;
-    const id = payload.id;
-    const deviceId = payload.subTypeValue + "_" + id.replace("0x", "");
+    const deviceId = payload.subTypeValue + "_" + payload.id.replace("0x", "");
     const deviceName = deviceId;
-    let entityId = deviceId;
-    let entityName = payload.id;
-    let entityTopic = payload.id;
 
     let deviceJson: DeviceStateStore;
-    if (!this.deviceStore.exists(id)) {
-      const deviceState = new DeviceState(id, deviceName);
+    if (!this.deviceStore.exists(payload.id)) {
+      const deviceState = new DeviceState(payload.id, deviceName);
       deviceState.subtype = payload.subtype;
       deviceState.subTypeValue = payload.subTypeValue;
       deviceState.type = payload.type;
       deviceJson = new DeviceStateStore(deviceState);
     } else {
-      const deviceState = this.deviceStore.get(id);
+      const deviceState = this.deviceStore.get(payload.id);
       deviceState.name = deviceName;
       deviceJson = new DeviceStateStore(deviceState);
     }
     deviceJson.overrideDeviceInfo();
 
-    if (payload.unitCode !== undefined && !this.rfxtrx.isGroup(payload)) {
-      entityId += "_" + payload.unitCode;
-      entityTopic += "/" + payload.unitCode;
-      entityName += " " + payload.unitCode;
-    }
-
+    const entityId = deviceJson.getEntityId(payload);
     this.state.set(entityId, payload, "event");
-
     deviceJson.addEntity(entityId);
 
-    this.publishDiscoverySensorToMQTT(
-      payload,
-      deviceJson,
-      deviceJson.state.name,
-      entityTopic,
-      bridgeName,
-    );
-    this.publishDiscoverySwitchToMQTT(
-      payload,
-      deviceJson,
-      entityTopic,
-      bridgeName,
-      entityId,
-      entityName,
-    );
+    this.loadDiscoverySensoInfo(payload, deviceJson);
+    this.loadDiscoverySwitchInfo(payload, deviceJson);
 
-    this.deviceStore.set(id, deviceJson.state);
+    this.deviceStore.set(payload.id, deviceJson.state);
+    this.publishDiscoveryDeviceToMqtt(deviceJson, bridgeName);
   }
 
-  publishDiscoverySwitchToMQTT(
-    payload: any,
+  publishDiscoveryDeviceToMqtt(
     deviceJson: DeviceStateStore,
-    entityTopic: string,
     bridgeName: string,
-    entityId: string,
-    entityName: string,
   ) {
+    deviceJson.overrideDeviceInfo();
+
+    const commonConf = {
+      availability: [{ topic: this.topicWill }],
+      device: deviceJson.getInfo(),
+      origin: this.discoveryOrigin,
+      json_attributes_topic: deviceJson.getStateTopic(this.topicDevice),
+      state_topic: deviceJson.getStateTopic(this.topicDevice),
+    };
+
+    const sensors = deviceJson.getSensors();
+    for (const index in sensors) {
+      const sensor = sensors[index];
+      const json = {
+        name: deviceJson.state.name + " " + sensor.name,
+        object_id: sensor.id,
+        unique_id: sensor.id + "_" + bridgeName,
+        value_template: "{{ value_json." + sensor.property + " }}",
+        ...commonConf,
+        ...lookup[sensor.type],
+      };
+      this.publishDiscovery(
+        "sensor/" + deviceJson.getId() + "/" + sensor.type + "/config",
+        JSON.stringify(json),
+      );
+    }
+
+    const switchs = deviceJson.getSwitchs();
+    for (const index in switchs) {
+      const switchInfo = switchs[index];
+      let entityTopic = deviceJson.getId();
+      if (switchInfo.unit !== undefined && !switchInfo.group) {
+        entityTopic += "/" + switchInfo.unit;
+      }
+      const json = {
+        availability: [{ topic: this.topicWill }],
+        device: deviceJson.getInfo(),
+        enabled_by_default: true,
+        payload_off: switchInfo.value_off,
+        payload_on: switchInfo.value_off,
+        json_attributes_topic: deviceJson.getStateTopic(
+          this.topicDevice,
+          switchInfo.id,
+        ),
+        command_topic: deviceJson.getCommandTopic(
+          this.mqtt.topics.base + "/cmd/",
+          switchInfo.id,
+        ),
+        name: switchInfo.name,
+        object_id: switchInfo.id,
+        origin: this.discoveryOrigin,
+        state_off: switchInfo.value_off,
+        state_on: switchInfo.value_on,
+        state_topic: deviceJson.getStateTopic(this.topicDevice, switchInfo.id),
+        unique_id: switchInfo.id + "_" + bridgeName,
+        value_template: "{{ value_json." + switchInfo.property + " }}",
+      };
+      this.publishDiscovery(
+        "switch/" + entityTopic + "/config",
+        JSON.stringify(json),
+      );
+    }
+  }
+
+  loadDiscoverySwitchInfo(payload: any, deviceJson: DeviceStateStore) {
+    let entityId = deviceJson.getEntityId(payload);
+    let entityName = payload.id;
     if (
       payload.type === "lighting1" ||
       payload.type === "lighting2" ||
@@ -199,11 +240,12 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
       let state_on = "On";
 
       let originalName = deviceJson.state.originalName;
-      if (payload.unitCode !== undefined && !this.rfxtrx.isGroup(payload)) {
+      if (payload.unitCode !== undefined && !payload.group) {
         originalName += " " + payload.unitCode;
+        entityName += " " + payload.unitCode;
       }
 
-      if (this.rfxtrx.isGroup(payload)) {
+      if (payload.group) {
         state_off = "Group off";
         state_on = "Group On";
         entityId += "_group";
@@ -217,32 +259,8 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
         state_on,
         state_off,
       );
+      switchInfo.group = payload.group;
       deviceJson.addSwitch(switchInfo);
-
-      const json = {
-        availability: [{ topic: this.topicWill }],
-        device: deviceJson.getInfo(),
-        enabled_by_default: true,
-        payload_off: switchInfo.value_off,
-        payload_on: switchInfo.value_off,
-        json_attributes_topic: this.topicDevice + "/" + entityTopic,
-        command_topic: deviceJson.getCommandTopic(
-          this.mqtt.topics.base + "/cmd/",
-          entityId,
-        ),
-        name: entityName,
-        object_id: entityId,
-        origin: this.discoveryOrigin,
-        state_off: switchInfo.value_off,
-        state_on: switchInfo.value_on,
-        state_topic: this.topicDevice + "/" + entityTopic,
-        unique_id: entityId + "_" + bridgeName,
-        value_template: "{{ value_json." + switchInfo.property + " }}",
-      };
-      this.publishDiscovery(
-        "switch/" + entityTopic + "/config",
-        JSON.stringify(json),
-      );
     }
 
     //"activlink", "asyncconfig", "asyncdata", "blinds1", "blinds2", "camera1", "chime1", "curtain1", "edisio",
@@ -250,25 +268,7 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
     // "radiator1", "remote", "rfy", "security1", "thermostat1", "thermostat2", "thermostat3", "thermostat4", "thermostat5"
   }
 
-  publishDiscoverySensorToMQTT(
-    payload: any,
-    deviceJson: DeviceStateStore,
-    deviceName: any,
-    entityTopic: any,
-    bridgeName: any,
-  ) {
-    if (payload.unitCode !== undefined && !this.rfxtrx.isGroup(payload)) {
-      entityTopic += "/" + payload.unitCode;
-    }
-
-    const commonConf = {
-      availability: [{ topic: this.topicWill }],
-      device: deviceJson.getInfo(),
-      json_attributes_topic: this.topicDevice + "/" + entityTopic,
-      origin: this.discoveryOrigin,
-      state_topic: this.topicDevice + "/" + entityTopic,
-    };
-
+  loadDiscoverySensoInfo(payload: any, deviceJson: DeviceStateStore) {
     if (payload.rssi !== undefined) {
       deviceJson.addSensor(
         new DeviceSensor(
@@ -419,23 +419,6 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
           "uv",
           "number",
         ),
-      );
-    }
-
-    const sensors = deviceJson.getSensors();
-    for (const index in sensors) {
-      const sensor = sensors[index];
-      const json = {
-        name: deviceName + " " + sensor.name,
-        object_id: sensor.id,
-        unique_id: sensor.id + "_" + bridgeName,
-        value_template: "{{ value_json." + sensor.property + " }}",
-        ...commonConf,
-        ...lookup[sensor.type],
-      };
-      this.publishDiscovery(
-        "sensor/" + deviceJson.getId() + "/" + sensor.type + "/config",
-        JSON.stringify(json),
       );
     }
   }

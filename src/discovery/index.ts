@@ -1,9 +1,9 @@
 "use strict";
 
 import IRfxcom from "../rfxcom/interface";
-import { Settings, settingsService } from "../settings";
 import { IMqtt } from "../mqtt";
 import { MQTTMessage, MqttEventListener } from "../models/mqtt";
+import { DeviceStateStore } from "../models/models";
 import StateStore, { DeviceStore } from "../store/state";
 import HomeassistantDiscovery from "./HomeassistantDiscovery";
 import BridgeDiscovery from "./BridgeDiscovery";
@@ -57,5 +57,12 @@ export default class Discovery implements MqttEventListener {
     } else {
       this.bridge.publishDiscoveryToMQTT(message.payload);
     }
+  }
+
+  publishDiscoveryDeviceToMqtt(
+    deviceJson: DeviceStateStore,
+    bridgeName: string,
+  ) {
+    this.homeassistant.publishDiscoveryDeviceToMqtt(deviceJson, bridgeName);
   }
 }

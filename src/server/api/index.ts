@@ -2,6 +2,7 @@ import { Router, Request, Response, NextFunction } from "express";
 import { logger } from "../../utils/logger";
 import StateStore, { DeviceStore } from "../../store/state";
 import { BridgeInfo } from "../../models/models";
+import Discovery from "../../discovery";
 import DeviceApi from "./DeviceApi";
 import BridgeApi from "./BridgeApi";
 import SettingApi from "./SettingApi";
@@ -12,6 +13,7 @@ export default class Api {
   constructor(
     devices: DeviceStore,
     state: StateStore,
+    discovery: Discovery,
     bridgeInfo: BridgeInfo,
     actionCallback: any,
   ) {
@@ -23,7 +25,7 @@ export default class Api {
     const settingApi = new SettingApi();
     this.router.use("/settings", settingApi.router);
 
-    const deviceApi = new DeviceApi(devices, state, actionCallback);
+    const deviceApi = new DeviceApi(devices, state, discovery, actionCallback);
     this.router.use("/devices", deviceApi.router);
 
     const bridgeApi = new BridgeApi(bridgeInfo, actionCallback);
