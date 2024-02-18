@@ -95,6 +95,11 @@ export default class Server {
     this.server.use(cookieParser());
 
     this.server.use(this.frontend.router);
+    this.server.set("views", this.frontend.getPath());
+    // Serve front-end content
+    this.server.get("^/api", (req, res) => {
+      res.sendFile("index.html", { root: this.frontend.getPath() });
+    });
     this.server.use(
       "/api",
       (req: Request, res: Response, next: NextFunction) => {

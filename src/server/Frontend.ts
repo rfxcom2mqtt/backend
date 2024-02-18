@@ -9,6 +9,11 @@ import frontend from "@rfxcom2mqtt/frontend";
 
 export default class Frontend {
   public router: Router;
+  public pathStatic: string;
+
+  getPath() {
+    return this.pathStatic;
+  }
 
   constructor() {
     this.router = Router();
@@ -25,6 +30,7 @@ export default class Frontend {
       );
       this.listPublicFiles(publicFiles);
       staticFrontend = serverStatic(publicFiles);
+      this.pathStatic = publicFiles;
     } else {
       frontend.setConfig(this.getFrontEndConfig());
       staticFrontend = expressStaticGzip(frontend.getPath(), {
@@ -38,8 +44,13 @@ export default class Frontend {
         ],
         orderPreference: ["br", "gz"],
       });
+      this.pathStatic = frontend.getPath();
     }
     this.router.use(staticFrontend);
+
+    //this.router.use("/devices",staticFrontend);
+    //this.router.use("/devices/*/",staticFrontend);
+    //this.router.use("/settings",staticFrontend);
   }
 
   getFrontEndConfig() {
