@@ -18,11 +18,11 @@ export class DeviceEntity {
   public manufacturer: string = "Rfxcom";
   public via_device: string = "rfxcom2mqtt_bridge";
   public identifiers: string[] = [];
-  public id: string = "";
+  public id?: string;
   public name: string = "";
   public originalName?: string;
 
-  constructor(id: string = "", name?: string) {
+  constructor(id?: string, name?: string) {
     this.identifiers = ["rfxcom2mqtt_" + id, "rfxcom2mqtt_" + name];
     this.id = id;
     this.name = name ? name : "";
@@ -75,22 +75,23 @@ export class DeviceStateStore {
     this.state = state;
   }
 
-  getInfo(): DeviceEntity {
-    const info = new DeviceEntity();
+  getInfo(): any {
+    let info = new DeviceEntity();
     info.name = this.state.name;
-    info.id = this.state.id;
+    //info.id = this.state.id;
     if (this.state.name !== this.state.originalName) {
       info.identifiers = [
-        "rfxcom2mqtt_" + info.id,
+        "rfxcom2mqtt_" + this.state.id,
         "rfxcom2mqtt_" + this.state.originalName,
         "rfxcom2mqtt_" + info.name,
       ];
     } else {
       info.identifiers = [
-        "rfxcom2mqtt_" + info.id,
+        "rfxcom2mqtt_" + this.state.id,
         "rfxcom2mqtt_" + this.state.originalName,
       ];
     }
+    delete info["id"];
     return info;
   }
 
