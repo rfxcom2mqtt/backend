@@ -11,23 +11,30 @@ import StateStore, { DeviceStore } from "../store/state";
 import { BridgeInfo } from "../models/models";
 import Api from "./api/index";
 import Frontend from "./Frontend";
+import WebSocketService from "./WebSocketService";
 
 export default class Server {
   private server?: core.Express;
   private serverProcess?: any;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private api: Api;
+  private api?: Api;
   private frontend: Frontend;
+  private websocketSrv: WebSocketService;
 
-  constructor(
+  constructor() {
+    this.frontend = new Frontend();
+    this.websocketSrv = new WebSocketService();
+  }
+
+  enableApi(
     devices: DeviceStore,
     state: StateStore,
     discovery: Discovery,
     bridgeInfo: BridgeInfo,
     actionCallback: any,
   ) {
+    logger.info("Server enable Api");
     this.api = new Api(devices, state, discovery, bridgeInfo, actionCallback);
-    this.frontend = new Frontend();
   }
 
   private authenticate(req: Request, res: Response, next: NextFunction): void {
@@ -106,7 +113,10 @@ export default class Server {
         this.authenticate(req, res, next);
       },
     );
-    this.server.use("/api", this.api.router);
+
+    if (this.api !== undefined) {
+      this.server?.use("/api", this.api.router);
+    }
 
     /*this.server.use(function (req: Request, res: Response, next: NextFunction) {
       logger.info(
@@ -157,6 +167,8 @@ export default class Server {
       );
     }
 
+    this.websocketSrv.init(this.serverProcess);
+
     this.server.use(
       (err: Error, req: Request, res: Response, next: NextFunction) => {
         logger.error(err.message + " " + err);
@@ -165,6 +177,8 @@ export default class Server {
         });
       },
     );
+
+    logger.info("Server Started");
   }
 
   async stop(): Promise<void> {

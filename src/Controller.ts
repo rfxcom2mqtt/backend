@@ -30,21 +30,22 @@ export default class Controller implements MqttEventListener {
   reload() {
     const config = settingsService.read();
     logger.info("configuration : " + JSON.stringify(config));
+    if (config.frontend.enabled) {
+      this.server = new Server();
+    }
     this.state = new State();
     this.device = new DeviceStore();
-    this.rfxBridge = getRfxcomInstance();
     this.mqttClient = getMqttInstance();
+    this.rfxBridge = getRfxcomInstance();
     this.discovery = new Discovery(
       this.mqttClient,
       this.rfxBridge,
       this.state,
       this.device,
     );
-    this.mqttClient.addListener(this.discovery);
-    this.mqttClient.addListener(this);
-
     if (config.frontend.enabled) {
-      this.server = new Server(
+      logger.info("Server enable Api");
+      this.server!!.enableApi(
         this.device,
         this.state,
         this.discovery,
@@ -52,6 +53,8 @@ export default class Controller implements MqttEventListener {
         (action: Action) => this.runAction(action),
       );
     }
+    this.mqttClient.addListener(this.discovery);
+    this.mqttClient.addListener(this);
   }
 
   async runAction(action: Action) {
@@ -104,9 +107,9 @@ export default class Controller implements MqttEventListener {
 
   async start(): Promise<void> {
     logger.info("Controller Starting");
+    this.server?.start();
     this.device?.start();
     this.discovery?.start();
-    this.server?.start();
     try {
       await this.rfxBridge?.initialise();
     } catch (error: any) {
