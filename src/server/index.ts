@@ -11,6 +11,8 @@ import StateStore, { DeviceStore } from "../store/state";
 import { BridgeInfo } from "../models/models";
 import Api from "./api/index";
 import Frontend from "./Frontend";
+import WebSocketService from "./WebSocketService";
+
 
 export default class Server {
   private server?: core.Express;
@@ -18,6 +20,7 @@ export default class Server {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private api: Api;
   private frontend: Frontend;
+  private websocketSrv: WebSocketService;
 
   constructor(
     devices: DeviceStore,
@@ -28,6 +31,7 @@ export default class Server {
   ) {
     this.api = new Api(devices, state, discovery, bridgeInfo, actionCallback);
     this.frontend = new Frontend();
+    this.websocketSrv = new WebSocketService();
   }
 
   private authenticate(req: Request, res: Response, next: NextFunction): void {
@@ -156,6 +160,8 @@ export default class Server {
         },
       );
     }
+
+    this.websocketSrv.init(this.serverProcess);
 
     this.server.use(
       (err: Error, req: Request, res: Response, next: NextFunction) => {
