@@ -10,7 +10,7 @@
         "node": "^18 || ^20 || ^21"
     },
     "dependencies": {
-        "@rfxcom2mqtt/frontend": "0.1.7-6",
+        "@rfxcom2mqtt/frontend": "0.1.7-11",
         "@types/express": "^4.17.21",
         "connect-gzip-static": "^3.0.1",
         "cookie-parser": "^1.4.5",

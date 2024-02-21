@@ -1,6 +1,6 @@
 import winston, { createLogger, transports, format } from "winston";
 import Transport = require("winston-transport");
-import { Server } from "socket.io";
+import { Server, Namespace } from "socket.io";
 import { v4 as uuidv4 } from "uuid";
 
 type LogLevel = "warn" | "debug" | "info" | "error";
@@ -12,8 +12,8 @@ const winstonToLevel = (level: WinstonLogLevel): LogLevel =>
   level === "warning" ? "warn" : level;
 
 export class SocketioTransport extends Transport {
-  private io: Server;
-  constructor(io: Server, options?: Transport.TransportStreamOptions) {
+  private io: Namespace;
+  constructor(io: Namespace, options?: Transport.TransportStreamOptions) {
     super(options);
     this.io = io;
   }

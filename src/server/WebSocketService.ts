@@ -1,18 +1,20 @@
 import { logger, loggerFactory, SocketioTransport } from "../utils/logger";
-import { Server, Socket } from "socket.io";
+import { Server, Socket, Namespace } from "socket.io";
 import { v4 as uuidv4 } from "uuid";
+import { ProxyConfig } from '../utils/utils';
 
 export default class WebSocketService {
   private messages = new Set();
   private messageExpirationTimeMS = 5 * 60 * 1000;
-  private sockets?: Server;
+  private sockets?: Namespace;
 
   constructor() {}
 
   init(server: any) {
     logger.info("start init websocket");
     //initialize the WebSocket server instance
-    this.sockets = new Server(server);
+    this.sockets = new Server(server,{path: "/socket.io"}).of(ProxyConfig.getSocketNamespace(),
+    )!!;
     const wss = this;
 
     loggerFactory.addTransport(new SocketioTransport(this.sockets));

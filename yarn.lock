@@ -2034,10 +2034,10 @@
     uncontrollable "^8.0.1"
     warning "^4.0.3"
 
-"@rfxcom2mqtt/frontend@0.1.7-6":
-  version "0.1.7-6"
-  resolved "https://registry.npmjs.org/@rfxcom2mqtt/frontend/-/frontend-0.1.7-6.tgz"
-  integrity sha512-dSkB/Cozq2BqubihIuD5xhAfY4fTgEMIYui+0rF7ufv4IFrQNqZ398nmjCRvNC6RwoZYUdAGY9oe+ZxXCEAGEQ==
+"@rfxcom2mqtt/frontend@0.1.7-11":
+  version "0.1.7-11"
+  resolved "https://registry.npmjs.org/@rfxcom2mqtt/frontend/-/frontend-0.1.7-11.tgz"
+  integrity sha512-U9mFH8vNBFphBsLMi0c/0KUhiEDS5EmhtSQLOJLTY8hp8TjJ3UW9+KDtvOs0yqwgWzpZp3k08Uigczn04MyAEA==
   dependencies:
     "@emotion/react" "^11.11.3"
     "@emotion/styled" "^11.11.0"

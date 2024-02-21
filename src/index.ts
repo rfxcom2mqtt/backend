@@ -7,10 +7,13 @@ let controller: Controller;
 let stopping = false;
 
 function getdotenvFile() {
-  console.log(process.argv[2]);
-  if (process.argv[2] !== undefined) {
+  if (
+    process.argv[2] !== undefined &&
+    process.argv[2].includes("--env-file=")
+  ) {
+    console.log("args : " + process.argv[2]);
     const envFile = process.argv[2].replace("--env-file=", "");
-    console.log(envFile);
+    console.log("envFile : " + envFile);
     return envFile;
   }
   return ".env";
