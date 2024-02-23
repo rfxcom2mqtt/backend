@@ -9,7 +9,6 @@ import { v4 as uuidv4 } from "uuid";
 
 const logger = loggerFactory.getLogger("WEBSOCKET");
 
-
 export default class WebSocketService implements LogEventListener {
   private messages = new Set();
   private messageExpirationTimeMS = 5 * 60 * 1000;
@@ -61,10 +60,8 @@ export default class WebSocketService implements LogEventListener {
       this.sockets?.emit("logged", value);
     });
 
-    
     // Send the log message via Socket.IO
     this.sendLog(logEvent);
-    
   }
 
   disconnect() {

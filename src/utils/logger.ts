@@ -103,12 +103,12 @@ class LoggerFactory {
     let logger;
 
     this.loggers.forEach((item) => {
-      if(item.name === name){
+      if (item.name === name) {
         logger = item;
       }
     });
 
-    if(!logger){
+    if (!logger) {
       logger = new Logger(name);
       this.loggers.push(logger);
     }
