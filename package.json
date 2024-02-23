@@ -37,7 +37,7 @@
         "build": "npx tsc && node index.js writehash",
         "build-start": "node index.js --env-file=.env.dev",
         "start": "ts-node ./src/index.ts",
-        "dev": "npx cross-env NODE_OPTIONS='--no-warnings' ts-node ./src/index.ts --env-file=.env.dev",
+        "dev": "ts-node ./src/index.ts --env-file=.env.dev",
         "pretty": "prettier --write \"./**/*.{js,jsx,ts,tsx}\"",
         "lint": "eslint \"./**/*.{js,jsx,ts,tsx}\"",
         "pretty:check": "prettier --check \"./**/*.{js,jsx,ts,tsx}\""
@@ -54,6 +54,10 @@
         "eslint-plugin-prettier": "~5.0.0",
         "prettier": "~3.0.3",
         "ts-node": "^10.9.2",
-        "typescript": "^5.3.3"
+        "typescript": "^5.3.3",
+        "postcss": ">=8.4.31",
+        "shelljs": ">=0.8.5",
+        "yargs-parser": ">=5.0.1",
+        "nth-check": ">=2.0.1"
     }
 }
