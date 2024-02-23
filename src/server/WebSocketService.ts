@@ -22,14 +22,13 @@ export default class WebSocketService implements LogEventListener {
     this.sockets = new Server(server, { path: "/socket.io" }).of(
       ProxyConfig.getSocketNamespace(),
     )!!;
-    const wss = this;
 
     loggerFactory.addTransport(new LogEventTransport(this));
 
     this.sockets.on("connect", (socket: Socket) => {
       this.getAllLogs();
       logger.info("connect " + JSON.stringify(socket.data) + " " + socket.id);
-      socket.on("getAllLogs", () => wss.getAllLogs());
+      socket.on("getAllLogs", () => this.getAllLogs());
       logger.info("init ws listener");
       socket.on("ping", () => {
         logger.info("ping");

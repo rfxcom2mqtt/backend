@@ -76,7 +76,7 @@ export class DeviceStateStore {
   }
 
   getInfo(): any {
-    let info = new DeviceEntity();
+    const info = new DeviceEntity();
     info.name = this.state.name;
     //info.id = this.state.id;
     if (this.state.name !== this.state.originalName) {
