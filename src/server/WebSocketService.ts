@@ -1,11 +1,14 @@
 import {
-  logger,
   loggerFactory,
-  SocketioTransport,
+  LogEventTransport,
   LogEventListener,
 } from "../utils/logger";
 import { Server, Socket, Namespace } from "socket.io";
 import { ProxyConfig } from "../utils/utils";
+import { v4 as uuidv4 } from "uuid";
+
+const logger = loggerFactory.getLogger("WEBSOCKET");
+
 
 export default class WebSocketService implements LogEventListener {
   private messages = new Set();
@@ -22,7 +25,7 @@ export default class WebSocketService implements LogEventListener {
     )!!;
     const wss = this;
 
-    loggerFactory.addTransport(new SocketioTransport(this.sockets, this));
+    loggerFactory.addTransport(new LogEventTransport(this));
 
     this.sockets.on("connect", (socket: Socket) => {
       this.getAllLogs();
@@ -46,7 +49,22 @@ export default class WebSocketService implements LogEventListener {
   }
 
   onLog(value) {
-    this.messages.add(value);
+    const logEvent = {
+      id: uuidv4(),
+      level: value.level,
+      value: value.message,
+      label: value.label,
+      time: value.timestamp,
+    };
+    this.messages.add(logEvent);
+    setImmediate(() => {
+      this.sockets?.emit("logged", value);
+    });
+
+    
+    // Send the log message via Socket.IO
+    this.sendLog(logEvent);
+    
   }
 
   disconnect() {

@@ -1,11 +1,13 @@
 import { StatusCodes } from "http-status-codes";
 import { Router, Request, Response } from "express";
-import { logger } from "../../utils/logger";
 import Discovery from "../../discovery";
 import StateStore, { DeviceStore } from "../../store/state";
 import { Action, DeviceStateStore } from "../../models/models";
 import { lookup } from "../../discovery/Homeassistant";
 import { settingsService } from "../../settings";
+
+import { loggerFactory } from "../../utils/logger";
+const logger = loggerFactory.getLogger("API");
 
 export default class DeviceApi {
   public router: Router;

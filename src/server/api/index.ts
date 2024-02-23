@@ -1,11 +1,13 @@
 import { Router, Request, Response, NextFunction } from "express";
-import { logger } from "../../utils/logger";
 import StateStore, { DeviceStore } from "../../store/state";
 import { BridgeInfo } from "../../models/models";
 import Discovery from "../../discovery";
 import DeviceApi from "./DeviceApi";
 import BridgeApi from "./BridgeApi";
 import SettingApi from "./SettingApi";
+
+import { loggerFactory } from "../../utils/logger";
+const logger = loggerFactory.getLogger("API");
 
 export default class Api {
   public router: Router;
@@ -18,7 +20,7 @@ export default class Api {
     actionCallback: any,
   ) {
     this.router = Router();
-    this.router.get("/", (req: Request, res: Response, next: NextFunction) => {
+    this.router.use("*", (req: Request, res: Response, next: NextFunction) => {
       return this.onApiRequest(req, res, next);
     });
 
@@ -35,7 +37,7 @@ export default class Api {
   private onApiRequest(req: Request, res: Response, next: NextFunction): any {
     logger.info(
       "onRequest " +
-        req.method +
+        req.method.toUpperCase() +
         " " +
         req.originalUrl +
         " body :" +

@@ -1,7 +1,5 @@
 import winston, { createLogger, transports, format } from "winston";
 import Transport = require("winston-transport");
-import { Server, Namespace } from "socket.io";
-import { v4 as uuidv4 } from "uuid";
 
 export interface LogEventListener {
   onLog(data: any): void;
@@ -15,35 +13,18 @@ const logToWinstonLevel = (level: LogLevel): WinstonLogLevel =>
 const winstonToLevel = (level: WinstonLogLevel): LogLevel =>
   level === "warning" ? "warn" : level;
 
-export class SocketioTransport extends Transport {
-  private io: Namespace;
+export class LogEventTransport extends Transport {
   private logEventListener: LogEventListener;
   constructor(
-    io: Namespace,
     logEventListener: LogEventListener,
     options?: Transport.TransportStreamOptions,
   ) {
     super(options);
-    this.io = io;
     this.logEventListener = logEventListener;
   }
 
   log(info: any, callback: any) {
-    setImmediate(() => {
-      this.io.emit("logged", info);
-    });
-
-    const logEvent = {
-      id: uuidv4(),
-      level: info.level,
-      value: info.message,
-      label: info.label,
-      time: info.timestamp,
-    };
-    // Send the log message via Socket.IO
-    this.io.emit("log", logEvent);
-    this.logEventListener.onLog(logEvent);
-
+    this.logEventListener.onLog(info);
     callback();
   }
 }
@@ -118,22 +99,32 @@ class LoggerFactory {
   }
 
   public getLogger(name: string): Logger {
-    this.default?.info("add logger : " + name);
-    const logger = new Logger(name);
-    this.loggers.push(logger);
+    this.default?.debug("add logger : " + name);
+    let logger;
+
+    this.loggers.forEach((item) => {
+      if(item.name === name){
+        logger = item;
+      }
+    });
+
+    if(!logger){
+      logger = new Logger(name);
+      this.loggers.push(logger);
+    }
     return logger;
   }
 
   addTransport(transport: winston.transport): void {
     this.loggers.forEach((logger) => {
-      this.default?.info("add ws for logger : " + logger.name);
+      this.default?.debug("add ws for logger : " + logger.name);
       logger.addTransport(transport);
     });
   }
 
   public getDefault() {
     if (this.default === undefined) {
-      this.default = this.getLogger("RFXCOM2MQTT");
+      this.default = this.getLogger("GATEWAY");
     }
     return this.default;
   }

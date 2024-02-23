@@ -4,7 +4,6 @@ import express, { Request, Response, NextFunction } from "express";
 import { StatusCodes } from "http-status-codes";
 import * as core from "express-serve-static-core";
 import fs from "fs";
-import { logger } from "../utils/logger";
 import { settingsService } from "../settings";
 import Discovery from "../discovery";
 import StateStore, { DeviceStore } from "../store/state";
@@ -12,6 +11,9 @@ import { BridgeInfo } from "../models/models";
 import Api from "./api/index";
 import Frontend from "./Frontend";
 import WebSocketService from "./WebSocketService";
+
+import { loggerFactory } from "../utils/logger";
+const logger = loggerFactory.getLogger("API");
 
 export default class Server {
   private server?: core.Express;
