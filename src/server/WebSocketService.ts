@@ -1,9 +1,13 @@
-import { logger, loggerFactory, SocketioTransport } from "../utils/logger";
+import {
+  logger,
+  loggerFactory,
+  SocketioTransport,
+  LogEventListener,
+} from "../utils/logger";
 import { Server, Socket, Namespace } from "socket.io";
-import { v4 as uuidv4 } from "uuid";
-import { ProxyConfig } from '../utils/utils';
+import { ProxyConfig } from "../utils/utils";
 
-export default class WebSocketService {
+export default class WebSocketService implements LogEventListener {
   private messages = new Set();
   private messageExpirationTimeMS = 5 * 60 * 1000;
   private sockets?: Namespace;
@@ -13,19 +17,18 @@ export default class WebSocketService {
   init(server: any) {
     logger.info("start init websocket");
     //initialize the WebSocket server instance
-    this.sockets = new Server(server,{path: "/socket.io"}).of(ProxyConfig.getSocketNamespace(),
+    this.sockets = new Server(server, { path: "/socket.io" }).of(
+      ProxyConfig.getSocketNamespace(),
     )!!;
     const wss = this;
 
-    loggerFactory.addTransport(new SocketioTransport(this.sockets));
+    loggerFactory.addTransport(new SocketioTransport(this.sockets, this));
 
     this.sockets.on("connect", (socket: Socket) => {
+      this.getAllLogs();
       logger.info("connect " + JSON.stringify(socket.data) + " " + socket.id);
-      socket.on("message", () => (value) => this.handleMessage(value));
-      socket.on("getMessage", () => wss.getMessages());
-      wss.sendMessage({
-        value: "init ws listener",
-      });
+      socket.on("getAllLogs", () => wss.getAllLogs());
+      logger.info("init ws listener");
       socket.on("ping", () => {
         logger.info("ping");
       });
@@ -34,30 +37,16 @@ export default class WebSocketService {
     logger.info("init websocket started");
   }
 
-  sendMessage(message) {
-    logger.info("send message " + message.value);
+  sendLog(message) {
+    this.sockets?.emit("log", message);
   }
 
-  getMessages() {
-    logger.info("getMessage");
-    this.messages.forEach((message) => this.sendMessage(message));
+  getAllLogs() {
+    this.messages.forEach((message) => this.sendLog(message));
   }
 
-  handleMessage(value) {
-    logger.info("handleMessage");
-    const message = {
-      id: uuidv4(),
-      label: "Server",
-      value: value,
-      time: Date.now(),
-    };
-
-    this.messages.add(message);
-    this.sendMessage(message);
-
-    setTimeout(() => {
-      this.messages.delete(message);
-    }, this.messageExpirationTimeMS);
+  onLog(value) {
+    this.messages.add(value);
   }
 
   disconnect() {

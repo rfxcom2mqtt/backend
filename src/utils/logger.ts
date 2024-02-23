@@ -3,6 +3,10 @@ import Transport = require("winston-transport");
 import { Server, Namespace } from "socket.io";
 import { v4 as uuidv4 } from "uuid";
 
+export interface LogEventListener {
+  onLog(data: any): void;
+}
+
 type LogLevel = "warn" | "debug" | "info" | "error";
 type WinstonLogLevel = "warning" | "debug" | "info" | "error";
 
@@ -13,9 +17,15 @@ const winstonToLevel = (level: WinstonLogLevel): LogLevel =>
 
 export class SocketioTransport extends Transport {
   private io: Namespace;
-  constructor(io: Namespace, options?: Transport.TransportStreamOptions) {
+  private logEventListener: LogEventListener;
+  constructor(
+    io: Namespace,
+    logEventListener: LogEventListener,
+    options?: Transport.TransportStreamOptions,
+  ) {
     super(options);
     this.io = io;
+    this.logEventListener = logEventListener;
   }
 
   log(info: any, callback: any) {
@@ -23,14 +33,16 @@ export class SocketioTransport extends Transport {
       this.io.emit("logged", info);
     });
 
-    // Send the log message via Socket.IO
-    this.io.emit("log", {
+    const logEvent = {
       id: uuidv4(),
       level: info.level,
       value: info.message,
       label: info.label,
       time: info.timestamp,
-    });
+    };
+    // Send the log message via Socket.IO
+    this.io.emit("log", logEvent);
+    this.logEventListener.onLog(logEvent);
 
     callback();
   }

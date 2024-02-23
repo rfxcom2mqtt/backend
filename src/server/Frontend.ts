@@ -6,7 +6,7 @@ import path from "path";
 import fs from "fs";
 // @ts-ignore
 import frontend from "@rfxcom2mqtt/frontend";
-import { ProxyConfig } from '../utils/utils';
+import { ProxyConfig } from "../utils/utils";
 
 export default class Frontend {
   public router: Router;
@@ -56,10 +56,12 @@ export default class Frontend {
 
   getFrontEndConfig() {
     return (
-      "window.config = { basePath: '" +ProxyConfig.getBasePath() +
+      "window.config = { basePath: '" +
+      ProxyConfig.getBasePath() +
       "', publicPath: '" +
       (process.env.API_PUBLIC_URL ? process.env.API_PUBLIC_URL : "") +
-      "', wsNamespace: '" + ProxyConfig.getSocketNamespace() +
+      "', wsNamespace: '" +
+      ProxyConfig.getSocketNamespace() +
       "',};"
     );
   }
