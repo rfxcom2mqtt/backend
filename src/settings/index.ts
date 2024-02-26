@@ -85,6 +85,20 @@ export interface Units {
   name: string;
 }
 
+function parseValueRef(text: string): { filename: string; key: string } | null {
+  const match = /!(.*) (.*)/g.exec(text);
+  if (match) {
+    let filename = match[1];
+    // This is mainly for backward compatibility.
+    if (!filename.endsWith(".yaml") && !filename.endsWith(".yml")) {
+      filename += ".yaml";
+    }
+    return { filename, key: match[2] };
+  } else {
+    return null;
+  }
+}
+
 class SettingsService {
   private _settingsWithDefaults?: Settings;
 
@@ -115,6 +129,8 @@ class SettingsService {
       this.getFileSettings(file),
     ) as Settings;
     applyEnvironmentVariables(this._settingsWithDefaults);
+    applySecretVariables(this._settingsWithDefaults);
+
     loggerFactory.setLevel(this._settingsWithDefaults!!.loglevel);
     logger.info("configuration loaded from path : " + file);
   }
@@ -327,6 +343,35 @@ class DataPath {
   }
 }
 const data = new DataPath();
+
+function applySecretVariables(settings: Partial<Settings>): void {
+  // Read !secret MQTT username and password if set
+  // eslint-disable-next-line
+  const interpretValue = (value: any): any => {
+    const ref = parseValueRef(value);
+    if (ref) {
+      return yaml.read(data.joinPath(ref.filename))[ref.key];
+    } else {
+      return value;
+    }
+  };
+
+  if (settings.mqtt?.username) {
+    settings.mqtt.username = interpretValue(settings.mqtt.username);
+  }
+
+  if (settings.mqtt?.password) {
+    settings.mqtt.password = interpretValue(settings.mqtt.password);
+  }
+
+  if (settings.mqtt?.server) {
+    settings.mqtt.server = interpretValue(settings.mqtt.server);
+  }
+
+  if (settings.frontend?.authToken) {
+    settings.frontend.authToken = interpretValue(settings.frontend.authToken);
+  }
+}
 
 function applyEnvironmentVariables(settings: Partial<Settings>): void {
   const mqttEnvVars = [
