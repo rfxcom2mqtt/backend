@@ -398,6 +398,18 @@ function applyEnvironmentVariables(settings: Partial<Settings>): void {
       settings.rfxcom[envEntry.props] = process.env[envEntry.env];
     }
   });
+
+  const frontnvVars = [{ env: "FRONTEND_ENABLED", props: "enabled" },
+                       { env: "FRONTEND_AUTH_TOKEN", props: "authToken" },
+                       { env: "FRONTEND_PORT", props: "port" },
+                       { env: "FRONTEND_HOST", props: "host" }];
+
+  frontnvVars.forEach((envEntry) => {
+    if (process.env[envEntry.env]) {
+      // @ts-ignore
+      settings.frontend[envEntry.props] = process.env[envEntry.env];
+    }
+  });
 }
 
 export function reRead(): void {
