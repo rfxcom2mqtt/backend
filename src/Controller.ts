@@ -239,10 +239,15 @@ export default class Controller implements MqttEventListener {
 
     if (payload.unitCode !== undefined && !payload.group) {
       topicEntity += "/" + payload.unitCode;
+      this.mqttClient?.publish(
+        this.mqttClient.topics.devices + "/" + topicEntity,
+        json,
+        (error: any) => {},
+      );
     }
 
     this.mqttClient?.publish(
-      this.mqttClient.topics.devices + "/" + topicEntity,
+      this.mqttClient.topics.devices,
       json,
       (error: any) => {},
     );

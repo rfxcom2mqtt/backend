@@ -399,10 +399,12 @@ function applyEnvironmentVariables(settings: Partial<Settings>): void {
     }
   });
 
-  const frontnvVars = [{ env: "FRONTEND_ENABLED", props: "enabled" },
-                       { env: "FRONTEND_AUTH_TOKEN", props: "authToken" },
-                       { env: "FRONTEND_PORT", props: "port" },
-                       { env: "FRONTEND_HOST", props: "host" }];
+  const frontnvVars = [
+    { env: "FRONTEND_ENABLED", props: "enabled" },
+    { env: "FRONTEND_AUTH_TOKEN", props: "authToken" },
+    { env: "FRONTEND_PORT", props: "port" },
+    { env: "FRONTEND_HOST", props: "host" },
+  ];
 
   frontnvVars.forEach((envEntry) => {
     if (process.env[envEntry.env]) {
