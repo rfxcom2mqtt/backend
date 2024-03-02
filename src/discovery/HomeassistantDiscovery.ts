@@ -65,12 +65,9 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
     logger.debug(`update ${deviceType}.${entityName} with value ${value}`);
 
     // get from save state
-    const entityState = this.state.get({
-      id: entityName,
-      type: deviceType,
-      subtype: data.message.subtype,
-    });
-    entityState.deviceType = deviceType;
+    const entityState = this.state.getByDeviceIdAndUnitCode(id, unitCode);
+    logger.info("entity  " + JSON.stringify(entityState));
+    entityState.type = deviceType;
     this.updateEntityStateFromValue(entityState, value);
     this.rfxtrx.sendCommand(
       deviceType,
@@ -84,15 +81,16 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
       (error: any) => {},
       { retain: true, qos: 1 },
     );
+    this.state.set(entityState.entityId, entityState);
   }
 
   updateEntityStateFromValue(entityState: any, value: string) {
     if (
-      entityState.deviceType === "lighting1" ||
-      entityState.deviceType === "lighting2" ||
-      entityState.deviceType === "lighting3" ||
-      entityState.deviceType === "lighting5" ||
-      entityState.deviceType === "lighting6"
+      entityState.type === "lighting1" ||
+      entityState.type === "lighting2" ||
+      entityState.type === "lighting3" ||
+      entityState.type === "lighting5" ||
+      entityState.type === "lighting6"
     ) {
       entityState.command = value;
       const cmd = value.toLowerCase().split(" ");
@@ -119,12 +117,10 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
       entityState.rfxFunction = "chime";
       entityState.command = value;
     } else {
-      logger.error(
-        "device type (" + entityState.deviceType + ") not supported",
-      );
+      logger.error("device type (" + entityState.type + ") not supported");
     }
 
-    //TODO get command for other deviceType
+    //TODO get command for other type
   }
 
   publishDiscoveryToMQTT(payload: any) {

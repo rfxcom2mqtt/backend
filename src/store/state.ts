@@ -10,7 +10,7 @@ const logger = loggerFactory.getLogger("STORE");
 const saveInterval = 1000 * 60; // 1 minutes
 
 class StateStore {
-  private state: { [s: string | number]: KeyValue } = {};
+  private state: { [s: string]: KeyValue } = {};
   private file = (process.env.RFXCOM2MQTT_DATA ?? "/app/data/") + "state.json";
   private timer?: NodeJS.Timeout = undefined;
   private saveInterval: number;
@@ -74,9 +74,23 @@ class StateStore {
     return this.state.hasOwnProperty(entity.id);
   }
 
-  get(entity: EntityState): KeyValue {
-    logger.debug(`get entity state : ` + entity.id);
-    return this.state[entity.id] || {};
+  get(id: string): KeyValue {
+    logger.debug(`get entity state : ` + id);
+    return this.state[id] || {};
+  }
+
+  getByDeviceIdAndUnitCode(id: string, unitCode?: number): KeyValue {
+    logger.debug(`get entities of device : ` + id + "." + unitCode);
+
+    for (const entity in this.state) {
+      if (
+        this.state[entity].id === id &&
+        this.state[entity].unitCode === "" + unitCode
+      ) {
+        return this.state[entity];
+      }
+    }
+    return {};
   }
 
   getByDeviceId(id: string): KeyValue {
