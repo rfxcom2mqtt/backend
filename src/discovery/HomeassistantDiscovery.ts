@@ -201,7 +201,7 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
         device: deviceJson.getInfo(),
         enabled_by_default: true,
         payload_off: switchInfo.value_off,
-        payload_on: switchInfo.value_off,
+        payload_on: switchInfo.value_on,
         json_attributes_topic: deviceJson.getStateTopic(
           this.topicDevice,
           switchInfo.id,
