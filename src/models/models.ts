@@ -30,6 +30,40 @@ export class DeviceEntity {
   }
 }
 
+export class DeviceCover{
+  constructor(
+    public id: string = "",
+    public name: string = "",
+    public description: string = "",
+    public property: string = "",
+    public positionProperty: string = "",
+    public type: string = "",
+  ) {}
+}
+
+export class DeviceBinarySensor {
+  constructor(
+    public id: string = "",
+    public name: string = "",
+    public description: string = "",
+    public property: string = "",
+    public type: string = "",
+    public value_on: boolean = true,
+    public value_off: boolean = false,
+  ) {}
+}
+
+export class DeviceSelect {
+  constructor(
+    public id: string = "",
+    public name: string = "",
+    public description: string = "",
+    public property: string = "",
+    public type: string = "",
+    public options: string[] = [],
+  ) {}
+}
+
 export class DeviceSensor {
   constructor(
     public id: string = "",
@@ -61,6 +95,9 @@ export class DeviceState extends DeviceEntity {
   public subTypeValue: string = "";
   entities: string[] = [];
   sensors: { [s: string]: DeviceSensor } = {};
+  binarysensors: { [s: string]: DeviceBinarySensor } = {};
+  selects: { [s: string]: DeviceSelect } = {};
+  covers: { [s: string]: DeviceCover } = {};
   switchs: { [s: string]: DeviceSwitch } = {};
 
   constructor(id: string, name: string) {
@@ -168,6 +205,51 @@ export class DeviceStateStore {
 
   getSwitchs(): { [s: string]: DeviceSwitch } {
     return this.state.switchs;
+  }
+
+  addBinarySensorId(sensorId: string) {
+    this.addBinarySensor(new DeviceBinarySensor(sensorId, sensorId));
+  }
+
+  addBinarySensor(sensor: DeviceBinarySensor): DeviceBinarySensor {
+    if (this.state.binarysensors[sensor.id] === undefined) {
+      this.state.binarysensors[sensor.id] = sensor;
+    }
+    return sensor;
+  }
+
+  getBinarySensors(): { [s: string]: DeviceBinarySensor } {
+    return this.state.binarysensors;
+  }
+
+  addSelelectId(sensorId: string) {
+    this.addSelect(new DeviceSelect(sensorId, sensorId));
+  }
+
+  addSelect(sensor: DeviceSelect): DeviceSelect {
+    if (this.state.selects[sensor.id] === undefined) {
+      this.state.selects[sensor.id] = sensor;
+    }
+    return sensor;
+  }
+
+  getSelects(): { [s: string]: DeviceSelect } {
+    return this.state.selects;
+  }
+
+  addCoverId(sensorId: string) {
+    this.addCover(new DeviceCover(sensorId, sensorId));
+  }
+
+  addCover(sensor: DeviceCover): DeviceCover {
+    if (this.state.covers[sensor.id] === undefined) {
+      this.state.covers[sensor.id] = sensor;
+    }
+    return sensor;
+  }
+
+  getCovers(): { [s: string]: DeviceCover } {
+    return this.state.covers;
   }
 
   overrideDeviceInfo() {
