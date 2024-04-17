@@ -5,6 +5,9 @@ import { SettingDevice, settingsService } from "../settings";
 import { IMqtt } from "../mqtt";
 import {
   DeviceSwitch,
+  DeviceBinarySensor,
+  DeviceSelect,
+  DeviceCover,
   DeviceSensor,
   DeviceState,
   DeviceStateStore,
@@ -147,7 +150,10 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
     this.state.set(entityId, payload, "event");
     deviceJson.addEntity(entityId);
 
-    this.loadDiscoverySensoInfo(payload, deviceJson);
+    this.loadDiscoverySensorInfo(payload, deviceJson);
+    this.loadDiscoveryBinarySensorInfo(payload, deviceJson);
+    this.loadDiscoverySelectInfo(payload, deviceJson);
+    this.loadDiscoveryCoverInfo(payload, deviceJson);
     this.loadDiscoverySwitchInfo(payload, deviceJson);
 
     this.deviceStore.set(payload.id, deviceJson.state);
@@ -181,6 +187,70 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
       };
       this.publishDiscovery(
         "sensor/" + deviceJson.getId() + "/" + sensor.type + "/config",
+        JSON.stringify(json),
+      );
+    }
+
+    const binarysensors = deviceJson.getBinarySensors();
+    for (const index in binarysensors) {
+      const binarysensor = binarysensors[index];
+      const json = {
+        name: deviceJson.state.name + " " + binarysensor.name,
+        object_id: binarysensor.id,
+        unique_id: binarysensor.id + "_" + bridgeName,
+        payload_off: binarysensor.value_off,
+        payload_on: binarysensor.value_on,
+        value_template: "{{ value_json." + binarysensor.property + " }}",
+        ...commonConf,
+        ...lookup[binarysensor.type],
+      };
+      this.publishDiscovery(
+        "binary_sensor/" + deviceJson.getId() + "/config",
+        JSON.stringify(json),
+      );
+    }
+
+    const covers = deviceJson.getCovers();
+    for (const index in covers) {
+      const cover = covers[index];
+      const json = {
+        name: deviceJson.state.name + " " + cover.name,
+        object_id: cover.id,
+        unique_id: cover.id + "_" + bridgeName,
+        value_template: "{{ value_json." + cover.property + " }}",
+        position_template: "{{ value_json." + cover.positionProperty + " }}",
+        position_topic: deviceJson.getStateTopic(this.topicDevice),
+        state_closing: "DOWN",
+        state_opening: "UP",
+        state_stopped: "STOP",
+        set_position_template: '{ "position": {{ position }} }',
+        set_position_topic: deviceJson.getCommandTopic(
+          this.mqtt.topics.base + "/cmd/",
+          cover.id,
+        ),
+        ...commonConf,
+        ...lookup[cover.type],
+      };
+      this.publishDiscovery(
+        "cover/" + deviceJson.getId() + "/config",
+        JSON.stringify(json),
+      );
+    }
+
+    const selects = deviceJson.getSelects();
+    for (const index in selects) {
+      const select = selects[index];
+      const json = {
+        name: deviceJson.state.name + " " + select.name,
+        object_id: select.id,
+        unique_id: select.id + "_" + bridgeName,
+        options: select.options,
+        value_template: "{{ value_json." + select.property + " }}",
+        ...commonConf,
+        ...lookup[select.type],
+      };
+      this.publishDiscovery(
+        "select/" + deviceJson.getId() + "/config",
         JSON.stringify(json),
       );
     }
@@ -264,7 +334,52 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
     // "radiator1", "remote", "rfy", "security1", "thermostat1", "thermostat2", "thermostat3", "thermostat4", "thermostat5"
   }
 
-  loadDiscoverySensoInfo(payload: any, deviceJson: DeviceStateStore) {
+  loadDiscoveryBinarySensorInfo(payload: any, deviceJson: DeviceStateStore) {
+    const entityId = deviceJson.getEntityId(payload);
+    const entityName = payload.id;
+    if (payload.type === "security1") {
+      const binarySensorInfo = new DeviceBinarySensor(
+        entityId,
+        entityName,
+        entityName,
+        "property",
+        "todo",
+      );
+      deviceJson.addBinarySensor(binarySensorInfo);
+    }
+  }
+
+  loadDiscoverySelectInfo(payload: any, deviceJson: DeviceStateStore) {
+    const entityId = deviceJson.getEntityId(payload);
+    const entityName = payload.id;
+    if (payload.type === "todo") {
+      const selectInfo = new DeviceSelect(
+        entityId,
+        entityName,
+        entityName,
+        "property",
+        "todo",
+      );
+      deviceJson.addSelect(selectInfo);
+    }
+  }
+
+  loadDiscoveryCoverInfo(payload: any, deviceJson: DeviceStateStore) {
+    const entityId = deviceJson.getEntityId(payload);
+    const entityName = payload.id;
+    if (payload.type === "todo") {
+      const coverInfo = new DeviceCover(
+        entityId,
+        entityName,
+        entityName,
+        "property",
+        "todo",
+      );
+      deviceJson.addCover(coverInfo);
+    }
+  }
+
+  loadDiscoverySensorInfo(payload: any, deviceJson: DeviceStateStore) {
     if (payload.rssi !== undefined) {
       deviceJson.addSensor(
         new DeviceSensor(
