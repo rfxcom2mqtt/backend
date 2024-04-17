@@ -30,7 +30,7 @@ export class DeviceEntity {
   }
 }
 
-export class DeviceCover{
+export class DeviceCover {
   constructor(
     public id: string = "",
     public name: string = "",

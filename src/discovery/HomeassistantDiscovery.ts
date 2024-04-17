@@ -220,10 +220,10 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
         value_template: "{{ value_json." + cover.property + " }}",
         position_template: "{{ value_json." + cover.positionProperty + " }}",
         position_topic: deviceJson.getStateTopic(this.topicDevice),
-        state_closing:"DOWN",
-        state_opening:"UP",
-        state_stopped:"STOP",
-        set_position_template:"{ \"position\": {{ position }} }",
+        state_closing: "DOWN",
+        state_opening: "UP",
+        state_stopped: "STOP",
+        set_position_template: '{ "position": {{ position }} }',
         set_position_topic: deviceJson.getCommandTopic(
           this.mqtt.topics.base + "/cmd/",
           cover.id,
@@ -335,60 +335,48 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
   }
 
   loadDiscoveryBinarySensorInfo(payload: any, deviceJson: DeviceStateStore) {
-    let entityId = deviceJson.getEntityId(payload);
-    let entityName = payload.id;
-    if (
-      payload.type === "security1" 
-    ) {
-
+    const entityId = deviceJson.getEntityId(payload);
+    const entityName = payload.id;
+    if (payload.type === "security1") {
       const binarySensorInfo = new DeviceBinarySensor(
         entityId,
         entityName,
         entityName,
         "property",
-        "todo" ,
+        "todo",
       );
       deviceJson.addBinarySensor(binarySensorInfo);
     }
-
   }
 
   loadDiscoverySelectInfo(payload: any, deviceJson: DeviceStateStore) {
-    let entityId = deviceJson.getEntityId(payload);
-    let entityName = payload.id;
-    if (
-      payload.type === "todo" 
-    ) {
-
+    const entityId = deviceJson.getEntityId(payload);
+    const entityName = payload.id;
+    if (payload.type === "todo") {
       const selectInfo = new DeviceSelect(
         entityId,
         entityName,
         entityName,
         "property",
-        "todo" ,
+        "todo",
       );
       deviceJson.addSelect(selectInfo);
     }
-
   }
 
   loadDiscoveryCoverInfo(payload: any, deviceJson: DeviceStateStore) {
-    let entityId = deviceJson.getEntityId(payload);
-    let entityName = payload.id;
-    if (
-      payload.type === "todo" 
-    ) {
-
+    const entityId = deviceJson.getEntityId(payload);
+    const entityName = payload.id;
+    if (payload.type === "todo") {
       const coverInfo = new DeviceCover(
         entityId,
         entityName,
         entityName,
         "property",
-        "todo" ,
+        "todo",
       );
       deviceJson.addCover(coverInfo);
     }
-
   }
 
   loadDiscoverySensorInfo(payload: any, deviceJson: DeviceStateStore) {
