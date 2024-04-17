@@ -13,6 +13,8 @@ import {
   UvEvent,
   WeightEvent,
   WaterlevelEvent,
+  Security1Event,
+  CommandRfxcomEvent,
 } from "../models/rfxcom";
 import IRfxcom from "./interface";
 
@@ -27,7 +29,6 @@ rfxcomEvents.push({
   subtype: 0,
   unitCode: "1",
   commandNumber: 0,
-  command: "Off",
   level: 0,
   rssi: 5,
   type: "lighting2",
@@ -39,7 +40,6 @@ rfxcomEvents.push({
   subtype: 0,
   unitCode: "2",
   commandNumber: 0,
-  command: "On",
   level: 0,
   rssi: 5,
   type: "lighting2",
@@ -128,6 +128,15 @@ rfxcomEvents.push({
   type: "waterlevel",
 } as WaterlevelEvent);
 
+rfxcomEvents.push({
+  id: "x10_door",
+  subtype: 0,
+  deviceStatus: "2",
+  batteryLevel: "OK",
+  rssi: 5,
+  type: "security1",
+} as Security1Event);
+
 export default class MockRfxcom implements IRfxcom {
   constructor() {}
 
@@ -182,10 +191,47 @@ export default class MockRfxcom implements IRfxcom {
       if (event.type === "lighting4") {
         deviceId = (event as Lighting4Event).data;
       }
+      if (this.isDeviceCommand(event)) {
+        (event as CommandRfxcomEvent).command = rfxcom.commandName(
+          rfxcom.packetNames[event.type.toLocaleLowerCase()],
+          event.subtype,
+          (event as CommandRfxcomEvent).commandNumber,
+        );
+      }
+      if (event.type === "security1") {
+        (event as Security1Event).status = this.getSecurityStatus(
+          parseInt((event as Security1Event).deviceStatus),
+        );
+      }
+      event.group = this.isGroup(event);
       event.subTypeValue = this.getSubType(event.type, "" + event.subtype);
       callback(event.type, event);
     });
   }
+
+  isDeviceCommand(payload: any): boolean {
+    if (
+      payload.type === "lighting1" ||
+      payload.type === "lighting2" ||
+      payload.type === "lighting5" ||
+      payload.type === "lighting6" ||
+      payload.type === "chime1" ||
+      payload.type === "fan" ||
+      payload.type === "blinds1" ||
+      payload.type === "edisio" ||
+      payload.type === "activlink" ||
+      payload.type === "funkbus" ||
+      payload.type === "hunterFan" ||
+      payload.type === "camera1" ||
+      payload.type === "remote" ||
+      payload.type === "blinds2" ||
+      payload.type === "thermostat3"
+    ) {
+      return true;
+    }
+    return false;
+  }
+
   isGroup(payload: any): boolean {
     if (payload.type === "lighting2") {
       return payload.commandNumber === 3 || payload.commandNumber === 4;
@@ -207,6 +253,28 @@ export default class MockRfxcom implements IRfxcom {
 
     return returnValue;
   }
+
+  getSecurityStatus(key: number): string {
+    logger.info("Mock get security status : " + key);
+    let returnValue = "";
+    Object.keys(rfxcom.security)
+      .filter(
+        (ele, ind) =>
+          ![
+            "X10_DOOR_WINDOW_SENSOR",
+            "X10_MOTION_SENSOR",
+            "X10_SECURITY_REMOTE",
+          ].includes(ele),
+      )
+      .forEach(function (statusValue: string) {
+        if (key === parseInt(rfxcom.security[statusValue])) {
+          returnValue = statusValue;
+        }
+      });
+
+    return returnValue;
+  }
+
   stop() {
     logger.info("Mock stop");
   }

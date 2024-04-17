@@ -113,9 +113,25 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
           entityState.rfxOpt = cmd[1];
         }
       }
+
+      // need to add support of function  (increaseLevel, decreaseLevel, chime, program, setMood, toggleOnOff, relayClose, relayStop,relayOpen,  lock, unlock, increaseColour, decreaseColour, setColour, setScene)
     } else if (entityState.deviceType === "lighting4") {
       entityState.rfxFunction = "sendData";
       entityState.command = value;
+    } else if (entityState.deviceType === "security1") {
+      entityState.command = value;
+      const command = value.toLowerCase();
+
+      //  need to add support of function  (sendStatus, armSystemAway, armSystemAwayWithDelay, armSystemHome, armSystemHomeWithDelay, disarmSystem)
+      if (command === "on") {
+        entityState.rfxFunction = "switchLightOn";
+      } else if (command === "off") {
+        entityState.rfxFunction = "switchLightOff";
+      } else if (command === "panic") {
+        entityState.rfxFunction = "sendPanic";
+      } else if (command === "end panic") {
+        entityState.rfxFunction = "cancelPanic";
+      }
     } else if (entityState.deviceType === "chime1") {
       entityState.rfxFunction = "chime";
       entityState.command = value;
@@ -337,14 +353,40 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
   loadDiscoveryBinarySensorInfo(payload: any, deviceJson: DeviceStateStore) {
     const entityId = deviceJson.getEntityId(payload);
     const entityName = payload.id;
+
     if (payload.type === "security1") {
+      // compute state from subtype
+      let state_off = "NORMAL";
+      let state_on = "ALARM";
+      if (payload.deviceStatus === 0 || payload.deviceStatus === 2) {
+        state_off = "NORMAL";
+        state_on = "ALARM";
+      }
+      if (payload.deviceStatus === 1 || payload.deviceStatus === 3) {
+        state_off = "NORMAL_DELAYED";
+        state_on = "ALARM_DELAYED";
+      }
+      if (payload.deviceStatus === 4 || payload.deviceStatus === 5) {
+        state_off = "NO_MOTION";
+        state_on = "MOTION";
+      }
+      if (payload.deviceStatus === 6 || payload.deviceStatus === 7) {
+        state_off = "END_PANIC";
+        state_on = "PANIC";
+      }
+
+      const originalName = deviceJson.state.originalName;
+
       const binarySensorInfo = new DeviceBinarySensor(
         entityId,
         entityName,
-        entityName,
-        "property",
-        "todo",
+        originalName,
+        "status",
+        payload.type,
+        state_on,
+        state_off,
       );
+
       deviceJson.addBinarySensor(binarySensorInfo);
     }
   }
@@ -352,7 +394,9 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
   loadDiscoverySelectInfo(payload: any, deviceJson: DeviceStateStore) {
     const entityId = deviceJson.getEntityId(payload);
     const entityName = payload.id;
-    if (payload.type === "todo") {
+    /*if (
+      payload.type === "todo" 
+    ) {
       const selectInfo = new DeviceSelect(
         entityId,
         entityName,
@@ -361,13 +405,16 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
         "todo",
       );
       deviceJson.addSelect(selectInfo);
-    }
+
+    }*/
   }
 
   loadDiscoveryCoverInfo(payload: any, deviceJson: DeviceStateStore) {
     const entityId = deviceJson.getEntityId(payload);
     const entityName = payload.id;
-    if (payload.type === "todo") {
+    /*if (
+      payload.type === "todo" 
+    ) {
       const coverInfo = new DeviceCover(
         entityId,
         entityName,
@@ -376,7 +423,7 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
         "todo",
       );
       deviceJson.addCover(coverInfo);
-    }
+    }*/
   }
 
   loadDiscoverySensorInfo(payload: any, deviceJson: DeviceStateStore) {

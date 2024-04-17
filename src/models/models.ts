@@ -48,8 +48,8 @@ export class DeviceBinarySensor {
     public description: string = "",
     public property: string = "",
     public type: string = "",
-    public value_on: boolean = true,
-    public value_off: boolean = false,
+    public value_on: string = "Alarm",
+    public value_off: string = "Normal",
   ) {}
 }
 

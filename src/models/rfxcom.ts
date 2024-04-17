@@ -17,137 +17,97 @@ export interface RfxcomEvent {
   group: boolean;
 }
 
-interface Lighting1Event extends RfxcomEvent {
+export interface CommandRfxcomEvent extends RfxcomEvent {
+  commandNumber: number;
+  command: string;
+  rssi: number;
+}
+
+interface Lighting1Event extends CommandRfxcomEvent {
   houseCode: string;
   unitCode: string;
-  commandNumber: number;
-  command: string;
-  rssi: number;
 }
 
-export interface Lighting2Event extends RfxcomEvent {
+export interface Lighting2Event extends CommandRfxcomEvent {
   unitCode: string;
-  commandNumber: number;
-  command: string;
   level: number;
-  rssi: number;
 }
 
-export interface Lighting4Event extends RfxcomEvent {
+export interface Lighting4Event extends CommandRfxcomEvent {
   data: string;
-  commandNumber: number;
-  command: string;
   pulseWidth: string;
-  rssi: number;
 }
 
-interface Lighting5Event extends RfxcomEvent {
+interface Lighting5Event extends CommandRfxcomEvent {
   unitCode: string;
-  commandNumber: number;
-  command: string;
   level: string;
-  rssi: number;
 }
 
-interface Lighting6Event extends RfxcomEvent {
+interface Lighting6Event extends CommandRfxcomEvent {
   groupCode: string;
   unitCode: string;
-  commandNumber: number;
-  command: string;
-  rssi: number;
 }
 
-interface ChimeEvent extends RfxcomEvent {
-  commandNumber: number;
-  command: string;
-  rssi: number;
-}
+interface ChimeEvent extends CommandRfxcomEvent {}
 
-interface FanEvent extends RfxcomEvent {
-  commandNumber: number;
-  command: string;
-  rssi: number;
+interface FanEvent extends CommandRfxcomEvent {
   state: string;
   co2: string;
 }
 
-interface Blinds1Event extends RfxcomEvent {
+interface Blinds1Event extends CommandRfxcomEvent {
   unitCode: number;
-  commandNumber: number;
-  command: string;
   batteryLevel: number;
-  rssi: number;
 }
 
-interface EdisioEvent extends RfxcomEvent {
+interface EdisioEvent extends CommandRfxcomEvent {
   unitCode: number;
-  commandNumber: number;
-  command: string;
   level: number;
   colour: string;
   maxRepeat: number;
   repeatCount: number;
   batteryVoltage: number;
-  rssi: number;
   extraBytes: string;
 }
 
-interface ActivLinkEvent extends RfxcomEvent {
-  commandNumber: number;
-  command: string;
+interface ActivLinkEvent extends CommandRfxcomEvent {
   alert: string;
   deviceStatus: string;
   batteryLevel: number;
-  rssi: number;
 }
 
-interface FunkbusEvent extends RfxcomEvent {
+interface FunkbusEvent extends CommandRfxcomEvent {
   groupCode: string;
-  commandNumber: number;
-  command: string;
   commandTime: string;
   deviceTypeNumber: number;
   sceneNumber: number;
   channelNumber: number;
-  rssi: number;
 }
 
-interface HunterfanEvent extends RfxcomEvent {
-  commandNumber: number;
-  command: string;
-  rssi: number;
-}
+interface HunterfanEvent extends CommandRfxcomEvent {}
 
-interface Security1Event extends RfxcomEvent {
+export interface Security1Event extends RfxcomEvent {
   deviceStatus: string;
+  status: string;
   tampered: string;
   batteryLevel: string;
   rssi: number;
 }
 
-interface Camera1Event extends RfxcomEvent {
+interface Camera1Event extends CommandRfxcomEvent {
   houseCode: string;
-  commandNumber: number;
-  command: string;
-  rssi: number;
 }
 
-interface RemoteEvent extends RfxcomEvent {
+interface RemoteEvent extends CommandRfxcomEvent {
   houseCode: string;
-  commandNumber: number;
-  command: string;
   commandType: string;
-  rssi: number;
 }
 
-interface Blinds2Event extends RfxcomEvent {
+interface Blinds2Event extends CommandRfxcomEvent {
   unitCode: string;
-  commandNumber: number;
-  command: string;
   percent: string;
   angle: string;
   batteryLevel: number;
-  rssi: number;
 }
 
 interface thermostat1Event extends RfxcomEvent {
@@ -160,10 +120,7 @@ interface thermostat1Event extends RfxcomEvent {
   rssi: number;
 }
 
-interface Thermostat3Event extends RfxcomEvent {
-  commandNumber: number;
-  command: string;
-}
+interface Thermostat3Event extends CommandRfxcomEvent {}
 
 export interface Bbq1Event extends RfxcomEvent {
   temperature: string;

@@ -242,12 +242,66 @@ export default class Rfxcom implements IRfxcom {
           if (evt.type === "lighting4") {
             deviceId = evt.data;
           }
+          if (this.isDeviceCommand(evt)) {
+            evt.command = rfxcom.commandName(
+              packetType,
+              evt.subtype,
+              evt.commandNumber,
+            );
+          }
+          if (evt.type === "security1") {
+            evt.status = this.getSecurityStatus(parseInt(evt.deviceStatus));
+          }
           evt.group = this.isGroup(evt);
           evt.subTypeValue = this.getSubType(evt.type, evt.subtype);
           callback(protocol, evt as RfxcomEvent);
         });
       });
     }
+  }
+
+  isDeviceCommand(payload: any): boolean {
+    if (
+      payload.type === "lighting1" ||
+      payload.type === "lighting2" ||
+      payload.type === "lighting5" ||
+      payload.type === "lighting6" ||
+      payload.type === "chime1" ||
+      payload.type === "fan" ||
+      payload.type === "blinds1" ||
+      payload.type === "edisio" ||
+      payload.type === "activlink" ||
+      payload.type === "funkbus" ||
+      payload.type === "hunterFan" ||
+      payload.type === "camera1" ||
+      payload.type === "remote" ||
+      payload.type === "blinds2" ||
+      payload.type === "thermostat3"
+    ) {
+      return true;
+    }
+    return false;
+  }
+
+  getSecurityStatus(key: number): string {
+    logger.info("Mock get security status : " + key);
+    let returnValue = "";
+    Object.keys(rfxcom.security)
+      .filter(
+        (ele, ind) =>
+          ![
+            "X10_DOOR_WINDOW_SENSOR",
+            "X10_MOTION_SENSOR",
+            "X10_SECURITY_REMOTE",
+          ].includes(ele),
+      )
+      .forEach(function (statusValue: string) {
+        if (key === parseInt(rfxcom.security[statusValue])) {
+          returnValue = statusValue;
+        }
+      });
+
+    return returnValue;
   }
 
   getSubType(type: string, subType: string): string {
