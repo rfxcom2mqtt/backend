@@ -45,7 +45,7 @@ export default class Controller implements MqttEventListener {
     );
     if (config.frontend.enabled) {
       logger.info("Server enable Api");
-      this.server!!.enableApi(
+      this.server!.enableApi(
         this.device,
         this.state,
         this.discovery,

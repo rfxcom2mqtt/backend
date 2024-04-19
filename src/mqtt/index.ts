@@ -1,4 +1,5 @@
 import * as mqtt from "mqtt";
+import { IConnectPacket, QoS } from "mqtt-packet";
 import { SettingMqtt, settingsService } from "../settings";
 import { MqttEventListener, MQTTMessage } from "../models/mqtt";
 import fs from "fs";
@@ -6,7 +7,7 @@ import { loggerFactory } from "../utils/logger";
 const logger = loggerFactory.getLogger("MQTT");
 
 interface MQTTOptions {
-  qos?: mqtt.QoS;
+  qos?: QoS;
   retain?: boolean;
 }
 
@@ -100,19 +101,21 @@ export default class Mqtt implements IMqtt {
       port = this.getConfig().port!!;
     }
 
-    let qos = 0 as mqtt.QoS;
+    let qos = 0 as QoS;
     if (this.getConfig().qos) {
-      qos = this.getConfig().qos as mqtt.QoS;
+      qos = this.getConfig().qos as QoS;
     }
 
     this.defaultOptions = { qos: qos, retain: this.getConfig().retain };
     logger.info(`Connecting to MQTT server at ${this.getConfig().server}`);
     const will = {
       topic: this.topics.base + "/" + this.topics.will,
-      payload: "offline",
-      qos: 1 as mqtt.QoS,
+      payload: Buffer.from("offline", "utf8"),
+      qos: 1 as QoS,
       retain: true,
+      properties: undefined,
     };
+
     const options: mqtt.IClientOptions = {
       username: undefined,
       password: undefined,
