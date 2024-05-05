@@ -1,11 +1,17 @@
 {
-  "extends": "@tsconfig/node18/tsconfig.json",
   "compilerOptions": {
+    "target": "es5",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     // Necessary to support yarn portals with the node-modules linker, used by yarn link (berry)
     "preserveSymlinks": true,
     "resolveJsonModule": true,
     "noImplicitAny": false,
     "noImplicitThis": true,
+    "esModuleInterop":true,
     "outDir": "dist",
     "baseUrl": ".",
     "allowJs": true,

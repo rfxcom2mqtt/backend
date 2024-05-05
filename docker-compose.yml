@@ -1,4 +1,4 @@
-version: "3.8"
+version: "3.3"
 
 services: 
   rfxcom2mqtt:
@@ -7,8 +7,10 @@ services:
     build: ./
     volumes:
       - ./config:/app/data
-    devices:
-      - /dev/ttyUSB1:/dev/ttyUSB0
+    ports:
+      - 8891:8891
+    #devices:
+    #  - /dev/ttyUSB1:/dev/ttyUSB0
     environment:
       - TZ=Europe/Paris
     restart: unless-stopped
