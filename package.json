@@ -3,7 +3,7 @@
     "repository": "https://github.com/rfxcom2mqtt/rfxcom2mqtt",
     "author": "Sguernion<sguernion@github.com>",
     "license": "Apache-2.0",
-    "version": "1.1.1",
+    "version": "1.2.1",
     "description": "RFXCOM to MQTT bridge",
     "main": "src/index.ts",
     "engines": {
