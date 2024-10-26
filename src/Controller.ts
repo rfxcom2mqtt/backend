@@ -246,6 +246,24 @@ export default class Controller implements MqttEventListener {
       );
     }
 
+    // if (payload.type == "temperaturehumidity1") {
+    //   topicEntity += "/" + payload.unitCode;
+    //   this.mqttClient?.publish(
+    //     this.mqttClient.topics.devices + "/" + topicEntity,
+    //     json,
+    //     (error: any) => {},
+    //   );
+    // }
+
+    if ( (payload.unitCode==undefined) && (payload.temperature || payload.humidity || payload.barometer || payload.weight ) ) {
+      // topicEntity += "/" + payload.unitCode;
+      this.mqttClient?.publish(
+        this.mqttClient.topics.devices + "/" + topicEntity,
+        json,
+        (error: any) => {},
+      );
+    }
+
     this.mqttClient?.publish(
       this.mqttClient.topics.devices,
       json,
