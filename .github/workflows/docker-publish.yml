@@ -8,6 +8,7 @@ on:
 
 env:
   PLATFORMS: 'linux/amd64,linux/arm64,linux/i386,linux/armhf'
+  TARGET_IMAGE: 'laurentlemercier/rfxcom2mqtt'
   
 jobs:
   docker:
