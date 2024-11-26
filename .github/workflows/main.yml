@@ -16,7 +16,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: laurentlemercier/rfxcom2mqtt
+          images: "rfxcom2mqtt/rfxcom2mqtt"
           tags: |
             type=raw,value=latest,enable={{is_default_branch}}
             type=raw,value=dev,event=develop

@@ -8,7 +8,7 @@ on:
 
 env:
   PLATFORMS: 'linux/amd64,linux/arm64,linux/i386,linux/armhf'
-  TARGET_IMAGE: 'laurentlemercier/rfxcom2mqtt'
+  TARGET_IMAGE: 'rfxcom2mqtt/rfxcom2mqtt'
   
 jobs:
   docker:
@@ -17,8 +17,8 @@ jobs:
       - 
         name: "Set environmental variables"
         run: |
-          echo "TARGET_IMAGE=${{secrets.DOCKERHUB_USERNAME}}/${DOCKERHUB_REPO}" >> $GITHUB_ENV
-          echo "PLATFORMS=${PLATFORMS}" >> $GITHUB_ENV
+          echo "TARGET_IMAGE=rfxcom2mqtt/rfxcom2mqtt" >> "$GITHUB_ENV"
+          echo "PLATFORMS=${PLATFORMS}" >> "$GITHUB_ENV"
       -  
         name: Check value
         id: target
@@ -34,6 +34,10 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images:  "${{ env.TARGET_IMAGE }}"
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=dev,event=develop
+
       -
         name: Set up QEMU
         uses: docker/setup-qemu-action@v2
