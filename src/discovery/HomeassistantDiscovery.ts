@@ -88,40 +88,79 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
   }
 
   updateEntityStateFromValue(entityState: any, value: string) {
-    if (
-      entityState.type === "lighting1" ||
-      entityState.type === "lighting2" ||
-      entityState.type === "lighting3" ||
-      entityState.type === "lighting5" ||
-      entityState.type === "lighting6"
-    ) {
-      entityState.command = value;
-      const cmd = value.toLowerCase().split(" ");
-      let command = cmd[0];
-      if (cmd[0] === "group") {
-        command = cmd[1];
-      }
-      if (command === "on") {
-        entityState.commandNumber = cmd[0] === "group" ? 4 : 1; //WORK only for lithing2
-        entityState.rfxFunction = "switchOn";
-      } else if (command === "off") {
-        entityState.commandNumber = cmd[0] === "group" ? 3 : 0; //WORK only for lithing2
-        entityState.rfxFunction = "switchOff";
-      } else {
-        if (cmd[0] === "level") {
-          entityState.rfxFunction = "setLevel";
-          entityState.rfxOpt = cmd[1];
+    switch (entityState.type) {
+      case "lighting1":
+      case "lighting2":
+      case "lighting3":
+      case "lighting5":
+      case "lighting6":
+        entityState.command = value;
+        const cmd = value.toLowerCase().split(" ");
+        let command = cmd[0];
+        if (cmd[0] === "group") {
+          command = cmd[1];
         }
-      }
-    } else if (entityState.deviceType === "lighting4") {
-      entityState.rfxFunction = "sendData";
-      entityState.command = value;
-    } else if (entityState.deviceType === "chime1") {
-      entityState.rfxFunction = "chime";
-      entityState.command = value;
-    } else {
-      logger.error("device type (" + entityState.type + ") not supported");
+        if (command === "on") {
+          entityState.commandNumber = cmd[0] === "group" ? 4 : 1; //WORK only for lithing2
+          entityState.rfxFunction = "switchOn";
+        } else if (command === "off") {
+          entityState.commandNumber = cmd[0] === "group" ? 3 : 0; //WORK only for lithing2
+          entityState.rfxFunction = "switchOff";
+        } else {
+          if (cmd[0] === "level") {
+            entityState.rfxFunction = "setLevel";
+            entityState.rfxOpt = cmd[1];
+          }
+        }
+        break;
+      case "lighting4":
+        entityState.rfxFunction = "sendData";
+        entityState.command = value;
+        break;
+      case "chime1":
+        entityState.rfxFunction = "chime";
+        entityState.command = value;
+        break;
+
+      //TODO get command for other type
+
+      default:
+        logger.info("device type (" + entityState.type + ") : default update values");
     }
+    // if (
+    //   entityState.type === "lighting1" ||
+    //   entityState.type === "lighting2" ||
+    //   entityState.type === "lighting3" ||
+    //   entityState.type === "lighting5" ||
+    //   entityState.type === "lighting6"
+    // ) {
+    //   entityState.command = value;
+    //   const cmd = value.toLowerCase().split(" ");
+    //   let command = cmd[0];
+    //   if (cmd[0] === "group") {
+    //     command = cmd[1];
+    //   }
+    //   if (command === "on") {
+    //     entityState.commandNumber = cmd[0] === "group" ? 4 : 1; //WORK only for lithing2
+    //     entityState.rfxFunction = "switchOn";
+    //   } else if (command === "off") {
+    //     entityState.commandNumber = cmd[0] === "group" ? 3 : 0; //WORK only for lithing2
+    //     entityState.rfxFunction = "switchOff";
+    //   } else {
+    //     if (cmd[0] === "level") {
+    //       entityState.rfxFunction = "setLevel";
+    //       entityState.rfxOpt = cmd[1];
+    //     }
+    //   }
+    // } else if (entityState.deviceType === "lighting4") {
+    //   entityState.rfxFunction = "sendData";
+    //   entityState.command = value;
+    // } else if (entityState.deviceType === "chime1") {
+    //   entityState.rfxFunction = "chime";
+    //   entityState.command = value;
+    // } else {
+    //   logger.error("device type (" + entityState.type + ") not supported");
+    // }
 
     //TODO get command for other type
   }
