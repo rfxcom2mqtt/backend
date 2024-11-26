@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 env:
-  PLATFORMS: 'linux/amd64,linux/arm64,linux/i386,linux/armhf'
+  PLATFORMS: 'linux/amd64,linux/arm64,linux/arm/v7'
   TARGET_IMAGE: 'rfxcom2mqtt/rfxcom2mqtt'
   
 jobs:
