@@ -52,7 +52,10 @@ nvm install 18.18
 nvm use 18.18
 npm install
 
-ts-node src/dev.ts
+npm install -g typescript
+npm install -g ts-node
+
+ts-node .\src\index.ts
 ```
 
 ### build docker image
