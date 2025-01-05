@@ -137,9 +137,11 @@ nvm install 18.18
 nvm use 18.18
 npm install
 
-ts-node src/index.ts --env-file=.env
-ts-node src/index.ts --env-file=.env.dev
-ts-node src/index.ts --env-file=.env.yla
+npm install -g typescript
+npm install -g ts-node
+
+ts-node .\src\index.ts
+
 ```
 
 ### Build docker image
