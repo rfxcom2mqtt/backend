@@ -1,6 +1,7 @@
 "use strict";
 import dotenv from "dotenv";
 dotenv.config({ path: getdotenvFile() });
+const logger = require("./utils/logger");
 import Controller from "./Controller";
 
 let controller: Controller;
@@ -37,6 +38,13 @@ function handleQuit() {
   }
 }
 
-process.on("SIGINT", handleQuit);
-process.on("SIGTERM", handleQuit);
+process.on("SIGINT", () => {
+  logger.info("Received SIGINT, shutting down...");
+  handleQuit();
+});
+
+process.on("SIGTERM", () => {
+  logger.info("Received SIGTERM, shutting down...");
+  handleQuit();
+});
 start();

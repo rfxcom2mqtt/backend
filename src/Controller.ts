@@ -10,11 +10,13 @@ import utils from "./utils/utils";
 import { logger } from "./utils/logger";
 import State, { DeviceStore } from "./store/state";
 import cron from "node-cron";
+import DeviceService from "./services/DeviceService";
 
 export default class Controller implements MqttEventListener {
   private rfxBridge?: IRfxcom;
   private mqttClient?: IMqtt;
   private discovery?: Discovery;
+  private deviceService?: DeviceService;
   private server?: Server;
   protected state?: State;
   protected device?: DeviceStore;
@@ -43,12 +45,15 @@ export default class Controller implements MqttEventListener {
       this.state,
       this.device,
     );
+    this.deviceService = new DeviceService(
+      this.device,
+      this.state,
+      this.discovery,
+    );
     if (config.frontend.enabled) {
       logger.info("Server enable Api");
       this.server!.enableApi(
-        this.device,
-        this.state,
-        this.discovery,
+        this.deviceService,
         this.bridgeInfo,
         (action: Action) => this.runAction(action),
       );

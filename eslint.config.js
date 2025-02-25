@@ -1,5 +1,6 @@
 //
-module.default = {
+module.exports = {
+  files: ["./**/*.{js,jsx,ts,tsx}"],
   rules: {
     // Place to specify ESLint rules. Can be used to overwrite rules specified from the extended configs
     "@typescript-eslint/ban-ts-comment": "off",
@@ -9,5 +10,5 @@ module.default = {
     "@typescript-eslint/no-extra-non-null-assertion": "off",
     "no-prototype-builtins": "off",
   },
-  ignores: ["node_modules/**", "dist/**", "index.js"],
+  ignorePatterns: ["node_modules/**", "coverage/**", "dist/**", "index.js"],
 };

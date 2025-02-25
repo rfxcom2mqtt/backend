@@ -5,7 +5,7 @@ name: Node.js CI
 
 on:
     push:
-        branches: ['develop', 'feature/**']
+        branches: ['develop', 'feature/**', 'feat/**']
     pull_request:
         branches: ['develop']
 defaults:
@@ -17,6 +17,9 @@ env:
 jobs:
     build:
         runs-on: ubuntu-latest
+        strategy:
+          matrix:
+            node-version: [22.13.1]
         steps:
             - name: 📥 Checkout Repository
               uses: actions/checkout@v4
@@ -30,12 +33,12 @@ jobs:
                   version: 8
                   run_install: true
 
-            - name: 🚀 Use Node.js
+            - name: 🚀 Use Node.js ${{ matrix.node-version }}
               uses: actions/setup-node@v3
               with:
-                  node-version: 20
+                  node-version: ${{ matrix.node-version }}
                   cache: pnpm
-                  cache-dependency-path: './package-lock.json'
+                  cache-dependency-path: './pnpm-lock.yaml'
 
             - name: 🛠️ Install Dependencies
               run: pnpm install --frozen-lockfile
@@ -46,8 +49,15 @@ jobs:
             - name: 💅 Check code style
               run: pnpm run pretty:check
 
-            #- name: 🧪 Run tests
-            #  run: pnpm run test:unit
+            #- name: Run tests
+            #  run: pnpm run test
+              
+            - name: Upload coverage to Codecov
+              uses: codecov/codecov-action@v4
+              with:
+                token: ${{ secrets.CODECOV_TOKEN }}
+                file: ./coverage/coverage-final.json
+                flags: unittests
 
             #- name: 🏗️ Build bundle
             #  run: pnpm build

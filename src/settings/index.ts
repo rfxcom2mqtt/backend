@@ -115,6 +115,7 @@ class SettingsService {
   }
 
   readLocalFile(file: string): Settings {
+    logger.info("readLocalFile : " + file);
     return load.load(file) as Settings;
   }
 

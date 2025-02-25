@@ -16,12 +16,16 @@ export default class WebSocketService implements LogEventListener {
 
   constructor() {}
 
-  init(server: any) {
+  init(server: any, sockets?: Namespace) {
     logger.info("start init websocket");
     //initialize the WebSocket server instance
-    this.sockets = new Server(server, { path: "/socket.io" }).of(
-      ProxyConfig.getSocketNamespace(),
-    )!!;
+    if (sockets === undefined) {
+      this.sockets = new Server(server, { path: "/socket.io" }).of(
+        ProxyConfig.getSocketNamespace(),
+      )!!;
+    } else {
+      this.sockets = sockets;
+    }
 
     loggerFactory.addTransport(new LogEventTransport(this));
 

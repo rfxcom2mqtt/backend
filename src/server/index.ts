@@ -5,12 +5,11 @@ import { StatusCodes } from "http-status-codes";
 import * as core from "express-serve-static-core";
 import fs from "fs";
 import { settingsService } from "../settings";
-import Discovery from "../discovery";
-import StateStore, { DeviceStore } from "../store/state";
 import { BridgeInfo } from "../models/models";
 import Api from "./api/index";
 import Frontend from "./Frontend";
 import WebSocketService from "./WebSocketService";
+import DeviceService from "../services/DeviceService";
 
 import { loggerFactory } from "../utils/logger";
 const logger = loggerFactory.getLogger("API");
@@ -29,14 +28,12 @@ export default class Server {
   }
 
   enableApi(
-    devices: DeviceStore,
-    state: StateStore,
-    discovery: Discovery,
+    deviceService: DeviceService,
     bridgeInfo: BridgeInfo,
     actionCallback: any,
   ) {
     logger.info("Server enable Api");
-    this.api = new Api(devices, state, discovery, bridgeInfo, actionCallback);
+    this.api = new Api(deviceService, bridgeInfo, actionCallback);
   }
 
   private authenticate(req: Request, res: Response, next: NextFunction): void {
@@ -99,17 +96,17 @@ export default class Server {
       this.server = express();
     }
 
-    this.server.use(express.json());
-    this.server.use(express.urlencoded({ extended: true }));
-    this.server.use(cookieParser());
+    this.server?.use(express.json());
+    this.server?.use(express.urlencoded({ extended: true }));
+    this.server?.use(cookieParser());
 
-    this.server.use(this.frontend.router);
-    this.server.set("views", this.frontend.getPath());
+    this.server?.use(this.frontend.router);
+    this.server?.set("views", this.frontend.getPath());
     // Serve front-end content
-    this.server.get("^/api", (req, res) => {
+    this.server?.get("^/api", (req, res) => {
       res.sendFile("index.html", { root: this.frontend.getPath() });
     });
-    this.server.use(
+    this.server?.use(
       "/api",
       (req: Request, res: Response, next: NextFunction) => {
         this.authenticate(req, res, next);
@@ -138,7 +135,7 @@ export default class Server {
     };
 
     if (!settingsService.get().frontend.host) {
-      (this.serverProcess = this.server.listen(
+      (this.serverProcess = this.server?.listen(
         settingsService.get().frontend.port,
       )),
         () => {
@@ -147,7 +144,7 @@ export default class Server {
           );
         };
     } else if (settingsService.get().frontend.host.startsWith("/")) {
-      this.serverProcess = this.server.listen(
+      this.serverProcess = this.server?.listen(
         settingsService.get().frontend.host,
         () => {
           logger.info(
@@ -156,7 +153,7 @@ export default class Server {
         },
       );
     } else {
-      this.serverProcess = this.server.listen(
+      this.serverProcess = this.server?.listen(
         settingsService.get().frontend.port,
         settingsService.get().frontend.host,
         () => {
@@ -171,7 +168,7 @@ export default class Server {
 
     this.websocketSrv.init(this.serverProcess);
 
-    this.server.use(
+    this.server?.use(
       (err: Error, req: Request, res: Response, next: NextFunction) => {
         logger.error(err.message + " " + err);
         return res.status(StatusCodes.BAD_REQUEST).json({

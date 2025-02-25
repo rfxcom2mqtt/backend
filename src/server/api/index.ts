@@ -5,6 +5,7 @@ import Discovery from "../../discovery";
 import DeviceApi from "./DeviceApi";
 import BridgeApi from "./BridgeApi";
 import SettingApi from "./SettingApi";
+import DeviceService from "../../services/DeviceService";
 
 import { loggerFactory } from "../../utils/logger";
 const logger = loggerFactory.getLogger("API");
@@ -13,9 +14,7 @@ export default class Api {
   public router: Router;
 
   constructor(
-    devices: DeviceStore,
-    state: StateStore,
-    discovery: Discovery,
+    deviceService: DeviceService,
     bridgeInfo: BridgeInfo,
     actionCallback: any,
   ) {
@@ -27,7 +26,7 @@ export default class Api {
     const settingApi = new SettingApi();
     this.router.use("/settings", settingApi.router);
 
-    const deviceApi = new DeviceApi(devices, state, discovery, actionCallback);
+    const deviceApi = new DeviceApi(deviceService, actionCallback);
     this.router.use("/devices", deviceApi.router);
 
     const bridgeApi = new BridgeApi(bridgeInfo, actionCallback);

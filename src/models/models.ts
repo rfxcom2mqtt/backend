@@ -30,6 +30,21 @@ export class DeviceEntity {
   }
 }
 
+export interface Device {
+  id?: string;
+  name: string;
+  type: string;
+  sensors: { [s: string]: Sensor };
+}
+
+export interface Sensor {
+  id: string;
+  name: string;
+  type: string;
+  property: string;
+  value: any;
+}
+
 export class DeviceCover {
   constructor(
     public id: string = "",
@@ -64,13 +79,14 @@ export class DeviceSelect {
   ) {}
 }
 
-export class DeviceSensor {
+export class DeviceSensor implements Sensor {
   constructor(
     public id: string = "",
     public name: string = "",
     public description: string = "",
     public property: string = "",
     public type: string = "",
+    public value: any = null,
   ) {}
 }
 
@@ -89,12 +105,12 @@ export class DeviceSwitch {
   ) {}
 }
 
-export class DeviceState extends DeviceEntity {
+export class DeviceState extends DeviceEntity implements Device {
   public type: string = "";
   public subtype: number = 0;
   public subTypeValue: string = "";
   entities: string[] = [];
-  sensors: { [s: string]: DeviceSensor } = {};
+  sensors: { [s: string]: Sensor } = {};
   binarysensors: { [s: string]: DeviceBinarySensor } = {};
   selects: { [s: string]: DeviceSelect } = {};
   covers: { [s: string]: DeviceCover } = {};
@@ -189,7 +205,7 @@ export class DeviceStateStore {
     return sensor;
   }
 
-  getSensors(): { [s: string]: DeviceSensor } {
+  getSensors(): { [s: string]: Sensor } {
     return this.state.sensors;
   }
 

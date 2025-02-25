@@ -103,7 +103,7 @@ async function start() {
   if (!semver.satisfies(process.version, version)) {
     console.log(
       `\t\Rfxcom2MQTT requires node version ${version}, you are running ${process.version}!\n`,
-    ); // eslint-disable-line
+    );
   }
 
   // Validate settings
@@ -121,7 +121,7 @@ async function start() {
     }
     console.log(
       `\nIf you don't know how to solve this, read https://rfxcom2mqtt.github.io/documentation/configuration/`,
-    ); // eslint-disable-line
+    );
     console.log(`\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n`);
     exit(1);
   }
