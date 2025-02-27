@@ -239,11 +239,6 @@ export default class Controller implements MqttEventListener {
 
     if (payload.unitCode !== undefined && !payload.group) {
       topicEntity += "/" + payload.unitCode;
-      this.mqttClient?.publish(
-        this.mqttClient.topics.devices + "/" + topicEntity,
-        json,
-        (error: any) => {},
-      );
     }
 
     // if (payload.type == "temperaturehumidity1") {
@@ -265,7 +260,7 @@ export default class Controller implements MqttEventListener {
     }
 
     this.mqttClient?.publish(
-      this.mqttClient.topics.devices,
+      this.mqttClient.topics.devices + "/" + topicEntity,
       json,
       (error: any) => {},
     );
