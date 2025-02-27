@@ -125,7 +125,9 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
       //TODO get command for other type
 
       default:
-        logger.info("device type (" + entityState.type + ") : default update values");
+        logger.info(
+          "device type (" + entityState.type + ") : default update values",
+        );
     }
     // if (
     //   entityState.type === "lighting1" ||

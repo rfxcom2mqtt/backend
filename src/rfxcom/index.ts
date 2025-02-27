@@ -148,22 +148,29 @@ export default class Rfxcom implements IRfxcom {
     payload: any,
     deviceConf: any,
   ) {
-    logger.debug(`Use RFY command: {"deviceType": "${deviceType}", "entityName": "${entityName}", "payload": "${payload}", "deviceConf": "${JSON.stringify(deviceConf)}"}`);
+    logger.debug(
+      `Use RFY command: {"deviceType": "${deviceType}", "entityName": "${entityName}", "payload": "${payload}", "deviceConf": "${JSON.stringify(deviceConf)}"}`,
+    );
 
     var self = this;
     var deviceIds = deviceConf ? [deviceConf.id] : entityName.split(",");
     // with this line of code we are able to use this id of the MQTT Topic without config file declaration :)
-    deviceIds.forEach(function(deviceId) {
+    deviceIds.forEach(function (deviceId) {
       try {
         var payloadObj = JSON.parse(payload);
-        var blindsMode = (deviceConf?.blindsMode || payload.blindsMode || "EU");
-        var subtype = (deviceConf?.subtype || payload.subtype || "RFY");
-        var rfy = new rfxcom.Rfy(self.rfxtrx, subtype, {venetianBlindsMode: blindsMode});
-        logger.info(`Send command '${payloadObj.command}' to deviceid: ${deviceId}, devicename: ${deviceConf?.name}`);
+        var blindsMode = deviceConf?.blindsMode || payload.blindsMode || "EU";
+        var subtype = deviceConf?.subtype || payload.subtype || "RFY";
+        var rfy = new rfxcom.Rfy(self.rfxtrx, subtype, {
+          venetianBlindsMode: blindsMode,
+        });
+        logger.info(
+          `Send command '${payloadObj.command}' to deviceid: ${deviceId}, devicename: ${deviceConf?.name}`,
+        );
         rfy.doCommand([deviceId, "1"], payloadObj.command);
-      }
-      catch (error) {
-        logger.error(`Payload is not a valid json format ${payload}, this command would be skipped.`);
+      } catch (error) {
+        logger.error(
+          `Payload is not a valid json format ${payload}, this command would be skipped.`,
+        );
       }
     });
   }

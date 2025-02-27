@@ -250,7 +250,13 @@ export default class Controller implements MqttEventListener {
     //   );
     // }
 
-    if ( (payload.unitCode==undefined) && (payload.temperature || payload.humidity || payload.barometer || payload.weight ) ) {
+    if (
+      payload.unitCode == undefined &&
+      (payload.temperature ||
+        payload.humidity ||
+        payload.barometer ||
+        payload.weight)
+    ) {
       // topicEntity += "/" + payload.unitCode;
       this.mqttClient?.publish(
         this.mqttClient.topics.devices + "/" + topicEntity,
