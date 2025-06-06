@@ -127,6 +127,16 @@ export default class Server {
       next();
     });*/
 
+    // Error handling middleware should be added after all routes
+    this.server.use(
+      (err: Error, req: Request, res: Response, next: NextFunction) => {
+        logger.error(err.message + " " + err);
+        res.status(StatusCodes.BAD_REQUEST).json({
+          error: err.message,
+        });
+      },
+    );
+
     /* istanbul ignore next */
     const options = {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -170,15 +180,6 @@ export default class Server {
     }
 
     this.websocketSrv.init(this.serverProcess);
-
-    this.server.use(
-      (err: Error, req: Request, res: Response, next: NextFunction) => {
-        logger.error(err.message + " " + err);
-        return res.status(StatusCodes.BAD_REQUEST).json({
-          error: err.message,
-        });
-      },
-    );
 
     logger.info("Server Started");
   }

@@ -11,17 +11,22 @@
     "resolveJsonModule": true,
     "noImplicitAny": false,
     "noImplicitThis": true,
-    "esModuleInterop":true,
+    "esModuleInterop": true,
     "outDir": "dist",
     "baseUrl": ".",
     "allowJs": true,
     "rootDir": "src",
     "inlineSourceMap": true,
     "experimentalDecorators": true,
+    "skipLibCheck": true,
     // TODO: Turn this on and fix all the errors
     "strict": true
   },
   "include": [
-    "./**/*.ts",
+    "src/**/*.ts"
   ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
 }
