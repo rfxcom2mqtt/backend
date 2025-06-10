@@ -1,42 +1,84 @@
 "use strict";
+
 import dotenv from "dotenv";
-dotenv.config({ path: getdotenvFile() });
-import Controller from "./Controller";
+import Controller from "./core/Controller";
+import { logger } from "./utils/logger";
+
+// Load environment variables from the specified file
+dotenv.config({ path: getEnvironmentFile() });
 
 let controller: Controller;
-let stopping = false;
+let isShuttingDown = false;
 
-function getdotenvFile() {
-  if (
-    process.argv[2] !== undefined &&
-    process.argv[2].includes("--env-file=")
-  ) {
-    console.log("args : " + process.argv[2]);
-    const envFile = process.argv[2].replace("--env-file=", "");
-    console.log("envFile : " + envFile);
+/**
+ * Determines which environment file to load based on command line arguments
+ * @returns The path to the environment file to load
+ */
+function getEnvironmentFile(): string {
+  const envFileArg = process.argv.find(arg => arg.includes("--env-file="));
+  
+  if (envFileArg) {
+    const envFile = envFileArg.replace("--env-file=", "");
+    logger.info(`Loading environment from: ${envFile}`);
     return envFile;
   }
+  
   return ".env";
 }
 
-function exit(code: number, restart: boolean = false) {
-  if (!restart) {
-    process.exit(code);
+/**
+ * Handles application exit with optional restart capability
+ * @param exitCode - The exit code to use
+ * @param shouldRestart - Whether the application should restart
+ */
+function handleExit(exitCode: number, shouldRestart: boolean = false): void {
+  if (!shouldRestart) {
+    logger.info(`Application exiting with code: ${exitCode}`);
+    process.exit(exitCode);
   }
 }
 
-async function start() {
-  controller = new Controller(exit);
-  await controller.start();
+/**
+ * Starts the main application controller
+ */
+async function startApplication(): Promise<void> {
+  try {
+    logger.info("Starting RFXCOM2MQTT application");
+    controller = new Controller(handleExit);
+    await controller.start();
+  } catch (error) {
+    logger.error(`Failed to start application: ${error}`);
+    process.exit(1);
+  }
 }
 
-function handleQuit() {
-  if (!stopping && controller) {
-    stopping = true;
+/**
+ * Handles graceful shutdown on SIGINT and SIGTERM signals
+ */
+function handleGracefulShutdown(): void {
+  if (!isShuttingDown && controller) {
+    isShuttingDown = true;
+    logger.info("Received shutdown signal, stopping application gracefully");
     controller.stop(false);
   }
 }
 
-process.on("SIGINT", handleQuit);
-process.on("SIGTERM", handleQuit);
-start();
+// Register signal handlers for graceful shutdown
+process.on("SIGINT", handleGracefulShutdown);
+process.on("SIGTERM", handleGracefulShutdown);
+
+// Handle uncaught exceptions
+process.on("uncaughtException", (error) => {
+  logger.error(`Uncaught exception: ${error.message}`);
+  logger.error(error.stack || "No stack trace available");
+  process.exit(1);
+});
+
+// Handle unhandled promise rejections
+process.on("unhandledRejection", (reason, promise) => {
+  logger.error(`Unhandled promise rejection at: ${promise}, reason: ${reason}`);
+  process.exit(1);
+});
+
+// Start the application
+startApplication();

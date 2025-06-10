@@ -7,7 +7,7 @@
     "description": "RFXCOM to MQTT bridge",
     "main": "src/index.ts",
     "engines": {
-        "node": "^18 || ^20 || ^21 || ^22"
+        "node": "^22"
     },
     "dependencies": {
         "@rfxcom2mqtt/frontend": "0.2.1",
