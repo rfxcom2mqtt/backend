@@ -7,11 +7,24 @@ import { MQTTMessage } from "./models/mqtt";
 import { RfxcomInfo } from "./models/rfxcom";
 import utils from "../utils/utils";
 import { logger } from "../utils/logger";
+import { safeExecute, MqttConnectionError, RfxcomError } from "../utils/errorHandling";
 import State, { DeviceStore } from "./store/state";
 import cron from "node-cron";
 import { getRfxcomInstance } from "../adapters/rfxcom";
 import IRfxcom from "./services/rfxcom.service";
 import { MqttEventListener } from "./services/mqtt.service";
+import { ExitCallback } from "../types/common";
+import { BRIDGE_ACTIONS, DEVICE_TYPES } from "../constants";
+
+/**
+ * Main Controller class that orchestrates the RFXCOM to MQTT bridge
+ * 
+ * This class is responsible for:
+ * - Managing the lifecycle of all components (RFXCOM, MQTT, Discovery, Server)
+ * - Handling communication between RFXCOM and MQTT
+ * - Processing bridge and device actions
+ * - Managing application state and device store
+ */
 
 export default class Controller implements MqttEventListener {
   private rfxBridge?: IRfxcom;
@@ -24,30 +37,55 @@ export default class Controller implements MqttEventListener {
 
   private exitCallback: (code: number, restart: boolean) => void;
 
-  constructor(exitCallback: (code: number, restart: boolean) => void) {
+  /**
+   * Creates a new Controller instance
+   * @param exitCallback - Callback function to handle application exit
+   */
+  constructor(exitCallback: ExitCallback) {
     this.exitCallback = exitCallback;
     this.reload();
   }
 
-  reload() {
+  /**
+   * Reloads the configuration and reinitializes all components
+   * This method is called during startup and when configuration changes
+   */
+  reload(): void {
     const config = settingsService.read();
-    logger.info("configuration : " + JSON.stringify(config));
+    logger.info(`Loading configuration: ${JSON.stringify(config)}`);
+    
+    this.initializeComponents(config);
+    this.setupEventListeners();
+  }
+
+  /**
+   * Initializes all core components based on configuration
+   * @param config - The application configuration
+   */
+  private initializeComponents(config: any): void {
+    // Initialize server if frontend is enabled
     if (config.frontend.enabled) {
       this.server = new Server();
     }
+
+    // Initialize core components
     this.state = new State();
     this.device = new DeviceStore();
     this.mqttClient = getMqttInstance();
     this.rfxBridge = getRfxcomInstance();
+    
+    // Initialize discovery service
     this.discovery = new Discovery(
       this.mqttClient,
       this.rfxBridge,
       this.state,
       this.device,
     );
-    if (config.frontend.enabled) {
-      logger.info("Server enable Api");
-      this.server!.enableApi(
+
+    // Enable API if frontend is enabled
+    if (config.frontend.enabled && this.server) {
+      logger.info("Enabling server API");
+      this.server.enableApi(
         this.device,
         this.state,
         this.discovery,
@@ -55,226 +93,437 @@ export default class Controller implements MqttEventListener {
         (action: Action) => this.runAction(action),
       );
     }
-    this.mqttClient.addListener(this.discovery);
-    this.mqttClient.addListener(this);
   }
 
-  async runAction(action: Action) {
-    if (action.type === "bridge") {
-      this.runBridgeAction(action.action);
-    } else if (action.type === "device") {
-      this.runDeviceAction(action.deviceId, action.entityId, action.action);
+  /**
+   * Sets up event listeners for MQTT communication
+   */
+  private setupEventListeners(): void {
+    if (this.mqttClient && this.discovery) {
+      this.mqttClient.addListener(this.discovery);
+      this.mqttClient.addListener(this);
     }
   }
 
-  async runDeviceAction(deviceId: string, entityId: string, action: string) {
+  /**
+   * Executes an action based on its type (bridge or device)
+   * @param action - The action to execute
+   */
+  async runAction(action: Action): Promise<void> {
+    try {
+      if (action.type === "bridge") {
+        await this.runBridgeAction(action.action);
+      } else if (action.type === "device") {
+        await this.runDeviceAction(action.deviceId, action.entityId, action.action);
+      } else {
+        logger.warn(`Unknown action type: ${action.type}`);
+      }
+    } catch (error) {
+      logger.error(`Failed to execute action: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  /**
+   * Executes a device-specific action
+   * @param deviceId - The ID of the device
+   * @param entityId - The entity ID within the device
+   * @param action - The action to perform
+   */
+  async runDeviceAction(deviceId: string, entityId: string, action: string): Promise<void> {
     const deviceState = this.device?.get(deviceId);
-    if (deviceState) {
+    
+    if (!deviceState) {
+      logger.warn(`Device not found: ${deviceId}`);
+      return;
+    }
+
+    if (!this.mqttClient) {
+      logger.error("MQTT client not available for device action");
+      return;
+    }
+
+    try {
       const device = new DeviceStateStore(deviceState);
+      const commandTopic = device.getCommandTopic(
+        this.mqttClient.topics.base + "/cmd/",
+        entityId,
+      );
+
       this.discovery?.onMQTTMessage({
-        topic: device.getCommandTopic(
-          this.mqttClient?.topics.base + "/cmd/",
-          entityId,
-        ),
+        topic: commandTopic,
         message: action,
       });
+
+      logger.debug(`Device action executed: ${deviceId}/${entityId} -> ${action}`);
+    } catch (error) {
+      logger.error(`Failed to execute device action: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
-  async runBridgeAction(action: string) {
-    logger.info(action);
-    if (action === "restart") {
-      await this.stop(true);
-      this.reload();
-      await this.start();
-    } else if (action === "stop") {
-      await this.stop(false);
-    } else if (action === "reset_devices") {
-      this.device?.reset();
-    } else if (action === "reset_state") {
-      this.state?.reset();
+  async runBridgeAction(action: string): Promise<void> {
+    logger.info(`Executing bridge action: ${action}`);
+    
+    switch (action) {
+      case BRIDGE_ACTIONS.RESTART:
+        await this.restartBridge();
+        break;
+      case BRIDGE_ACTIONS.STOP:
+        await this.stop(false);
+        break;
+      case BRIDGE_ACTIONS.RESET_DEVICES:
+        this.resetDevices();
+        break;
+      case BRIDGE_ACTIONS.RESET_STATE:
+        this.resetState();
+        break;
+      default:
+        logger.warn(`Unknown bridge action: ${action}`);
     }
   }
 
-  async startMqtt() {
-    // MQTT
-    try {
-      await this.mqttClient?.connect();
-    } catch (error: any) {
-      logger.error(`MQTT failed to connect, exiting...`);
+  private async restartBridge(): Promise<void> {
+    await this.stop(true);
+    this.reload();
+    await this.start();
+  }
+
+  private resetDevices(): void {
+    this.device?.reset();
+    logger.info("Devices reset completed");
+  }
+
+  private resetState(): void {
+    this.state?.reset();
+    logger.info("State reset completed");
+  }
+
+  private async startMqtt(): Promise<void> {
+    await safeExecute(
+      async () => {
+        if (!this.mqttClient) {
+          throw new MqttConnectionError("MQTT client not initialized");
+        }
+        await this.mqttClient.connect();
+      },
+      "Failed to connect to MQTT broker",
+      { component: "MQTT" }
+    ).catch(async (error) => {
+      logger.error(`MQTT connection failed: ${error.message}`);
       await this.rfxBridge?.stop();
       await this.exitCallback(1, false);
+    });
+  }
+
+  /**
+   * Starts all components of the RFXCOM to MQTT bridge
+   * This includes the server, device store, discovery service, RFXCOM bridge, and MQTT client
+   */
+  async start(): Promise<void> {
+    logger.info("Controller starting");
+    
+    try {
+      await this.startComponents();
+      await this.initializeRfxcomBridge();
+      await this.startMqtt();
+      this.setupRfxcomEventHandlers();
+      this.scheduleHealthcheck();
+      
+      logger.info("Controller started successfully");
+    } catch (error) {
+      logger.error(`Failed to start controller: ${error instanceof Error ? error.message : String(error)}`);
+      throw error;
     }
   }
 
-  async start(): Promise<void> {
-    logger.info("Controller Starting");
+  /**
+   * Starts the core components (server, device store, discovery)
+   */
+  private async startComponents(): Promise<void> {
     this.server?.start();
     this.device?.start();
     this.discovery?.start();
-    try {
-      await this.rfxBridge?.initialise();
-    } catch (error: any) {
-      logger.error("Failed to start Rfxcom");
-      logger.error("Exiting...");
-      logger.error(error.stack);
+  }
+
+  /**
+   * Initializes the RFXCOM bridge with error handling
+   */
+  private async initializeRfxcomBridge(): Promise<void> {
+    await safeExecute(
+      async () => {
+        if (!this.rfxBridge) {
+          throw new RfxcomError("RFXCOM bridge not initialized");
+        }
+        await this.rfxBridge.initialise();
+      },
+      "Failed to initialize RFXCOM bridge",
+      { component: "RFXCOM" }
+    );
+  }
+
+  /**
+   * Sets up event handlers for RFXCOM bridge events
+   */
+  private setupRfxcomEventHandlers(): void {
+    if (!this.rfxBridge) {
+      logger.warn("RFXCOM bridge not available for event handler setup");
+      return;
     }
 
-    await this.startMqtt();
-
-    this.rfxBridge?.subscribeProtocolsEvent((type: any, evt: any) =>
+    // Subscribe to protocol events
+    this.rfxBridge.subscribeProtocolsEvent((type: any, evt: any) =>
       this.sendToMQTT(type, evt),
     );
 
-    const mqttClient = this.mqttClient;
-    const hass = this.discovery;
+    // Handle status updates
+    this.rfxBridge.onStatus((coordinatorInfo: RfxcomInfo) => {
+      this.handleRfxcomStatus(coordinatorInfo);
+    });
+
+    // Handle disconnection events
+    this.rfxBridge.onDisconnect((evt: any) => {
+      this.handleRfxcomDisconnect(evt);
+    });
+  }
+
+  /**
+   * Handles RFXCOM status updates
+   * @param coordinatorInfo - Information about the RFXCOM coordinator
+   */
+  private handleRfxcomStatus(coordinatorInfo: RfxcomInfo): void {
     const config = settingsService.get();
-    const bridgeInfo = this.bridgeInfo;
     const version = utils.getRfxcom2MQTTVersion();
-    // RFXCOM Status
-    this.rfxBridge?.onStatus(function (coordinatorInfo: RfxcomInfo) {
-      bridgeInfo.coordinator = coordinatorInfo;
-      bridgeInfo.version = version;
-      bridgeInfo.logLevel = config ? config.loglevel : "info";
-      mqttClient?.publish(
-        mqttClient.topics.info,
-        JSON.stringify(bridgeInfo),
-        (error: any) => {},
-      );
-      if (config?.homeassistant?.discovery) {
-        hass?.publishDiscoveryToMQTT({ device: false, payload: bridgeInfo });
-      }
-    });
 
-    // RFXCOM Disconnect
-    this.rfxBridge?.onDisconnect(function (evt: any) {
-      mqttClient?.publish("disconnected", "disconnected", (error: any) => {});
-    });
+    this.bridgeInfo.coordinator = coordinatorInfo;
+    this.bridgeInfo.version = version;
+    this.bridgeInfo.logLevel = config ? config.loglevel : "info";
 
-    this.scheduleHealthcheck();
-    logger.info("Started");
-  }
+    // Publish bridge info to MQTT
+    this.mqttClient?.publish(
+      this.mqttClient.topics.info,
+      JSON.stringify(this.bridgeInfo),
+      (error: any) => {
+        if (error) {
+          logger.error(`Failed to publish bridge info: ${error.message}`);
+        }
+      },
+    );
 
-  async stop(restart = false): Promise<void> {
-    this.device?.stop();
-    await this.discovery?.stop();
-    await this.mqttClient?.disconnect();
-    await this.rfxBridge?.stop();
-    await this.server?.stop();
-    await this.exitCallback(0, restart);
-  }
-
-  scheduleHealthcheck() {
-    if (settingsService.get().healthcheck.enabled) {
-      cron.schedule(settingsService.get().healthcheck.cron, () => {
-        logger.debug("Healthcheck");
-        const mqttClient = this.mqttClient;
-
-        const stop = this.stop;
-        this.rfxBridge?.getStatus(function (status: string) {
-          mqttClient?.publishState(status);
-          if (status === "offline") {
-            stop();
-          }
-        });
+    // Publish to Home Assistant discovery if enabled
+    if (config?.homeassistant?.discovery) {
+      this.discovery?.publishDiscoveryToMQTT({ 
+        device: false, 
+        payload: this.bridgeInfo 
       });
     }
   }
 
-  subscribeTopic(): string[] {
-    return [settingsService.get().mqtt.base_topic + "/command/#"];
+  /**
+   * Handles RFXCOM disconnection events
+   * @param evt - The disconnection event
+   */
+  private handleRfxcomDisconnect(evt: any): void {
+    logger.warn("RFXCOM disconnected");
+    this.mqttClient?.publish("disconnected", "disconnected", (error: any) => {
+      if (error) {
+        logger.error(`Failed to publish disconnection status: ${error.message}`);
+      }
+    });
   }
-  // RFXCOM Transmit
-  onMQTTMessage(data: MQTTMessage) {
-    const dn = data.topic.split("/");
-    if (dn[0] != settingsService.get().mqtt.base_topic) {
-      logger.warn(
-        "Topic Error, should start with " +
-          settingsService.get().mqtt.base_topic,
-      );
+
+  /**
+   * Stops all components gracefully
+   * @param restart - Whether the application should restart after stopping
+   */
+  async stop(restart = false): Promise<void> {
+    logger.info(`Stopping controller (restart: ${restart})`);
+    
+    try {
+      this.device?.stop();
+      await this.discovery?.stop();
+      await this.mqttClient?.disconnect();
+      await this.rfxBridge?.stop();
+      await this.server?.stop();
+      
+      logger.info("Controller stopped successfully");
+      await this.exitCallback(0, restart);
+    } catch (error) {
+      logger.error(`Error during shutdown: ${error instanceof Error ? error.message : String(error)}`);
+      await this.exitCallback(1, restart);
+    }
+  }
+
+  /**
+   * Schedules periodic health checks if enabled in configuration
+   */
+  private scheduleHealthcheck(): void {
+    const config = settingsService.get();
+    
+    if (!config.healthcheck.enabled) {
+      logger.debug("Health check disabled");
       return;
     }
 
-    if (dn[1] === "command") {
-      const deviceType = dn[2];
-      let entityName = dn[3];
-      // Used for units and forms part of the device id
-      if (dn[4] !== undefined && dn[4].length > 0) {
-        entityName += "/" + dn[4];
+    logger.info(`Scheduling health check with cron: ${config.healthcheck.cron}`);
+    
+    cron.schedule(config.healthcheck.cron, () => {
+      this.performHealthcheck();
+    });
+  }
+
+  /**
+   * Performs a health check by querying RFXCOM status
+   */
+  private performHealthcheck(): void {
+    logger.debug("Performing health check");
+    
+    this.rfxBridge?.getStatus((status: string) => {
+      this.mqttClient?.publishState(status);
+      
+      if (status === "offline") {
+        logger.error("Health check failed: RFXCOM is offline");
+        this.stop();
+      } else {
+        logger.debug(`Health check passed: RFXCOM status is ${status}`);
+      }
+    });
+  }
+
+  /**
+   * Returns the MQTT topics this controller subscribes to
+   * @returns Array of topic patterns to subscribe to
+   */
+  subscribeTopic(): string[] {
+    const baseTopic = settingsService.get().mqtt.base_topic;
+    return [`${baseTopic}/command/#`];
+  }
+
+  /**
+   * Handles incoming MQTT messages and routes them to RFXCOM
+   * @param data - The MQTT message data
+   */
+  onMQTTMessage(data: MQTTMessage): void {
+    try {
+      const topicParts = data.topic.split("/");
+      const baseTopic = settingsService.get().mqtt.base_topic;
+
+      if (!this.validateTopicStructure(topicParts, baseTopic)) {
+        return;
       }
 
-      const deviceConf = settingsService
-        .get()
-        .devices.find((dev: SettingDevice) => dev.name === entityName);
-      this.rfxBridge?.onCommand(
-        deviceType,
-        entityName,
-        data.message,
-        deviceConf,
-      );
+      if (topicParts[1] === "command") {
+        this.handleCommandMessage(topicParts, data.message);
+      } else {
+        logger.warn(`Invalid topic structure: expected 'command' but got '${topicParts[1]}'`);
+      }
+    } catch (error) {
+      logger.error(`Error processing MQTT message: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  /**
+   * Validates the structure of an incoming MQTT topic
+   * @param topicParts - The topic split into parts
+   * @param baseTopic - The expected base topic
+   * @returns True if the topic structure is valid
+   */
+  private validateTopicStructure(topicParts: string[], baseTopic: string): boolean {
+    if (topicParts[0] !== baseTopic) {
+      logger.warn(`Invalid topic base: expected '${baseTopic}' but got '${topicParts[0]}'`);
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * Handles command messages from MQTT
+   * @param topicParts - The topic split into parts
+   * @param message - The message content
+   */
+  private handleCommandMessage(topicParts: string[], message: string): void {
+    const deviceType = topicParts[2];
+    let entityName = topicParts[3];
+
+    // Handle unit codes in the entity name
+    if (topicParts[4] !== undefined && topicParts[4].length > 0) {
+      entityName += "/" + topicParts[4];
+    }
+
+    // Find device configuration
+    const deviceConf = settingsService
+      .get()
+      .devices.find((dev: SettingDevice) => dev.name === entityName);
+
+    // Send command to RFXCOM bridge
+    this.rfxBridge?.onCommand(deviceType, entityName, message, deviceConf);
+    
+    logger.debug(`Command sent to RFXCOM: ${deviceType}/${entityName} -> ${message}`);
+  }
+
+  private sendToMQTT(type: string, evt: any): void {
+    logger.info(`Received RFXCOM event: ${JSON.stringify(evt)}`);
+    
+    try {
+      const processedEvent = this.processRfxcomEvent(type, evt);
+      const topicEntity = this.buildTopicEntity(processedEvent);
+      const payload = JSON.stringify(processedEvent, null, 2);
+
+      this.publishToMqttTopic(topicEntity, payload);
+      this.handleHomeAssistantDiscovery(processedEvent);
+
+    } catch (error) {
+      logger.error(`Failed to process RFXCOM event: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  private processRfxcomEvent(type: string, evt: any): any {
+    // Create a copy and add type information
+    const processedEvent = { ...evt, type };
+    
+    // Handle special device types
+    if (type === DEVICE_TYPES.LIGHTING4) {
+      processedEvent.id = evt.data;
+    }
+
+    return processedEvent;
+  }
+
+  private buildTopicEntity(event: any): string {
+    let topicEntity = event.id;
+
+    // Add unit code to topic if present and not a group command
+    if (event.unitCode !== undefined && !event.group) {
+      topicEntity += `/${event.unitCode}`;
+    }
+
+    return topicEntity;
+  }
+
+  private publishToMqttTopic(topicEntity: string, payload: string): void {
+    if (!this.mqttClient) {
+      logger.warn("MQTT client not available, cannot publish message");
       return;
     }
 
-    logger.warn(
-      "Topic Error, should start with " +
-        settingsService.get().mqtt.base_topic +
-        "/command",
+    const fullTopic = `${this.mqttClient.topics.devices}/${topicEntity}`;
+    
+    this.mqttClient.publish(
+      fullTopic,
+      payload,
+      (error: any) => {
+        if (error) {
+          logger.error(`Failed to publish to MQTT topic ${fullTopic}: ${error.message}`);
+        } else {
+          logger.debug(`Successfully published to MQTT topic: ${fullTopic}`);
+        }
+      }
     );
-    return;
   }
 
-  sendToMQTT(type: any, evt: any) {
-    logger.info("receive from rfxcom : " + JSON.stringify(evt));
-    // Add type to event!
-    evt.type = type;
-
-    let deviceId = evt.id;
-    if (type === "lighting4") {
-      deviceId = evt.data;
-    }
-
-    // Define default topic entity
-    let topicEntity = deviceId;
-
-    const json = JSON.stringify(evt, null, 2);
-    const payload = JSON.parse(json);
-
-    if (payload.unitCode !== undefined && !payload.group) {
-      topicEntity += "/" + payload.unitCode;
-    }
-
-    // if (payload.type == "temperaturehumidity1") {
-    //   topicEntity += "/" + payload.unitCode;
-    //   this.mqttClient?.publish(
-    //     this.mqttClient.topics.devices + "/" + topicEntity,
-    //     json,
-    //     (error: any) => {},
-    //   );
-    // }
-
-    if (
-      payload.unitCode == undefined &&
-      (payload.temperature ||
-        payload.humidity ||
-        payload.barometer ||
-        payload.weight)
-    ) {
-      // topicEntity += "/" + payload.unitCode;
-      this.mqttClient?.publish(
-        this.mqttClient.topics.devices + "/" + topicEntity,
-        json,
-        (error: any) => {},
-      );
-    }
-
-    this.mqttClient?.publish(
-      this.mqttClient.topics.devices + "/" + topicEntity,
-      json,
-      (error: any) => {},
-    );
-
-    if (settingsService.get().homeassistant?.discovery) {
-      this.discovery?.publishDiscoveryToMQTT({
+  private handleHomeAssistantDiscovery(payload: any): void {
+    const config = settingsService.get();
+    
+    if (config?.homeassistant?.discovery && this.discovery) {
+      this.discovery.publishDiscoveryToMQTT({
         device: true,
         payload: payload,
       });
