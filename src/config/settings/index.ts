@@ -10,16 +10,20 @@ import yaml from "./yaml";
 
 type RecursivePartial<T> = { [P in keyof T]?: RecursivePartial<T[P]> };
 
+export type LogLevel = 'error' | 'warn' | 'info' | 'debug';
+export interface HealthcheckConfig {
+  readonly enabled: boolean;
+  readonly cron: string;
+}
+export interface CacheConfig {
+  readonly enable: boolean;
+  readonly saveInterval: number;
+}
+
 export interface Settings {
-  loglevel: "warn" | "debug" | "info" | "error";
-  cacheState: {
-    enable: boolean;
-    saveInterval: number;
-  };
-  healthcheck: {
-    enabled: boolean;
-    cron: string;
-  };
+  loglevel: LogLevel;
+  cacheState: CacheConfig;
+  healthcheck: HealthcheckConfig;
   homeassistant: SettingHass;
   devices: SettingDevice[];
   mqtt: SettingMqtt;
@@ -44,7 +48,7 @@ export interface SettingMqtt {
   version?: 3 | 4 | 5;
   username?: string;
   password?: string;
-  port?: string;
+  port?: number;
   server: string;
   key?: string;
   ca?: string;

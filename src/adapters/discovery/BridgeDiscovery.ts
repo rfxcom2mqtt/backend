@@ -1,8 +1,8 @@
 "use strict";
 
 import IRfxcom from "../../core/services/rfxcom.service";
-import { Settings, settingsService } from "../../config/settings";
-import { IMqtt } from "../mqtt";
+import { IMqtt } from "../../core/services/mqtt.service";
+import { settingsService } from "../../config/settings";
 import { DeviceBridge, BridgeInfo } from "../../core/models";
 import { MQTTMessage } from "../../core/models/mqtt";
 import { loggerFactory, logger } from "../../utils/logger";

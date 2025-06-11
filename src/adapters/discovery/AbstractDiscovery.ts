@@ -2,9 +2,8 @@
 
 import { settingsService } from "../../config/settings";
 import IRfxcom from "../../core/services/rfxcom.service";
+import { IMqtt } from "../../core/services/mqtt.service";
 import utils from "../../utils/utils";
-
-import { IMqtt } from "../mqtt";
 
 export default class AbstractDiscovery {
   protected mqtt: IMqtt;

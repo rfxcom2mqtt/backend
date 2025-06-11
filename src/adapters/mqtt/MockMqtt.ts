@@ -1,6 +1,8 @@
 import { settingsService } from "../../config/settings";
-import { IMqtt, Topic, MQTTOptions } from ".";
+import { MQTTOptions } from ".";
 import { MqttEventListener } from "../../core/services/mqtt.service";
+import { IMqtt } from "../../core/services/mqtt.service";
+import { Topic } from "../../core/models/mqtt";
 
 export class MockMqtt implements IMqtt {
   public topics: Topic;

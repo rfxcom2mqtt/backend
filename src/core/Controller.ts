@@ -2,20 +2,24 @@ import cron from "node-cron";
 
 import { SettingDevice, settingsService } from "../config/settings";
 import Discovery from "../adapters/discovery";
-import { IMqtt, getMqttInstance } from "../adapters/mqtt";
+import { getMqttInstance } from "../adapters/mqtt";
 import { getRfxcomInstance } from "../adapters/rfxcom";
 import Server from "../application";
 import utils from "../utils/utils";
 import { logger } from "../utils/logger";
 import { safeExecute, MqttConnectionError, RfxcomError } from "../utils/errorHandling";
-import { ExitCallback } from "../types/common";
 import { BRIDGE_ACTIONS, DEVICE_TYPES } from "../constants";
 import { BridgeInfo, DeviceStateStore, Action } from "./models";
 import { MQTTMessage } from "./models/mqtt";
 import { RfxcomInfo } from "./models/rfxcom";
 import IRfxcom from "./services/rfxcom.service";
-import { MqttEventListener } from "./services/mqtt.service";
+import { IMqtt, MqttEventListener } from "./services/mqtt.service";
 import State, { DeviceStore } from "./store/state";
+
+
+export interface ExitCallback {
+  (code: number, restart: boolean): void;
+}
 
 /**
  * Main Controller class that orchestrates the RFXCOM to MQTT bridge
@@ -36,7 +40,7 @@ export default class Controller implements MqttEventListener {
   protected device?: DeviceStore;
   protected bridgeInfo = new BridgeInfo();
 
-  private exitCallback: (code: number, restart: boolean) => void;
+  private exitCallback: ExitCallback;
 
   /**
    * Creates a new Controller instance

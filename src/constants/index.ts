@@ -1,6 +1,6 @@
 // Application constants
 export const APP_CONSTANTS = {
-  DEFAULT_MQTT_PORT: "1883",
+  DEFAULT_MQTT_PORT: 1883,
   DEFAULT_QOS: 0,
   SAVE_INTERVAL: 1000 * 60, // 1 minute
   RFXCOM2MQTT_PREFIX: "rfxcom2mqtt_",

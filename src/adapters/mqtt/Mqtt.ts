@@ -2,13 +2,13 @@ import * as fs from "fs";
 import * as mqtt from "mqtt";
 import { QoS } from "mqtt-packet";
 import { SettingMqtt, settingsService } from "../../config/settings";
-import { MQTTMessage } from "../../core/models/mqtt";
+import { MQTTMessage, Topic } from "../../core/models/mqtt";
 import { MqttEventListener } from "../../core/services/mqtt.service";
+import { IMqtt } from "../../core/services/mqtt.service";
 import { loggerFactory } from "../../utils/logger";
 import { MqttConnectionError } from "../../utils/errorHandling";
 import { APP_CONSTANTS } from "../../constants";
-import { MqttConnectionConfig } from "../../types/common";
-import { IMqtt, Topic, MQTTOptions } from ".";
+import { MqttConnectionConfig, MQTTOptions } from ".";
 
 const logger = loggerFactory.getLogger("MQTT");
 

@@ -2,48 +2,26 @@ import { QoS } from "mqtt-packet";
 import Mqtt from "./Mqtt";
 import { MockMqtt } from "./MockMqtt";
 import { settingsService } from "../../config/settings";
-import { MqttEventListener } from "../../core/services/mqtt.service";
+import { IMqtt } from "../../core/services/mqtt.service";
 
 export interface MQTTOptions {
   qos?: QoS;
   retain?: boolean;
 }
 
-export class Topic {
-  base: string;
-  will: string;
-  devices: string;
-  info: string;
-
-  constructor(baseTopic: string) {
-    this.base = baseTopic;
-    this.devices = "devices";
-    this.will = "bridge/status";
-    this.info = "bridge/info";
-  }
-}
-
-export interface IMqtt {
-  topics: Topic;
-  addListener(listener: MqttEventListener);
-  publish(
-    topic: string,
-    playload: any,
-    callback: any,
-    options: MQTTOptions,
-    base,
-  ): void;
-  publish(
-    topic: string,
-    playload: any,
-    callback: any,
-    options: MQTTOptions,
-  ): void;
-  publish(topic: string, playload: any, callback: any): void;
-  publishState(state: string);
-  connect(): Promise<void>;
-  isConnected(): boolean;
-  disconnect();
+export interface MqttConnectionConfig {
+  server: string;
+  port: number;
+  username?: string;
+  password?: string;
+  qos: number;
+  retain: boolean;
+  version?: number;
+  keepalive?: number;
+  ca?: string;
+  key?: string;
+  cert?: string;
+  client_id?: string;
 }
 
 export function getMqttInstance(): IMqtt {

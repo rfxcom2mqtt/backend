@@ -1,11 +1,11 @@
-import { MqttConfig, LogLevel } from '../types/enhanced';
-import { ConfigurationError } from './errorHandling';
-import { logger } from './logger';
+import { LogLevel, SettingMqtt } from '.';
+import { ConfigurationError } from '../../utils/errorHandling';
+import { logger } from '../../utils/logger';
 
 /**
  * Validates MQTT configuration
  */
-export function validateMqttConfig(config: Partial<MqttConfig>): MqttConfig {
+export function validateMqttConfig(config: Partial<SettingMqtt>): SettingMqtt {
   const errors: string[] = [];
 
   if (!config.server) {
@@ -36,19 +36,21 @@ export function validateMqttConfig(config: Partial<MqttConfig>): MqttConfig {
   }
 
   return {
-    server: config.server!,
-    port: config.port || 1883,
     base_topic: config.base_topic!,
-    qos: config.qos || 0,
+    include_device_information: config.include_device_information!,
     retain: config.retain || false,
+    qos: config.qos || 0,
+    version: config.version,
     username: config.username,
     password: config.password,
-    version: config.version,
-    keepalive: config.keepalive,
-    ca: config.ca,
+    port: config.port || 1883,
+    server: config.server!,
     key: config.key,
+    ca: config.ca,
     cert: config.cert,
+    keepalive: config.keepalive,
     client_id: config.client_id,
+    reject_unauthorized: config.reject_unauthorized
   };
 }
 

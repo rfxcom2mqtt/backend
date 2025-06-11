@@ -12,10 +12,9 @@ import {
 } from "../../core/models";
 import { MQTTMessage } from "../../core/models/mqtt";
 import IRfxcom from "../../core/services/rfxcom.service";
+import { IMqtt } from "../../core/services/mqtt.service";
 import StateStore, { DeviceStore } from "../../core/store/state";
 import { logger } from "../../utils/logger";
-
-import { IMqtt } from "../mqtt";
 
 import AbstractDiscovery from "./AbstractDiscovery";
 import { lookup } from "./Homeassistant";

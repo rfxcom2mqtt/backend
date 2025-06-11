@@ -1,8 +1,22 @@
+import { RfxcomInfo } from "../models/rfxcom";
+
+export interface OnStatusCallback {
+  (coordinatorInfo: RfxcomInfo): void;
+}
+
+export interface StatusCallback {
+  (status: string): void;
+}
+
+export interface RfxcomEventHandler {
+  (type: any, evt: any): void;
+}
+
 export default interface IRfxcom {
   isGroup(payload: any): boolean;
   initialise(): Promise<void>;
-  getStatus(callback: any): void;
-  onStatus(callback: any): void;
+  getStatus(callback: StatusCallback): void;
+  onStatus(callback: OnStatusCallback): void;
   onCommand(
     deviceType: string,
     entityName: string,
@@ -10,7 +24,7 @@ export default interface IRfxcom {
     deviceConf: any,
   ): void;
   onDisconnect(callback: any): void;
-  subscribeProtocolsEvent(callback: any): void;
+  subscribeProtocolsEvent(callback: RfxcomEventHandler): void;
   getSubType(type: string, subType: string): string;
   stop(): void;
   sendCommand(
