@@ -1,9 +1,11 @@
 import rfxcom from "rfxcom";
+
 import { settingsService } from "../../config/settings";
 import { RfxcomInfo, RfxcomEvent } from "../../core/models/rfxcom";
 import IRfxcom from "../../core/services/rfxcom.service";
-import MockRfxcom from "./Mock";
 import { loggerFactory } from "../../utils/logger";
+
+import MockRfxcom from "./Mock";
 const logger = loggerFactory.getLogger("RFXCOM");
 
 export function getRfxcomInstance(): IRfxcom {

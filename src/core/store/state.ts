@@ -1,9 +1,11 @@
-import { DeviceState, KeyValue, EntityState } from "../models";
 import fs from "fs";
-import { settingsService } from "../../config/settings";
+
 import objectAssignDeep from "object-assign-deep";
 
+import { settingsService } from "../../config/settings";
 import { loggerFactory } from "../../utils/logger";
+
+import { DeviceState, KeyValue, EntityState } from "../models";
 const logger = loggerFactory.getLogger("STORE");
 
 const saveInterval = 1000 * 60; // 1 minutes

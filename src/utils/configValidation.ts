@@ -1,8 +1,4 @@
-/**
- * Configuration validation utilities for better error handling and type safety
- */
-
-import { ApplicationConfig, MqttConfig, LogLevel } from '../types/enhanced';
+import { MqttConfig, LogLevel } from '../types/enhanced';
 import { ConfigurationError } from './errorHandling';
 import { logger } from './logger';
 

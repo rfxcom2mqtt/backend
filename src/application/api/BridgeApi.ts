@@ -1,5 +1,6 @@
-import { StatusCodes } from "http-status-codes";
 import { Router, Request, Response } from "express";
+import { StatusCodes } from "http-status-codes";
+
 import { BridgeInfo, Action } from "../../core/models";
 
 export default class BridgeApi {

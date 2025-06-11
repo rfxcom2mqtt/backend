@@ -1,6 +1,7 @@
 "use strict";
 
 import dotenv from "dotenv";
+
 import Controller from "./core/Controller";
 import { logger } from "./utils/logger";
 

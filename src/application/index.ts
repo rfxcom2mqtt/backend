@@ -1,18 +1,19 @@
+import fs from "fs";
+
 import cookieParser from "cookie-parser";
 import express, { Request, Response, NextFunction } from "express";
-
-import { StatusCodes } from "http-status-codes";
 import * as core from "express-serve-static-core";
-import fs from "fs";
-import { settingsService } from "../config/settings";
+import { StatusCodes } from "http-status-codes";
+
 import Discovery from "../adapters/discovery";
-import StateStore, { DeviceStore } from "../core/store/state";
+import { settingsService } from "../config/settings";
 import { BridgeInfo } from "../core/models";
+import StateStore, { DeviceStore } from "../core/store/state";
+import { loggerFactory } from "../utils/logger";
+
 import Api from "./api/index";
 import Frontend from "./Frontend";
 import WebSocketService from "./WebSocketService";
-
-import { loggerFactory } from "../utils/logger";
 const logger = loggerFactory.getLogger("API");
 
 export default class Server {

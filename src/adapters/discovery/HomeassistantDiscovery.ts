@@ -1,8 +1,6 @@
 "use strict";
 
-import IRfxcom from "../../core/services/rfxcom.service";
 import { SettingDevice, settingsService } from "../../config/settings";
-import { IMqtt } from "../mqtt";
 import {
   DeviceSwitch,
   DeviceBinarySensor,
@@ -13,8 +11,12 @@ import {
   DeviceStateStore,
 } from "../../core/models";
 import { MQTTMessage } from "../../core/models/mqtt";
+import IRfxcom from "../../core/services/rfxcom.service";
 import StateStore, { DeviceStore } from "../../core/store/state";
 import { logger } from "../../utils/logger";
+
+import { IMqtt } from "../mqtt";
+
 import AbstractDiscovery from "./AbstractDiscovery";
 import { lookup } from "./Homeassistant";
 

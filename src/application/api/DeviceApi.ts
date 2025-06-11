@@ -1,11 +1,12 @@
-import { StatusCodes } from "http-status-codes";
 import { Router, Request, Response } from "express";
+import { StatusCodes } from "http-status-codes";
+
 import Discovery from "../../adapters/discovery";
-import StateStore, { DeviceStore } from "../../core/store/state";
-import { Action, DeviceStateStore } from "../../core/models";
-import { settingsService } from "../../config/settings";
-import { loggerFactory } from "../../utils/logger";
 import { lookup } from "../../adapters/discovery/Homeassistant";
+import { settingsService } from "../../config/settings";
+import { Action, DeviceStateStore } from "../../core/models";
+import StateStore, { DeviceStore } from "../../core/store/state";
+import { loggerFactory } from "../../utils/logger";
 const logger = loggerFactory.getLogger("API");
 
 export default class DeviceApi {

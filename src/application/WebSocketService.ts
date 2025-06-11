@@ -1,11 +1,12 @@
+import { Server, Socket, Namespace } from "socket.io";
+import { v4 as uuidv4 } from "uuid";
+
 import {
   loggerFactory,
   LogEventTransport,
   LogEventListener,
 } from "../utils/logger";
-import { Server, Socket, Namespace } from "socket.io";
 import { ProxyConfig } from "../utils/utils";
-import { v4 as uuidv4 } from "uuid";
 
 const logger = loggerFactory.getLogger("WEBSOCKET");
 

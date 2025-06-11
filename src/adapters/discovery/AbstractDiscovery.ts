@@ -1,9 +1,10 @@
 "use strict";
 
-import IRfxcom from "../../core/services/rfxcom.service";
 import { settingsService } from "../../config/settings";
-import { IMqtt } from "../mqtt";
+import IRfxcom from "../../core/services/rfxcom.service";
 import utils from "../../utils/utils";
+
+import { IMqtt } from "../mqtt";
 
 export default class AbstractDiscovery {
   protected mqtt: IMqtt;

@@ -1,9 +1,12 @@
+import path from "path";
+
 import load from "node-config-yaml";
 import objectAssignDeep from "object-assign-deep";
+
 import { KeyValue } from "../../core/models";
-import yaml from "./yaml";
-import path from "path";
 import { logger, loggerFactory } from "../../utils/logger";
+
+import yaml from "./yaml";
 
 type RecursivePartial<T> = { [P in keyof T]?: RecursivePartial<T[P]> };
 

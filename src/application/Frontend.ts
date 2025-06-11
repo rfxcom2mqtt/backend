@@ -1,10 +1,12 @@
+import fs from "fs";
+import path from "path";
+
 import { Router } from "express";
 import expressStaticGzip from "express-static-gzip";
 import serverStatic from "serve-static";
-import path from "path";
-import fs from "fs";
 // @ts-ignore
 import frontend from "@rfxcom2mqtt/frontend";
+
 import { ProxyConfig } from "../utils/utils";
 import { loggerFactory } from "../utils/logger";
 const logger = loggerFactory.getLogger("API");

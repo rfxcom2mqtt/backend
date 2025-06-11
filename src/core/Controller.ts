@@ -1,20 +1,21 @@
+import cron from "node-cron";
+
 import { SettingDevice, settingsService } from "../config/settings";
 import Discovery from "../adapters/discovery";
 import { IMqtt, getMqttInstance } from "../adapters/mqtt";
+import { getRfxcomInstance } from "../adapters/rfxcom";
 import Server from "../application";
-import { BridgeInfo, DeviceStateStore, Action } from "./models";
-import { MQTTMessage } from "./models/mqtt";
-import { RfxcomInfo } from "./models/rfxcom";
 import utils from "../utils/utils";
 import { logger } from "../utils/logger";
 import { safeExecute, MqttConnectionError, RfxcomError } from "../utils/errorHandling";
-import State, { DeviceStore } from "./store/state";
-import cron from "node-cron";
-import { getRfxcomInstance } from "../adapters/rfxcom";
-import IRfxcom from "./services/rfxcom.service";
-import { MqttEventListener } from "./services/mqtt.service";
 import { ExitCallback } from "../types/common";
 import { BRIDGE_ACTIONS, DEVICE_TYPES } from "../constants";
+import { BridgeInfo, DeviceStateStore, Action } from "./models";
+import { MQTTMessage } from "./models/mqtt";
+import { RfxcomInfo } from "./models/rfxcom";
+import IRfxcom from "./services/rfxcom.service";
+import { MqttEventListener } from "./services/mqtt.service";
+import State, { DeviceStore } from "./store/state";
 
 /**
  * Main Controller class that orchestrates the RFXCOM to MQTT bridge

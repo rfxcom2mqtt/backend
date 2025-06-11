@@ -1,4 +1,3 @@
-// Validation utility functions
 import { logger } from "./logger";
 
 /**

@@ -1,14 +1,14 @@
+import * as fs from "fs";
 import * as mqtt from "mqtt";
 import { QoS } from "mqtt-packet";
-import * as fs from "fs";
 import { SettingMqtt, settingsService } from "../../config/settings";
 import { MQTTMessage } from "../../core/models/mqtt";
-import { loggerFactory } from "../../utils/logger";
-import { safeExecute, MqttConnectionError } from "../../utils/errorHandling";
-import { IMqtt, Topic, MQTTOptions } from ".";
 import { MqttEventListener } from "../../core/services/mqtt.service";
+import { loggerFactory } from "../../utils/logger";
+import { MqttConnectionError } from "../../utils/errorHandling";
 import { APP_CONSTANTS } from "../../constants";
-import { MqttConnectionConfig, ErrorCallback, PublishCallback } from "../../types/common";
+import { MqttConnectionConfig } from "../../types/common";
+import { IMqtt, Topic, MQTTOptions } from ".";
 
 const logger = loggerFactory.getLogger("MQTT");
 

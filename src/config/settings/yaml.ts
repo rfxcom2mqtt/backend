@@ -1,7 +1,9 @@
-import yaml from "js-yaml";
 import fs from "fs";
-import { KeyValue } from "../../core/models";
+
 import equals from "fast-deep-equal";
+import yaml from "js-yaml";
+
+import { KeyValue } from "../../core/models";
 import { logger } from "../../utils/logger";
 
 function read(file: string): KeyValue {
