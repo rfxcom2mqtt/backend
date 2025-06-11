@@ -1,5 +1,5 @@
 import rfxcom from "rfxcom";
-import { SettingRfxcom, settingsService } from "../../config/settings";
+import { SettingDevice, SettingRfxcom, settingsService } from "../../config/settings";
 import {
   RfxcomInfo,
   Lighting2Event,
@@ -14,7 +14,7 @@ import {
   WeightEvent,
   WaterlevelEvent,
 } from "../../core/models/rfxcom";
-import IRfxcom from "../../core/services/rfxcom.service";
+import IRfxcom, { CommandPayload, OnStatusCallback, RfxcomEventHandler, StatusCallback } from "../../core/services/rfxcom.service";
 
 import { loggerFactory } from "../../utils/logger";
 const logger = loggerFactory.getLogger("RFXCOM");
@@ -141,11 +141,11 @@ export default class MockRfxcom implements IRfxcom {
       resolve();
     });
   }
-  getStatus(callback: any) {
+  getStatus(callback: StatusCallback) {
     logger.info("Mock get status");
     callback("online");
   }
-  onStatus(callback: any) {
+  onStatus(callback: OnStatusCallback) {
     logger.info("Mock on status");
     const rfxcomInfo = new RfxcomInfo();
     rfxcomInfo.receiverTypeCode = 83;
@@ -165,16 +165,16 @@ export default class MockRfxcom implements IRfxcom {
   onCommand(
     deviceType: string,
     entityName: string,
-    payload: any,
-    deviceConf: any,
+    payload: CommandPayload | string,
+    deviceConf?: SettingDevice,
   ) {
     logger.info("Mock on command");
   }
-  onDisconnect(callback: any) {
+  onDisconnect(callback: (evt: Record<string, unknown>) => void) {
     logger.info("Mock on disconnect");
     callback({});
   }
-  subscribeProtocolsEvent(callback: any) {
+  subscribeProtocolsEvent(callback: RfxcomEventHandler) {
     logger.info("Mock subscribeProtocolsEvent");
     rfxcomEvents.forEach((event) => {
       //event.deviceName = rfxcom.deviceNames[event.type][event.subtype];
@@ -186,9 +186,10 @@ export default class MockRfxcom implements IRfxcom {
       callback(event.type, event);
     });
   }
-  isGroup(payload: any): boolean {
+  isGroup(payload: RfxcomEvent): boolean {
     if (payload.type === "lighting2") {
-      return payload.commandNumber === 3 || payload.commandNumber === 4;
+      const lighting2Payload = payload as Lighting2Event;
+      return lighting2Payload.commandNumber === 3 || lighting2Payload.commandNumber === 4;
     }
     return false;
   }

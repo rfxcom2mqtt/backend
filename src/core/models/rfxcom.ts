@@ -17,47 +17,38 @@ export interface RfxcomEvent {
   group: boolean;
 }
 
-interface Lighting1Event extends RfxcomEvent {
+export interface LightingEvent extends RfxcomEvent {
+  commandNumber: number;
+  command: string;
+  rssi: number;
+}
+
+export interface Lighting1Event extends LightingEvent {
   houseCode: string;
   unitCode: string;
-  commandNumber: number;
-  command: string;
-  rssi: number;
 }
 
-export interface Lighting2Event extends RfxcomEvent {
+export interface Lighting2Event extends LightingEvent {
   unitCode: string;
-  commandNumber: number;
-  command: string;
   level: number;
-  rssi: number;
 }
 
-export interface Lighting4Event extends RfxcomEvent {
+export interface Lighting4Event extends LightingEvent {
   data: string;
-  commandNumber: number;
-  command: string;
   pulseWidth: string;
-  rssi: number;
 }
 
-interface Lighting5Event extends RfxcomEvent {
+export interface Lighting5Event extends LightingEvent {
   unitCode: string;
-  commandNumber: number;
-  command: string;
   level: string;
-  rssi: number;
 }
 
-interface Lighting6Event extends RfxcomEvent {
+export interface Lighting6Event extends LightingEvent {
   groupCode: string;
   unitCode: string;
-  commandNumber: number;
-  command: string;
-  rssi: number;
 }
 
-interface ChimeEvent extends RfxcomEvent {
+export interface ChimeEvent extends RfxcomEvent {
   commandNumber: number;
   command: string;
   rssi: number;

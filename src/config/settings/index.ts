@@ -85,6 +85,7 @@ export interface SettingDevice {
   units?: Units[];
   options?: string[];
   repetitions?: number;
+  blindsMode?: string;
 }
 
 export interface Units {

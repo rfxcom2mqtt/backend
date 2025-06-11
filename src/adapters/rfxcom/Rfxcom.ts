@@ -1,8 +1,8 @@
 import rfxcom from "rfxcom";
 
-import { settingsService } from "../../config/settings";
-import { RfxcomInfo, RfxcomEvent } from "../../core/models/rfxcom";
-import IRfxcom from "../../core/services/rfxcom.service";
+import { SettingDevice, settingsService } from "../../config/settings";
+import { RfxcomInfo, RfxcomEvent, Lighting2Event, Lighting4Event, Lighting1Event, Lighting6Event } from "../../core/models/rfxcom";
+import IRfxcom, { CommandPayload, OnStatusCallback, RfxcomEventHandler, StatusCallback } from "../../core/services/rfxcom.service";
 import { loggerFactory } from "../../utils/logger";
 
 import MockRfxcom from "./Mock";
@@ -37,15 +37,18 @@ export default class Rfxcom implements IRfxcom {
     return this.rfxtrx;
   }
 
-  isGroup(payload: any): boolean {
+  isGroup(payload: RfxcomEvent): boolean {
     if (payload.type === "lighting2") {
-      return payload.commandNumber === 3 || payload.commandNumber === 4;
+      const lighting2Payload = payload as Lighting2Event;
+      return lighting2Payload.commandNumber === 3 || lighting2Payload.commandNumber === 4;
     }
     if (payload.type === "lighting1") {
-      return payload.commandNumber === 5 || payload.commandNumber === 6;
+      const lighting1Payload = payload as Lighting1Event;
+      return lighting1Payload.commandNumber === 5 || lighting1Payload.commandNumber === 6;
     }
     if (payload.type === "lighting6") {
-      return payload.commandNumber === 2 || payload.commandNumber === 3;
+      const lighting6Payload = payload as Lighting6Event;
+      return lighting6Payload.commandNumber === 2 || lighting6Payload.commandNumber === 3;
     }
     return false;
   }
@@ -53,7 +56,7 @@ export default class Rfxcom implements IRfxcom {
   async initialise(): Promise<void> {
     logger.info(`Connecting to RFXCOM at ${this.getConfig().usbport}`);
     return new Promise((resolve, reject) => {
-      this.rfxtrx.initialise(function (error: any) {
+      this.rfxtrx.initialise(function (error: Error | null) {
         if (error) {
           logger.error("Unable to initialise the RFXCOM device");
           reject("Unable to initialise the RFXCOM device");
@@ -65,7 +68,7 @@ export default class Rfxcom implements IRfxcom {
     });
   }
 
-  private validRfxcomDevice(device: any) {
+  private validRfxcomDevice(device: string) {
     return (
       this.getRfxcomDevices().find(
         (rfxcomDevice) => device === rfxcomDevice,
@@ -73,7 +76,7 @@ export default class Rfxcom implements IRfxcom {
     );
   }
 
-  private validRfxcomDeviceFunction(device: any, deviceFunction: any) {
+  private validRfxcomDeviceFunction(device: string, deviceFunction: string) {
     if (rfxcom[device] === undefined) {
       return false;
     }
@@ -90,13 +93,13 @@ export default class Rfxcom implements IRfxcom {
 
   protected enableRFXProtocols() {
     const config = this.getConfig();
-    this.rfxtrx.enableRFXProtocols(config.receive, function (evt: any) {
+    this.rfxtrx.enableRFXProtocols(config.receive, function (evt: Record<string, unknown>) {
       logger.info("RFXCOM enableRFXProtocols : " + config.receive);
     });
   }
 
-  getStatus(callback: any) {
-    this.rfxtrx.getRFXStatus(function (error: any) {
+  getStatus(callback: StatusCallback) {
+    this.rfxtrx.getRFXStatus(function (error: Error | null) {
       if (error) {
         logger.error("Healthcheck: RFX Status ERROR");
         callback("offline");
@@ -106,9 +109,9 @@ export default class Rfxcom implements IRfxcom {
     });
   }
 
-  onStatus(callback: any) {
+  onStatus(callback: OnStatusCallback) {
     logger.info("RFXCOM listen status event");
-    this.rfxtrx.on("status", function (evt: any) {
+    this.rfxtrx.on("status", function (evt: Record<string, unknown>) {
       const json = JSON.stringify(
         evt,
         function (key, value) {
@@ -130,8 +133,8 @@ export default class Rfxcom implements IRfxcom {
   onCommand(
     deviceType: string,
     entityName: string,
-    payload: any,
-    deviceConf: any,
+    payload: CommandPayload | string,
+    deviceConf?: SettingDevice,
   ) {
     if (deviceType?.toLowerCase() === "rfy") {
       this.onCommandRfy(deviceType, entityName, payload, deviceConf);
@@ -143,8 +146,8 @@ export default class Rfxcom implements IRfxcom {
   private onCommandRfy(
     deviceType: string,
     entityName: string,
-    payload: any,
-    deviceConf: any,
+    payload: CommandPayload | string,
+    deviceConf?: SettingDevice,
   ) {
     logger.debug(
       `Use RFY command: {"deviceType": "${deviceType}", "entityName": "${entityName}", "payload": "${payload}", "deviceConf": "${JSON.stringify(deviceConf)}"}`,
@@ -155,9 +158,9 @@ export default class Rfxcom implements IRfxcom {
     // with this line of code we are able to use this id of the MQTT Topic without config file declaration :)
     deviceIds.forEach(function (deviceId) {
       try {
-        var payloadObj = JSON.parse(payload);
-        var blindsMode = deviceConf?.blindsMode || payload.blindsMode || "EU";
-        var subtype = deviceConf?.subtype || payload.subtype || "RFY";
+        var payloadObj = typeof payload === 'string' ? JSON.parse(payload) : payload;
+        var blindsMode = deviceConf?.blindsMode || (typeof payload !== 'string' ? payloadObj.blindsMode : undefined) || "EU";
+        var subtype = deviceConf?.subtype || (typeof payload !== 'string' ? payloadObj.subtype : undefined) || "RFY";
         var rfy = new rfxcom.Rfy(self.rfxtrx, subtype, {
           venetianBlindsMode: blindsMode,
         });
@@ -176,8 +179,8 @@ export default class Rfxcom implements IRfxcom {
   private onCommandDefault(
     deviceType: string,
     entityName: string,
-    payload: any,
-    deviceConf: any,
+    payload: CommandPayload | string,
+    deviceConf?: SettingDevice,
   ) {
     let transmitRepetitions: number | undefined;
     let subtype: string;
@@ -187,14 +190,24 @@ export default class Rfxcom implements IRfxcom {
       return;
     }
 
+    // Handle string vs object payload
+    if (typeof payload === 'string') {
+      try {
+        payload = JSON.parse(payload) as CommandPayload;
+      } catch (error) {
+        logger.error(`Payload is not a valid json format: ${payload}`);
+        return;
+      }
+    }
+
     // We will need subType from payload
-    subtype = payload.subtype;
+    subtype = payload.subtype || '';
 
-    const deviceFunction = payload.deviceFunction;
+    const deviceFunction = payload.deviceFunction || '';
 
-    if (!this.validRfxcomDeviceFunction(deviceType, payload.deviceFunction)) {
+    if (!deviceFunction || !this.validRfxcomDeviceFunction(deviceType, deviceFunction)) {
       logger.warn(
-        payload.deviceFunction +
+        deviceFunction +
           " is not a valid device function on " +
           deviceType,
       );
@@ -236,11 +249,11 @@ export default class Rfxcom implements IRfxcom {
     if (deviceOptions) {
       device = new rfxcom[deviceType](
         this.rfxtrx.get(),
-        payload.subtype,
+        subtype,
         deviceOptions,
       );
     } else {
-      device = new rfxcom[deviceType](this.rfxtrx.get(), payload.subtype);
+      device = new rfxcom[deviceType](this.rfxtrx.get(), subtype);
     }
 
     const repeat: number = transmitRepetitions ? transmitRepetitions : 1;
@@ -265,30 +278,30 @@ export default class Rfxcom implements IRfxcom {
     }
   }
 
-  onDisconnect(callback: any) {
+  onDisconnect(callback: (evt: Record<string, unknown>) => void) {
     logger.info("RFXCOM listen disconnect event");
-    this.rfxtrx.on("disconnect", function (evt: any) {
+    this.rfxtrx.on("disconnect", function (evt: Record<string, unknown>) {
       callback(evt);
       logger.info("RFXCOM Disconnected");
     });
   }
 
-  subscribeProtocolsEvent(callback: any) {
+  subscribeProtocolsEvent(callback: RfxcomEventHandler) {
     if (this.getConfig().receive) {
       // Subscribe to specific rfxcom events
-      this.getConfig().receive.forEach((protocol: any) => {
+      this.getConfig().receive.forEach((protocol: string) => {
         logger.info("RFXCOM listen event for protocol : " + protocol);
-        this.rfxtrx.on(protocol, (evt: any, packetType: string) => {
+        this.rfxtrx.on(protocol, (evt: RfxcomEvent, packetType: string) => {
           logger.info("receive " + protocol);
           // Add type to event
           evt.type = protocol;
           evt.deviceName = rfxcom.deviceNames[packetType][evt.subtype];
           let deviceId = evt.id;
           if (evt.type === "lighting4") {
-            deviceId = evt.data;
+            deviceId = (evt as Lighting4Event).data;
           }
           evt.group = this.isGroup(evt);
-          evt.subTypeValue = this.getSubType(evt.type, evt.subtype);
+          evt.subTypeValue = this.getSubType(evt.type, evt.subtype.toString());
           callback(protocol, evt as RfxcomEvent);
         });
       });
