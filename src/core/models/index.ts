@@ -1,6 +1,5 @@
-import { RfxcomInfo } from "./rfxcom";
 import { settingsService } from "../../config/settings";
-
+import { RfxcomInfo } from "./rfxcom";
 
 const RFXCOM2MQTT_PREFIX = "rfxcom2mqtt_";
 
@@ -19,7 +18,7 @@ export interface KeyValue {
 
 export class DeviceEntity {
   public manufacturer: string = "Rfxcom";
-  public via_device: string = RFXCOM2MQTT_PREFIX+"bridge";
+  public via_device: string = RFXCOM2MQTT_PREFIX + "bridge";
   public identifiers: string[] = [];
   public id?: string;
   public name: string = "";
@@ -120,7 +119,6 @@ export class DeviceStateStore {
     info.name = this.state.name;
     //info.id = this.state.id;
     if (this.state.name !== this.state.originalName) {
-      
       info.identifiers = [
         RFXCOM2MQTT_PREFIX + this.state.id,
         RFXCOM2MQTT_PREFIX + this.state.originalName,
@@ -129,7 +127,7 @@ export class DeviceStateStore {
     } else {
       info.identifiers = [
         RFXCOM2MQTT_PREFIX + this.state.id,
-        RFXCOM2MQTT_PREFIX+ this.state.originalName,
+        RFXCOM2MQTT_PREFIX + this.state.originalName,
       ];
     }
     delete info["id"];
@@ -151,7 +149,10 @@ export class DeviceStateStore {
 
   getCommandTopic(baseTopic: string, entityId: string) {
     let topicSufix = "";
-    if (this.state.switchs[entityId].unit !== undefined) {
+    if (
+      this.state.switchs[entityId] &&
+      this.state.switchs[entityId].unit !== undefined
+    ) {
       topicSufix = "/" + this.state.switchs[entityId].unit;
     }
     return (
@@ -169,6 +170,7 @@ export class DeviceStateStore {
     let topicSufix = "";
     if (
       switchId !== undefined &&
+      this.state.switchs[switchId] &&
       this.state.switchs[switchId].unit !== undefined
     ) {
       topicSufix = "/" + this.state.switchs[switchId].unit;

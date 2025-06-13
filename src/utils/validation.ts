@@ -6,7 +6,10 @@ import { logger } from "./logger";
  * @param expectedBaseTopic - The expected base topic
  * @returns boolean indicating if the topic is valid
  */
-export function validateMqttTopic(topic: string, expectedBaseTopic: string): boolean {
+export function validateMqttTopic(
+  topic: string,
+  expectedBaseTopic: string,
+): boolean {
   if (!topic || !expectedBaseTopic) {
     return false;
   }

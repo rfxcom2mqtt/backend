@@ -1,8 +1,8 @@
 "use strict";
 
 import { settingsService } from "../../config/settings";
-import IRfxcom from "../../core/services/rfxcom.service";
 import { IMqtt } from "../../core/services/mqtt.service";
+import IRfxcom from "../../core/services/rfxcom.service";
 import utils from "../../utils/utils";
 
 export default class AbstractDiscovery {
@@ -12,6 +12,31 @@ export default class AbstractDiscovery {
   protected topicDevice: string;
   protected baseTopic: string;
   protected discoveryOrigin: { name: string; sw: string; url: string };
+  
+  // Getters for testing purposes
+  getMqtt(): IMqtt {
+    return this.mqtt;
+  }
+  
+  getRfxtrx(): IRfxcom {
+    return this.rfxtrx;
+  }
+  
+  getTopicWill(): string {
+    return this.topicWill;
+  }
+  
+  getTopicDevice(): string {
+    return this.topicDevice;
+  }
+  
+  getBaseTopic(): string {
+    return this.baseTopic;
+  }
+  
+  getDiscoveryOrigin(): { name: string; sw: string; url: string } {
+    return this.discoveryOrigin;
+  }
 
   constructor(mqtt: IMqtt, rfxtrx: IRfxcom) {
     this.mqtt = mqtt;

@@ -2,19 +2,19 @@ import * as fs from "fs";
 import * as mqtt from "mqtt";
 import { QoS } from "mqtt-packet";
 import { SettingMqtt, settingsService } from "../../config/settings";
+import { APP_CONSTANTS } from "../../constants";
 import { MQTTMessage, Topic } from "../../core/models/mqtt";
 import { MqttEventListener } from "../../core/services/mqtt.service";
 import { IMqtt } from "../../core/services/mqtt.service";
-import { loggerFactory } from "../../utils/logger";
 import { MqttConnectionError } from "../../utils/errorHandling";
-import { APP_CONSTANTS } from "../../constants";
+import { loggerFactory } from "../../utils/logger";
 import { MqttConnectionConfig, MQTTOptions } from ".";
 
 const logger = loggerFactory.getLogger("MQTT");
 
 /**
  * MQTT client implementation for the RFXCOM to MQTT bridge
- * 
+ *
  * This class handles:
  * - Connection management to MQTT broker
  * - Publishing messages to MQTT topics
@@ -62,9 +62,11 @@ export default class Mqtt implements IMqtt {
   async connect(): Promise<void> {
     const connectionConfig = this.buildConnectionConfig();
     const options = this.buildMqttOptions(connectionConfig);
-    
-    logger.info(`Connecting to MQTT server at ${connectionConfig.server}:${connectionConfig.port}`);
-    
+
+    logger.info(
+      `Connecting to MQTT server at ${connectionConfig.server}:${connectionConfig.port}`,
+    );
+
     return new Promise((resolve, reject) => {
       const connectionUrl = `${connectionConfig.server}:${connectionConfig.port}`;
       this.client = mqtt.connect(connectionUrl, options);
@@ -102,9 +104,9 @@ export default class Mqtt implements IMqtt {
    */
   private buildMqttOptions(config: MqttConnectionConfig): mqtt.IClientOptions {
     // Set default publish options
-    this.defaultOptions = { 
-      qos: config.qos as QoS, 
-      retain: config.retain 
+    this.defaultOptions = {
+      qos: config.qos as QoS,
+      retain: config.retain,
     };
 
     const will = this.createWillMessage();
@@ -141,7 +143,10 @@ export default class Mqtt implements IMqtt {
    * @param options - The MQTT client options to configure
    * @param config - The connection configuration
    */
-  private configureAuthentication(options: mqtt.IClientOptions, config: MqttConnectionConfig): void {
+  private configureAuthentication(
+    options: mqtt.IClientOptions,
+    config: MqttConnectionConfig,
+  ): void {
     if (config.username) {
       options.username = config.username;
       options.password = config.password;
@@ -156,7 +161,10 @@ export default class Mqtt implements IMqtt {
    * @param options - The MQTT client options to configure
    * @param config - The connection configuration
    */
-  private configureProtocolOptions(options: mqtt.IClientOptions, config: MqttConnectionConfig): void {
+  private configureProtocolOptions(
+    options: mqtt.IClientOptions,
+    config: MqttConnectionConfig,
+  ): void {
     if (config.version && [3, 4, 5].includes(config.version)) {
       options.protocolVersion = config.version as 3 | 4 | 5;
       logger.debug(`Using MQTT protocol version: ${config.version}`);
@@ -178,14 +186,19 @@ export default class Mqtt implements IMqtt {
    * @param options - The MQTT client options to configure
    * @param config - The connection configuration
    */
-  private configureSslOptions(options: mqtt.IClientOptions, config: MqttConnectionConfig): void {
+  private configureSslOptions(
+    options: mqtt.IClientOptions,
+    config: MqttConnectionConfig,
+  ): void {
     if (config.ca) {
       logger.debug(`MQTT SSL/TLS: Loading CA certificate from ${config.ca}`);
       try {
         options.ca = fs.readFileSync(config.ca);
       } catch (error) {
         logger.error(`Failed to read CA certificate: ${error}`);
-        throw new MqttConnectionError(`Failed to read CA certificate: ${error}`);
+        throw new MqttConnectionError(
+          `Failed to read CA certificate: ${error}`,
+        );
       }
     }
 
@@ -198,7 +211,9 @@ export default class Mqtt implements IMqtt {
         options.cert = fs.readFileSync(config.cert);
       } catch (error) {
         logger.error(`Failed to read SSL certificates: ${error}`);
-        throw new MqttConnectionError(`Failed to read SSL certificates: ${error}`);
+        throw new MqttConnectionError(
+          `Failed to read SSL certificates: ${error}`,
+        );
       }
     }
   }
@@ -208,7 +223,10 @@ export default class Mqtt implements IMqtt {
    * @param resolve - Promise resolve function
    * @param reject - Promise reject function
    */
-  private setupConnectionHandlers(resolve: () => void, reject: (error: any) => void): void {
+  private setupConnectionHandlers(
+    resolve: () => void,
+    reject: (error: any) => void,
+  ): void {
     this.client?.on("connect", async () => {
       logger.info("Successfully connected to MQTT broker");
       this.subscribeToListenerTopics();
@@ -247,8 +265,10 @@ export default class Mqtt implements IMqtt {
   private setupMessageHandler(): void {
     this.client?.on("message", (topic: string, message: Buffer) => {
       const messageStr = message.toString();
-      logger.debug(`Received MQTT message on '${topic}' with data '${messageStr}'`);
-      
+      logger.debug(
+        `Received MQTT message on '${topic}' with data '${messageStr}'`,
+      );
+
       this.notifyListeners(topic, messageStr);
     });
   }
@@ -261,8 +281,8 @@ export default class Mqtt implements IMqtt {
   private notifyListeners(topic: string, message: string): void {
     this.listeners.forEach((listener) => {
       const subscribedTopics = listener.subscribeTopic();
-      const isTopicMatch = subscribedTopics.some(subscribedTopic => 
-        this.isTopicMatch(topic, subscribedTopic)
+      const isTopicMatch = subscribedTopics.some((subscribedTopic) =>
+        this.isTopicMatch(topic, subscribedTopic),
       );
 
       if (isTopicMatch) {
@@ -299,7 +319,9 @@ export default class Mqtt implements IMqtt {
 
     this.client.subscribe(topics, (error) => {
       if (error) {
-        logger.error(`Failed to subscribe to topics ${topics.join(", ")}: ${error.message}`);
+        logger.error(
+          `Failed to subscribe to topics ${topics.join(", ")}: ${error.message}`,
+        );
       } else {
         logger.info(`Successfully subscribed to topics: ${topics.join(", ")}`);
       }
@@ -332,14 +354,18 @@ export default class Mqtt implements IMqtt {
       ...this.defaultOptions,
       ...options,
     };
-    
+
     const fullTopic = `${base}/${topic}`;
-    
-    logger.debug(`Publishing to MQTT topic '${fullTopic}' with payload: ${payload}`);
-    
+
+    logger.debug(
+      `Publishing to MQTT topic '${fullTopic}' with payload: ${payload}`,
+    );
+
     this.client.publish(fullTopic, payload, actualOptions, (error) => {
       if (error) {
-        logger.error(`Failed to publish to topic '${fullTopic}': ${error.message}`);
+        logger.error(
+          `Failed to publish to topic '${fullTopic}': ${error.message}`,
+        );
       } else {
         logger.debug(`Successfully published to topic '${fullTopic}'`);
       }
@@ -352,14 +378,19 @@ export default class Mqtt implements IMqtt {
    * @param state - The state to publish
    */
   publishState(state: string): void {
-    this.publish(this.topics.will, state, (error) => {
-      if (error) {
-        logger.error(`Failed to publish state '${state}': ${error.message}`);
-      }
-    }, {
-      retain: true,
-      qos: 0,
-    });
+    this.publish(
+      this.topics.will,
+      state,
+      (error) => {
+        if (error) {
+          logger.error(`Failed to publish state '${state}': ${error.message}`);
+        }
+      },
+      {
+        retain: true,
+        qos: 0,
+      },
+    );
   }
 
   /**
@@ -367,7 +398,11 @@ export default class Mqtt implements IMqtt {
    * @returns True if connected and not reconnecting
    */
   isConnected(): boolean {
-    return this.client !== undefined && this.client.connected && !this.client.reconnecting;
+    return (
+      this.client !== undefined &&
+      this.client.connected &&
+      !this.client.reconnecting
+    );
   }
 
   /**
@@ -380,10 +415,10 @@ export default class Mqtt implements IMqtt {
     }
 
     logger.info("Disconnecting from MQTT broker");
-    
+
     // Publish offline state before disconnecting
     this.publishState("offline");
-    
+
     // Close the connection
     this.client.end(false, {}, () => {
       logger.info("MQTT client disconnected successfully");

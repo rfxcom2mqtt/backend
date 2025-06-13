@@ -1,11 +1,9 @@
 import fs from "fs";
-
 import objectAssignDeep from "object-assign-deep";
-
 import { settingsService } from "../../config/settings";
 import { loggerFactory } from "../../utils/logger";
-
 import { DeviceState, KeyValue, EntityState } from "../models";
+
 const logger = loggerFactory.getLogger("STORE");
 
 const saveInterval = 1000 * 60; // 1 minutes
@@ -17,8 +15,12 @@ class StateStore {
   private saveInterval: number;
 
   constructor() {
-    this.saveInterval =
-      saveInterval * settingsService.get().cacheState.saveInterval;
+    const settings = settingsService.get();
+    const saveIntervalMultiplier =
+      settings && settings.cacheState && settings.cacheState.saveInterval
+        ? settings.cacheState.saveInterval
+        : 1;
+    this.saveInterval = saveInterval * saveIntervalMultiplier;
   }
 
   start(): void {
@@ -144,8 +146,12 @@ export class DeviceStore {
   private saveInterval: number;
 
   constructor() {
-    this.saveInterval =
-      saveInterval * settingsService.get().cacheState.saveInterval;
+    const settings = settingsService.get();
+    const saveIntervalMultiplier =
+      settings && settings.cacheState && settings.cacheState.saveInterval
+        ? settings.cacheState.saveInterval
+        : 1;
+    this.saveInterval = saveInterval * saveIntervalMultiplier;
   }
 
   start(): void {

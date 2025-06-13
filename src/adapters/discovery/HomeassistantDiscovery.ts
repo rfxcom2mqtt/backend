@@ -1,6 +1,14 @@
 "use strict";
 
 import { SettingDevice, settingsService } from "../../config/settings";
+import { MQTTMessage } from "../../core/models/mqtt";
+import { IMqtt } from "../../core/services/mqtt.service";
+import IRfxcom from "../../core/services/rfxcom.service";
+import StateStore, { DeviceStore } from "../../core/store/state";
+import { logger } from "../../utils/logger";
+import AbstractDiscovery from "./AbstractDiscovery";
+import { lookup } from "./Homeassistant";
+
 import {
   DeviceSwitch,
   DeviceBinarySensor,
@@ -10,14 +18,6 @@ import {
   DeviceState,
   DeviceStateStore,
 } from "../../core/models";
-import { MQTTMessage } from "../../core/models/mqtt";
-import IRfxcom from "../../core/services/rfxcom.service";
-import { IMqtt } from "../../core/services/mqtt.service";
-import StateStore, { DeviceStore } from "../../core/store/state";
-import { logger } from "../../utils/logger";
-
-import AbstractDiscovery from "./AbstractDiscovery";
-import { lookup } from "./Homeassistant";
 
 export default class HomeassistantDiscovery extends AbstractDiscovery {
   protected state: StateStore;
@@ -51,17 +51,18 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
     logger.info(`Mqtt cmd from discovery :${data.topic} ${value}`);
     const dn = data.topic.split("/");
     const deviceType = dn[2];
-    const id = dn[4];
-    const subTypeValue = dn[3];
+    const id = dn[3];
+    const unitCode =
+      dn[4] !== undefined && dn[4] !== "set" && dn[4].length > 0
+        ? parseInt(dn[4])
+        : 1;
     let entityName = id;
     let entityTopic = id;
-    let unitCode = 1;
 
     //TODO check data
 
     // Used for units and forms part of the device id
-    if (dn[5] !== undefined && dn[5] !== "set" && dn[5].length > 0) {
-      unitCode = parseInt(dn[5]);
+    if (unitCode !== 1) {
       entityTopic += "/" + unitCode;
       entityName += "_" + unitCode;
     }
@@ -75,9 +76,9 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
     this.updateEntityStateFromValue(entityState, value);
     this.rfxtrx.sendCommand(
       deviceType,
-      subTypeValue,
+      id,
       entityState.rfxFunction,
-      entityTopic,
+      `${id}/${unitCode}`,
     );
     this.mqtt.publish(
       this.mqtt.topics.devices + "/" + entityTopic,
@@ -180,10 +181,22 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
       deviceState.subtype = payload.subtype;
       deviceState.subTypeValue = payload.subTypeValue;
       deviceState.type = payload.type;
+      deviceState.entities = [];
+      deviceState.sensors = {};
+      deviceState.binarysensors = {};
+      deviceState.selects = {};
+      deviceState.covers = {};
+      deviceState.switchs = {};
       deviceJson = new DeviceStateStore(deviceState);
     } else {
       const deviceState = this.deviceStore.get(payload.id);
       deviceState.name = deviceName;
+      if (!deviceState.entities) deviceState.entities = [];
+      if (!deviceState.sensors) deviceState.sensors = {};
+      if (!deviceState.binarysensors) deviceState.binarysensors = {};
+      if (!deviceState.selects) deviceState.selects = {};
+      if (!deviceState.covers) deviceState.covers = {};
+      if (!deviceState.switchs) deviceState.switchs = {};
       deviceJson = new DeviceStateStore(deviceState);
     }
     deviceJson.overrideDeviceInfo();
@@ -304,6 +317,12 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
       if (switchInfo.unit !== undefined && !switchInfo.group) {
         entityTopic += "/" + switchInfo.unit;
       }
+
+      // Skip if switchInfo.id is not defined in switchs
+      if (!deviceJson.state.switchs[switchInfo.id]) {
+        continue;
+      }
+
       const json = {
         availability: [{ topic: this.topicWill }],
         device: deviceJson.getInfo(),
@@ -422,6 +441,11 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
   }
 
   loadDiscoverySensorInfo(payload: any, deviceJson: DeviceStateStore) {
+    // Initialize sensors object if it doesn't exist
+    if (!deviceJson.state.sensors) {
+      deviceJson.state.sensors = {};
+    }
+
     if (payload.rssi !== undefined) {
       deviceJson.addSensor(
         new DeviceSensor(

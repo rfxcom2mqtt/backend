@@ -1,5 +1,18 @@
 import rfxcom from "rfxcom";
-import { SettingDevice, SettingRfxcom, settingsService } from "../../config/settings";
+import { loggerFactory } from "../../utils/logger";
+
+import {
+  SettingDevice,
+  SettingRfxcom,
+  settingsService,
+} from "../../config/settings";
+import IRfxcom, {
+  CommandPayload,
+  OnStatusCallback,
+  RfxcomEventHandler,
+  StatusCallback,
+} from "../../core/services/rfxcom.service";
+
 import {
   RfxcomInfo,
   Lighting2Event,
@@ -14,9 +27,7 @@ import {
   WeightEvent,
   WaterlevelEvent,
 } from "../../core/models/rfxcom";
-import IRfxcom, { CommandPayload, OnStatusCallback, RfxcomEventHandler, StatusCallback } from "../../core/services/rfxcom.service";
 
-import { loggerFactory } from "../../utils/logger";
 const logger = loggerFactory.getLogger("RFXCOM");
 
 const rfxcomEvents: RfxcomEvent[] = [];
@@ -189,7 +200,10 @@ export default class MockRfxcom implements IRfxcom {
   isGroup(payload: RfxcomEvent): boolean {
     if (payload.type === "lighting2") {
       const lighting2Payload = payload as Lighting2Event;
-      return lighting2Payload.commandNumber === 3 || lighting2Payload.commandNumber === 4;
+      return (
+        lighting2Payload.commandNumber === 3 ||
+        lighting2Payload.commandNumber === 4
+      );
     }
     return false;
   }
@@ -198,7 +212,8 @@ export default class MockRfxcom implements IRfxcom {
     let returnValue = "";
     if (rfxcom.packetNames[type.toLocaleLowerCase()] !== undefined) {
       if (rfxcom[type] !== undefined) {
-        rfxcom[type].forEach(function (subTypeName: string) {
+        // Use Object.keys to iterate over the object properties
+        Object.keys(rfxcom[type]).forEach(function (subTypeName: string) {
           if (parseInt(subType) === parseInt(rfxcom[type][subTypeName])) {
             returnValue = subTypeName;
           }

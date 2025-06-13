@@ -1,3 +1,3 @@
 import Rfxcom, { getRfxcomInstance } from "./Rfxcom";
 
-export { Rfxcom, getRfxcomInstance  }
+export { Rfxcom, getRfxcomInstance };

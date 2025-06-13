@@ -8,30 +8,42 @@ export class ApplicationError extends Error {
 
   constructor(message: string, code: string, context?: Record<string, any>) {
     super(message);
-    this.name = 'ApplicationError';
+    this.name = "ApplicationError";
     this.code = code;
     this.context = context;
+
+    // Fix the prototype chain for proper instanceof checks
+    Object.setPrototypeOf(this, ApplicationError.prototype);
   }
 }
 
 export class MqttConnectionError extends ApplicationError {
   constructor(message: string, context?: Record<string, any>) {
-    super(message, 'MQTT_CONNECTION_ERROR', context);
-    this.name = 'MqttConnectionError';
+    super(message, "MQTT_CONNECTION_ERROR", context);
+    this.name = "MqttConnectionError";
+
+    // Fix the prototype chain for proper instanceof checks
+    Object.setPrototypeOf(this, MqttConnectionError.prototype);
   }
 }
 
 export class RfxcomError extends ApplicationError {
   constructor(message: string, context?: Record<string, any>) {
-    super(message, 'RFXCOM_ERROR', context);
-    this.name = 'RfxcomError';
+    super(message, "RFXCOM_ERROR", context);
+    this.name = "RfxcomError";
+
+    // Fix the prototype chain for proper instanceof checks
+    Object.setPrototypeOf(this, RfxcomError.prototype);
   }
 }
 
 export class ConfigurationError extends ApplicationError {
   constructor(message: string, context?: Record<string, any>) {
-    super(message, 'CONFIGURATION_ERROR', context);
-    this.name = 'ConfigurationError';
+    super(message, "CONFIGURATION_ERROR", context);
+    this.name = "ConfigurationError";
+
+    // Fix the prototype chain for proper instanceof checks
+    Object.setPrototypeOf(this, ConfigurationError.prototype);
   }
 }
 
@@ -41,15 +53,15 @@ export class ConfigurationError extends ApplicationError {
 export async function safeExecute<T>(
   operation: () => Promise<T>,
   errorMessage: string,
-  context?: Record<string, any>
+  context?: Record<string, any>,
 ): Promise<T | null> {
   try {
     return await operation();
   } catch (error) {
     throw new ApplicationError(
       `${errorMessage}: ${error instanceof Error ? error.message : String(error)}`,
-      'OPERATION_FAILED',
-      { ...context, originalError: error }
+      "OPERATION_FAILED",
+      { ...context, originalError: error },
     );
   }
 }

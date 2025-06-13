@@ -1,4 +1,5 @@
 import winston, { createLogger, transports, format } from "winston";
+
 import Transport = require("winston-transport");
 
 export interface LogEventListener {
@@ -39,15 +40,11 @@ class Logger {
     this.logger = createLogger({
       transports: this.transportsToUse,
       format: format.combine(
-        format((info) => {
-          info.level = info.level.toUpperCase();
-          return info;
-        })(),
-        //format.colorize(),
         format.label({ label: name }),
         format.timestamp({ format: "YYYY-MM-DD hh:mm:ss" }),
-        format.printf(({ timestamp, label, level, message }) => {
-          return `[${timestamp}][${label}] ${level}: ${message}`;
+        format.printf((info) => {
+          info.level = info.level.toUpperCase();
+          return `[${info.timestamp}][${info.label}] ${info.level}: ${info.message}`;
         }),
       ),
     });
@@ -132,4 +129,4 @@ class LoggerFactory {
 
 const loggerFactory = new LoggerFactory();
 const logger = loggerFactory.getDefault();
-export { loggerFactory, logger };
+export { loggerFactory, logger, Logger };

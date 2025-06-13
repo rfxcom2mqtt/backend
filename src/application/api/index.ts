@@ -1,11 +1,11 @@
 import { Router, Request, Response, NextFunction } from "express";
-import StateStore, { DeviceStore } from "../../core/store/state";
-import { BridgeInfo } from "../../core/models";
 import Discovery from "../../adapters/discovery";
-import DeviceApi from "./DeviceApi";
-import BridgeApi from "./BridgeApi";
-import SettingApi from "./SettingApi";
+import { BridgeInfo } from "../../core/models";
+import StateStore, { DeviceStore } from "../../core/store/state";
 import { loggerFactory } from "../../utils/logger";
+import BridgeApi from "./BridgeApi";
+import DeviceApi from "./DeviceApi";
+import SettingApi from "./SettingApi";
 
 const logger = loggerFactory.getLogger("API");
 

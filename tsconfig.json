@@ -19,8 +19,9 @@
     "inlineSourceMap": true,
     "experimentalDecorators": true,
     "skipLibCheck": true,
-    // TODO: Turn this on and fix all the errors
-    "strict": true
+    "strict": true,
+    "noImplicitReturns": true,
+    "forceConsistentCasingInFileNames": true
   },
   "include": [
     "src/**/*.ts"

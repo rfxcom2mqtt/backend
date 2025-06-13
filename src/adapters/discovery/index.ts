@@ -1,18 +1,22 @@
 "use strict";
 
-import IRfxcom from "../../core/services/rfxcom.service";
-import { IMqtt } from "../../core/services/mqtt.service";
-import { MQTTMessage } from "../../core/models/mqtt";
 import { DeviceStateStore } from "../../core/models";
+import { MQTTMessage } from "../../core/models/mqtt";
+import { IMqtt, MqttEventListener } from "../../core/services/mqtt.service";
+import IRfxcom from "../../core/services/rfxcom.service";
 import StateStore, { DeviceStore } from "../../core/store/state";
-import HomeassistantDiscovery from "./HomeassistantDiscovery";
 import BridgeDiscovery from "./BridgeDiscovery";
-import { MqttEventListener } from "src/core/services/mqtt.service";
+import HomeassistantDiscovery from "./HomeassistantDiscovery";
 
 export default class Discovery implements MqttEventListener {
   protected baseTopic: string;
   homeassistant: HomeassistantDiscovery;
   bridge: BridgeDiscovery;
+  
+  // Getter for testing purposes
+  getBaseTopic(): string {
+    return this.baseTopic;
+  }
 
   constructor(
     mqtt: IMqtt,

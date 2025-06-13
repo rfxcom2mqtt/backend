@@ -1,8 +1,8 @@
 import { QoS } from "mqtt-packet";
-import Mqtt from "./Mqtt";
-import { MockMqtt } from "./MockMqtt";
 import { settingsService } from "../../config/settings";
 import { IMqtt } from "../../core/services/mqtt.service";
+import { MockMqtt } from "./MockMqtt";
+import Mqtt from "./Mqtt";
 
 export interface MQTTOptions {
   qos?: QoS;

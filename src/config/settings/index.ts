@@ -1,16 +1,16 @@
-import path from "path";
-
 import load from "node-config-yaml";
-import objectAssignDeep from "object-assign-deep";
-
+import * as objectAssignDeepModule from "object-assign-deep";
+import path from "path";
 import { KeyValue } from "../../core/models";
 import { logger, loggerFactory } from "../../utils/logger";
-
 import yaml from "./yaml";
+
+const objectAssignDeep =
+  objectAssignDeepModule.default || objectAssignDeepModule;
 
 type RecursivePartial<T> = { [P in keyof T]?: RecursivePartial<T[P]> };
 
-export type LogLevel = 'error' | 'warn' | 'info' | 'debug';
+export type LogLevel = "error" | "warn" | "info" | "debug";
 export interface HealthcheckConfig {
   readonly enabled: boolean;
   readonly cron: string;
@@ -178,7 +178,7 @@ class SettingsService {
 
     const _settings = this._settingsWithDefaults;
     /* eslint-disable-line */ // @ts-ignore
-    this._settingsWithDefaults = objectAssignDeep.noMutate(
+    this._settingsWithDefaults = objectAssignDeepModule.noMutate(
       _settings,
       newSettings,
     );
@@ -263,7 +263,11 @@ class SettingsService {
       }
     }
 
-    if (yaml.writeIfChanged(data.getConfigPath(), toWrite)) {
+    // Call writeIfChanged and store the result
+    const changed = yaml.writeIfChanged(data.getConfigPath(), toWrite);
+
+    // If the file was changed, reload settings
+    if (changed) {
       this.loadSettingsWithDefaults(data.getConfigPath());
     }
   }

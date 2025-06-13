@@ -1,7 +1,6 @@
 "use strict";
 
 import dotenv from "dotenv";
-
 import Controller from "./core/Controller";
 import { logger } from "./utils/logger";
 
@@ -16,14 +15,14 @@ let isShuttingDown = false;
  * @returns The path to the environment file to load
  */
 function getEnvironmentFile(): string {
-  const envFileArg = process.argv.find(arg => arg.includes("--env-file="));
-  
+  const envFileArg = process.argv.find((arg) => arg.includes("--env-file="));
+
   if (envFileArg) {
     const envFile = envFileArg.replace("--env-file=", "");
     logger.info(`Loading environment from: ${envFile}`);
     return envFile;
   }
-  
+
   return ".env";
 }
 

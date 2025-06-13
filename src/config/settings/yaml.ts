@@ -1,8 +1,6 @@
-import fs from "fs";
-
 import equals from "fast-deep-equal";
+import fs from "fs";
 import yaml from "js-yaml";
-
 import { KeyValue } from "../../core/models";
 import { logger } from "../../utils/logger";
 

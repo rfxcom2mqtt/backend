@@ -4,16 +4,16 @@
 
 RFXCOM to MQTT bridge for RFXtrx433 devices
 
-## Vue d'ensemble
+## Overview
 
-rfxcom2mqtt est un pont entre les appareils RFXCOM (RFXtrx433) et MQTT. Il publie les événements RFXCOM sur des topics MQTT et prend également en charge l'intégration avec Home Assistant via la découverte MQTT.
+rfxcom2mqtt is a bridge between RFXCOM (RFXtrx433) devices and MQTT. It publishes RFXCOM events to MQTT topics and also supports integration with Home Assistant via MQTT discovery.
 
-Tous les événements RFXCOM reçus sont publiés sur le topic MQTT rfxcom2mqtt/devices/\<id\>. 
-C'est au récepteur MQTT de filtrer ces messages ou d'avoir un mécanisme d'enregistrement/apprentissage/appairage.
+All received RFXCOM events are published to the MQTT topic rfxcom2mqtt/devices/\<id\>. 
+It's up to the MQTT receiver to filter these messages or have a registration/learning/pairing mechanism.
 
-## Architecture du projet
+## Project Architecture
 
-Le projet est structuré en plusieurs modules interagissant :
+The project is structured into several interacting modules:
 
 ```mermaid
 graph TD
@@ -31,85 +31,85 @@ graph TD
     A --> M[DeviceService]
 ```
 
-### Composants principaux
+### Main Components
 
-1. **Controller** : Classe principale qui coordonne tous les composants
-2. **RFXCOM** : Gère la communication avec les appareils RFXtrx433
-3. **MQTT** : Gère la communication avec le broker MQTT
-4. **Discovery** : Gère la découverte des appareils et l'intégration avec Home Assistant
-5. **Server** : Gère l'interface web
-6. **State** : Gère l'état des appareils et des entités
-7. **DeviceService** : Gère les appareils RFXCOM
+1. **Controller**: Main class that coordinates all components
+2. **RFXCOM**: Manages communication with RFXtrx433 devices
+3. **MQTT**: Manages communication with the MQTT broker
+4. **Discovery**: Manages device discovery and Home Assistant integration
+5. **Server**: Manages the web interface
+6. **State**: Manages device and entity states
+7. **DeviceService**: Manages RFXCOM devices
 
-## Fonctionnalités principales
+## Key Features
 
-### 1. Communication avec les appareils RFXCOM
+### 1. RFXCOM Device Communication
 
-Le module RFXCOM (src/rfxcom/index.ts) est responsable de la communication avec les appareils RFXtrx433. Il :
+The RFXCOM module (src/adapters/rfxcom) is responsible for communication with RFXtrx433 devices. It:
 
-- Initialise la connexion avec l'appareil RFXCOM via le port USB configuré
-- Gère les protocoles RFXCOM (activation, écoute d'événements)
-- Traite les commandes reçues via MQTT et les envoie aux appareils RFXCOM
-- Gère les événements de statut et de déconnexion
-- Fournit des méthodes pour envoyer des commandes spécifiques (comme RFY pour les volets roulants)
+- Initializes the connection with the RFXCOM device via the configured USB port
+- Manages RFXCOM protocols (activation, event listening)
+- Processes commands received via MQTT and sends them to RFXCOM devices
+- Handles status and disconnection events
+- Provides methods for sending specific commands (such as RFY for roller shutters)
 
-### 2. Communication MQTT
+### 2. MQTT Communication
 
-Le module MQTT (src/mqtt/index.ts) gère la communication avec le broker MQTT. Il :
+The MQTT module (src/adapters/mqtt) manages communication with the MQTT broker. It:
 
-- Établit une connexion avec le broker MQTT configuré
-- Gère les topics MQTT (base, devices, will, info)
-- Publie des messages sur les topics MQTT
-- S'abonne aux topics MQTT et transmet les messages reçus aux écouteurs
-- Gère l'état de la connexion (en ligne/hors ligne)
+- Establishes a connection with the configured MQTT broker
+- Manages MQTT topics (base, devices, will, info)
+- Publishes messages to MQTT topics
+- Subscribes to MQTT topics and forwards received messages to listeners
+- Manages connection state (online/offline)
 
-### 3. Découverte des appareils
+### 3. Device Discovery
 
-Le module Discovery (src/discovery/index.ts) gère la découverte des appareils et l'intégration avec Home Assistant. Il coordonne deux types de découverte :
+The Discovery module (src/adapters/discovery) manages device discovery and Home Assistant integration. It coordinates two types of discovery:
 
-- **HomeassistantDiscovery** : pour découvrir les appareils RFXCOM dans Home Assistant
-- **BridgeDiscovery** : pour découvrir le pont RFXCOM dans Home Assistant
+- **HomeassistantDiscovery**: for discovering RFXCOM devices in Home Assistant
+- **BridgeDiscovery**: for discovering the RFXCOM bridge in Home Assistant
 
-### 4. Interface web et API
+### 4. Web Interface and API
 
-Le module Server (src/server/index.ts) gère l'interface web du projet. Il :
+The Server module (src/application) manages the project's web interface. It:
 
-- Configure un serveur Express pour l'interface web
-- Gère l'authentification si un token est configuré
-- Configure HTTPS si des certificats SSL sont fournis
-- Sert le contenu frontend (interface utilisateur)
-- Configure les routes API
-- Initialise le service WebSocket pour les communications en temps réel
+- Configures an Express server for the web interface
+- Handles authentication if a token is configured
+- Configures HTTPS if SSL certificates are provided
+- Serves frontend content (user interface)
+- Configures API routes
+- Initializes the WebSocket service for real-time communications
 
 ## Usage
 
 <img align="left" height="100px" width="100px" src="https://user-images.githubusercontent.com/7738048/40914297-49e6e560-6800-11e8-8904-36cce896e5a8.png">
 
-### [Intégration Home Assistant](./docs/usage/integrations/home_assistant.md)
+### [Home Assistant Integration](./docs/usage/integrations/home_assistant.md)
 
-La façon la plus simple d'intégrer Rfxcom2MQTT avec Home Assistant est d'utiliser [MQTT discovery](https://www.home-assistant.io/integrations/mqtt#mqtt-discovery).
-Cela permet à Rfxcom2MQTT d'ajouter automatiquement des appareils à Home Assistant.
+The easiest way to integrate Rfxcom2MQTT with Home Assistant is to use [MQTT discovery](https://www.home-assistant.io/integrations/mqtt#mqtt-discovery).
+This allows Rfxcom2MQTT to automatically add devices to Home Assistant.
 
 ### Configuration
 
-Voir l'exemple **config.yml**
+See the **config.yml** example file.
 
-### Liste des commandes disponibles
+### Available Commands List
 
 [DeviceCommands](https://github.com/rfxcom/node-rfxcom/blob/master/DeviceCommands.md)
 
-### [Topics MQTT et Messages](./docs/usage/mqtt_topics_and_messages.md)
+### [MQTT Topics and Messages](./docs/usage/mqtt_topics_and_messages.md)
 
-### Intégration Somfy RFY
+### Somfy RFY Integration
 
-#### Configuration Home Assistant
+#### Home Assistant Configuration
 
-Ajoutez ces lignes au fichier /hass-config/configuration.yaml.
+Add these lines to your /hass-config/configuration.yaml file.
 
 ``` YML
 mqtt:
   cover:
-    - name: "BSO Volet"
+    - name: "BSO Cover"
       command_topic: "rfxcom2mqtt/command/rfy/0x0B0003,0x020405,0x000006,0x000007"
       state_topic: "rfxcom2mqtt/command/rfy/0x0B0003,0x020405,0x000006,0x000007"
       availability:
@@ -128,7 +128,7 @@ mqtt:
       optimistic: false
       value_template: "{{ value.x }}"
       
-    - name: "Salle de jeux Volet"
+    - name: "Game Room Cover"
       command_topic: "rfxcom2mqtt/command/rfy/0x000002"
       state_topic: "rfxcom2mqtt/command/rfy/0x000002"
       availability:
@@ -148,15 +148,15 @@ mqtt:
       value_template: "{{ value.x }}"
 ```
 
-#### Déclencheur MQTT [[MQTT explorer]](https://mqtt-explorer.com/)
+#### MQTT Trigger [[MQTT explorer]](https://mqtt-explorer.com/)
 
-##### Topics MQTT
+##### MQTT Topics
 
-* Topic par nom : rfxcom2mqtt/command/rfy/Mezanine3
-* Topic par id : rfxcom2mqtt/command/rfy/0x000003
-* Topic par liste d'ids : rfxcom2mqtt/command/rfy/0x000001,0x000002,0x000003
+* Topic by name: rfxcom2mqtt/command/rfy/Mezanine3
+* Topic by id: rfxcom2mqtt/command/rfy/0x000003
+* Topic by id list: rfxcom2mqtt/command/rfy/0x000001,0x000002,0x000003
 
-##### Corps MQTT
+##### MQTT Payload
 
 ``` MQTT
 {
@@ -164,14 +164,14 @@ mqtt:
 }
 ```
 
-##### Commandes MQTT
+##### MQTT Commands
 
 * up
 * down
 * stop
 * program
 
-#### Configuration rfxcom2mqtt (optionnel)
+#### rfxcom2mqtt Configuration (optional)
 
 ``` YML
 devices:
@@ -185,47 +185,47 @@ devices:
 
 ### Healthcheck
 
-Si le healthcheck est activé dans la configuration, le statut rfxcom sera vérifié toutes les minutes.
-En cas d'erreur, le processus node se terminera.
-Si installé dans docker, le conteneur essaiera de redémarrer et de se reconnecter à l'appareil RFXCOM.
+If healthcheck is enabled in the configuration, the rfxcom status will be checked every minute.
+In case of error, the node process will terminate.
+If installed in docker, the container will try to restart and reconnect to the RFXCOM device.
 
-## Modèles de données
+## Data Models
 
-Le module models (src/models/models.ts) définit les modèles de données utilisés dans le projet. Voici les principales classes :
+The models module (src/core/models) defines the data models used in the project. Here are the main classes:
 
-1. **Action** : représente une action à exécuter sur un appareil ou le pont
-2. **DeviceEntity** : classe de base pour les entités d'appareil
-3. **DeviceState** : représente l'état d'un appareil
-4. **DeviceStateStore** : gère l'état d'un appareil et fournit des méthodes pour le manipuler
-5. **DeviceSensor, DeviceBinarySensor, DeviceSwitch, DeviceCover, DeviceSelect** : représentent différents types d'entités d'appareil
-6. **BridgeInfo** : représente les informations sur le pont RFXCOM
+1. **Action**: represents an action to execute on a device or the bridge
+2. **DeviceEntity**: base class for device entities
+3. **DeviceState**: represents a device's state
+4. **DeviceStateStore**: manages a device's state and provides methods to manipulate it
+5. **DeviceSensor, DeviceBinarySensor, DeviceSwitch, DeviceCover, DeviceSelect**: represent different types of device entities
+6. **BridgeInfo**: represents information about the RFXCOM bridge
 
 ## Configuration
 
-La configuration du projet est définie dans un fichier YAML (config.yml). Voici les principales sections :
+The project configuration is defined in a YAML file (config.yml). Here are the main sections:
 
-1. **loglevel** : niveau de journalisation (info, debug, warn, error)
-2. **healthcheck** : configuration pour vérifier le statut RFXCOM
-3. **cacheState** : configuration pour sauvegarder l'état des appareils
-4. **homeassistant** : configuration pour l'intégration avec Home Assistant
-5. **mqtt** : configuration pour la connexion MQTT
-6. **rfxcom** : configuration pour la connexion RFXCOM
-7. **devices** : liste des appareils avec leurs IDs, noms et types
-8. **frontend** : configuration pour l'interface web
+1. **loglevel**: logging level (info, debug, warn, error)
+2. **healthcheck**: configuration for checking RFXCOM status
+3. **cacheState**: configuration for saving device states
+4. **homeassistant**: configuration for Home Assistant integration
+5. **mqtt**: configuration for MQTT connection
+6. **rfxcom**: configuration for RFXCOM connection
+7. **devices**: list of devices with their IDs, names, and types
+8. **frontend**: configuration for the web interface
 
-## Dépendances
+## Dependencies
 
-La bibliothèque [RFXCOM](https://github.com/rfxcom/node-rfxcom) Node pour la communication avec le [RFXCOM](http://www.rfxcom.com) RFXtrx433 433.92MHz Transceiver.
+The [RFXCOM](https://github.com/rfxcom/node-rfxcom) Node library for communication with the [RFXCOM](http://www.rfxcom.com) RFXtrx433 433.92MHz Transceiver.
 
-La bibliothèque [MQTT.js](https://github.com/mqttjs/MQTT.js) pour l'envoi et la réception de messages MQTT.
+The [MQTT.js](https://github.com/mqttjs/MQTT.js) library for sending and receiving MQTT messages.
 
-Autres dépendances principales :
-- **express** : framework web pour l'interface utilisateur
-- **socket.io** : bibliothèque pour les communications WebSocket
-- **winston** : bibliothèque pour la journalisation
-- **js-yaml** : bibliothèque pour la gestion des fichiers YAML
+Other main dependencies:
+- **express**: web framework for the user interface
+- **socket.io**: library for WebSocket communications
+- **winston**: library for logging
+- **js-yaml**: library for YAML file management
 
-## Développement
+## Development
 
 ``` Node
 nvm install 18.18
@@ -238,18 +238,27 @@ npm install -g ts-node
 ts-node .\src\index.ts
 ```
 
-### Construction d'une image Docker
+### Building a Docker Image
 
-Construction d'une image locale
+Building a local image
 
 ```
 docker-compose build
 ```
 
-Construction d'une image multi-architecture
+Building a multi-architecture image
 
 ```
 docker buildx build \ 
 --platform linux/amd64,linux/arm/v7 \
 --push \
 -t rfxcom2mqtt/rfxcom2mqtt .
+```
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+This project is licensed under the Apache-2.0 License - see the LICENSE file for details.
