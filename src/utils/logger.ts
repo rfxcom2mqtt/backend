@@ -67,11 +67,11 @@ class Logger {
 
   warn(message: string): void {
     // winston.config.syslog.levels doesn't have warn, but is required for syslog.
-    this.logger.warning(message);
+    this.logger.warn(message);
   }
 
   warning(message: string): void {
-    this.logger.warning(message);
+    this.logger.warn(message);
   }
 
   info(message: string): void {

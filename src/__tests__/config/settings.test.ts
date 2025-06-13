@@ -3,7 +3,7 @@ import path from "path";
 import { jest } from "@jest/globals";
 
 // Mock dependencies
-jest.mock("node-config-yaml", () => ({
+jest.mock("../../config/settings/config-loader", () => ({
   load: jest.fn(),
 }));
 
@@ -48,7 +48,7 @@ jest.mock("../../config/settings/yaml", () => ({
 }));
 
 // Import the module under test
-const load = require("node-config-yaml");
+const load = require("../../config/settings/config-loader");
 const objectAssignDeep = require("object-assign-deep");
 
 const { settingsService, reRead, validate } = require("../../config/settings");

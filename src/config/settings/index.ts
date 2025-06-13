@@ -1,6 +1,7 @@
-import load from "node-config-yaml";
+import fs from "fs";
 import * as objectAssignDeepModule from "object-assign-deep";
 import path from "path";
+import load from "./config-loader";
 import { KeyValue } from "../../core/models";
 import { logger, loggerFactory } from "../../utils/logger";
 import yaml from "./yaml";
@@ -339,7 +340,12 @@ class DataPath {
   private dataPath: string;
 
   constructor() {
-    this.dataPath = process.env.RFXCOM2MQTT_DATA ?? "/app/data/";
+    // Check if config directory exists in current directory
+    if (fs.existsSync(path.join(process.cwd(), 'config'))) {
+      this.dataPath = path.join(process.cwd(), 'config/');
+    } else {
+      this.dataPath = process.env.RFXCOM2MQTT_DATA ?? "/app/data/";
+    }
   }
 
   joinPath(file: string): string {
@@ -351,7 +357,7 @@ class DataPath {
   }
 
   getConfigPath(): string {
-    return this.dataPath + "config.yml";
+    return path.join(this.dataPath, "config.yml");
   }
 }
 const data = new DataPath();

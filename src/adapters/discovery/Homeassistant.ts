@@ -2,8 +2,6 @@
 
 import { KeyValue } from "../../core/models";
 
-();
-
 export const lookup: { [s: string]: KeyValue } = {
   battery: {
     device_class: "battery",
