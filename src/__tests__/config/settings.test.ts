@@ -38,6 +38,7 @@ jest.mock("fs", () => ({
     .fn()
     .mockImplementation((path) => Buffer.from(`mock content for ${path}`)),
   writeFileSync: jest.fn(),
+  existsSync: jest.fn().mockReturnValue(false),
 }));
 
 // Mock yaml module
