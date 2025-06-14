@@ -155,7 +155,7 @@ describe("Rfxcom", () => {
 
       // Act & Assert
       await expect(rfxcom.initialise()).rejects.toBe(
-        "Unable to initialise the RFXCOM device",
+        "Unable to initialise the RFXCOM device: Initialization failed",
       );
     });
   });

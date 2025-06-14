@@ -54,7 +54,7 @@ export interface ChimeEvent extends RfxcomEvent {
   rssi: number;
 }
 
-interface FanEvent extends RfxcomEvent {
+export interface FanEvent extends RfxcomEvent {
   commandNumber: number;
   command: string;
   rssi: number;
@@ -62,7 +62,7 @@ interface FanEvent extends RfxcomEvent {
   co2: string;
 }
 
-interface Blinds1Event extends RfxcomEvent {
+export interface Blinds1Event extends RfxcomEvent {
   unitCode: number;
   commandNumber: number;
   command: string;
@@ -109,7 +109,7 @@ interface HunterfanEvent extends RfxcomEvent {
   rssi: number;
 }
 
-interface Security1Event extends RfxcomEvent {
+export interface Security1Event extends RfxcomEvent {
   deviceStatus: string;
   tampered: string;
   batteryLevel: string;
