@@ -218,7 +218,7 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
       const sensor = sensors[index];
       const json = {
         name: deviceJson.state.name + " " + sensor.name,
-        object_id: sensor.id,
+        default_entity_id: "sensor." + sensor.id,
         unique_id: sensor.id + "_" + bridgeName,
         value_template: "{{ value_json." + sensor.property + " }}",
         ...commonConf,
@@ -235,7 +235,7 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
       const binarysensor = binarysensors[index];
       const json = {
         name: deviceJson.state.name + " " + binarysensor.name,
-        object_id: binarysensor.id,
+        default_entity_id: "binary_sensor." + binarysensor.id,
         unique_id: binarysensor.id + "_" + bridgeName,
         payload_off: binarysensor.value_off,
         payload_on: binarysensor.value_on,
@@ -254,7 +254,7 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
       const cover = covers[index];
       const json = {
         name: deviceJson.state.name + " " + cover.name,
-        object_id: cover.id,
+        default_entity_id: "cover." + cover.id,
         unique_id: cover.id + "_" + bridgeName,
         value_template: "{{ value_json." + cover.property + " }}",
         position_template: "{{ value_json." + cover.positionProperty + " }}",
@@ -281,7 +281,7 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
       const select = selects[index];
       const json = {
         name: deviceJson.state.name + " " + select.name,
-        object_id: select.id,
+        default_entity_id: "select." + select.id,
         unique_id: select.id + "_" + bridgeName,
         options: select.options,
         value_template: "{{ value_json." + select.property + " }}",
@@ -316,7 +316,7 @@ export default class HomeassistantDiscovery extends AbstractDiscovery {
           switchInfo.id,
         ),
         name: switchInfo.name,
-        object_id: switchInfo.id,
+        default_entity_id: "switch." + switchInfo.id,
         origin: this.discoveryOrigin,
         state_off: switchInfo.value_off,
         state_on: switchInfo.value_on,
